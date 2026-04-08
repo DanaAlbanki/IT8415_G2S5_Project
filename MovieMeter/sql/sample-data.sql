@@ -10,7 +10,7 @@ INSERT INTO mm_users (role_id, full_name, username, email, password_hash, accoun
 VALUES
 (1, 'Ahmed Mohammed', 'admin_ahmed', 'ahmed@moviemeter.com', 'hash', 'active', NOW()),
 (2, 'Fatema Ali', 'fatema_creator', 'fatema@moviemeter.com', 'hash', 'active', NOW()),
-(2, 'Mohsen Mohsen', 'mohsen_creator', 'mohsen@moviemeter.com', 'hash', 'active', NOW()),
+(2, 'Mohsen Mohamed', 'mohsen_creator', 'mohsen@moviemeter.com', 'hash', 'active', NOW()),
 (3, 'Sara Hussain', 'sara_user', 'sara@gmail.com', 'hash', 'active', NOW()),
 (3, 'Mohammed Ali', 'mohammed_user', 'mohammed@gmail.com', 'hash', 'active', NOW()),
 (3, 'Zainab Ahmed', 'zainab_user', 'zainab@gmail.com', 'hash', 'active', NOW());
