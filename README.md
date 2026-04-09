@@ -153,7 +153,7 @@ Used to automate database operations.
 | Frontend | HTML, CSS, JavaScript, Bootstrap, jQuery |
 | Backend | PHP |
 | Database | MySQL |
-| Tools | XAMPP / phpMyAdmin / NetBeans / Postman |
+| Tools | XAMPP, MAMP/ phpMyAdmin / NetBeans / Postman |
 
 ---
 
