@@ -1,8 +1,23 @@
-# Ignore database credentials
-config.php
+# Ignore config with sensitive data
+config/config.php
 
-# Ignore uploaded images
-images/
-
-# Mac system files
+# OS files
 .DS_Store
+Thumbs.db
+
+# IDE files
+nbproject/private/
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Uploads (optional)
+uploads/
+
+# Test files (optional)
+tests/

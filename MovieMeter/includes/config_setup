@@ -1,3 +1,4 @@
+In config/ folder
 Create a file called config.php and paste the following code inside it:
 replace my id with yours
 <?php
