@@ -1,6 +1,8 @@
+-- ALL TRIGGERS
+
 DELIMITER $$
 
--- Purpose: Validate user data before inserting a new user.
+-- 1) Validate user data before inserting a new user.
 DROP TRIGGER IF EXISTS trg_before_insert_user_check_role$$
 CREATE TRIGGER trg_before_insert_user_check_role
 BEFORE INSERT ON mm_users
@@ -28,7 +30,7 @@ BEGIN
 END$$
 
 
--- Purpose: Validate movie data before inserting a new movie.
+-- 2) Validate movie data before inserting a new movie.
 DROP TRIGGER IF EXISTS trg_before_insert_movie_check_creator$$
 CREATE TRIGGER trg_before_insert_movie_check_creator
 BEFORE INSERT ON mm_movies
@@ -55,7 +57,7 @@ BEGIN
 END$$
 
 
--- Purpose: Validate movie data when updating movie information or status.
+-- 3) Validate movie data when updating movie information or status.
 DROP TRIGGER IF EXISTS trg_before_update_movie_manage_status$$
 CREATE TRIGGER trg_before_update_movie_manage_status
 BEFORE UPDATE ON mm_movies
@@ -78,7 +80,7 @@ BEGIN
 END$$
 
 
--- Purpose: Log deleted movies after status changes to deleted.
+-- 4) Log deleted movies after status changes to deleted.
 DROP TRIGGER IF EXISTS trg_after_update_movie_log_status$$
 CREATE TRIGGER trg_after_update_movie_log_status
 AFTER UPDATE ON mm_movies
@@ -93,7 +95,7 @@ BEGIN
 END$$
 
 
--- Purpose: Validate movie media before inserting media for a movie.
+-- 5) Validate movie media before inserting media for a movie.
 DROP TRIGGER IF EXISTS trg_before_insert_movie_media_check_movie$$
 CREATE TRIGGER trg_before_insert_movie_media_check_movie
 BEFORE INSERT ON mm_movie_media
@@ -114,7 +116,7 @@ BEGIN
 END$$
 
 
--- Purpose: Prevent adding a rating for a deleted or unpublished movie.
+-- 6) Prevent adding a rating for a deleted or unpublished movie.
 DROP TRIGGER IF EXISTS trg_before_insert_rating_check_movie$$
 CREATE TRIGGER trg_before_insert_rating_check_movie
 BEFORE INSERT ON mm_ratings
@@ -135,7 +137,7 @@ BEGIN
 END$$
 
 
--- Purpose: Update movie average rating and rating count after inserting a rating.
+-- 7) Update movie average rating and rating count after inserting a rating.
 DROP TRIGGER IF EXISTS trg_after_insert_rating_update_movie$$
 CREATE TRIGGER trg_after_insert_rating_update_movie
 AFTER INSERT ON mm_ratings
@@ -156,7 +158,7 @@ BEGIN
 END$$
 
 
--- Purpose: Update movie average rating and rating count after updating a rating.
+-- 8) Update movie average rating and rating count after updating a rating.
 DROP TRIGGER IF EXISTS trg_after_update_rating_update_movie$$
 CREATE TRIGGER trg_after_update_rating_update_movie
 AFTER UPDATE ON mm_ratings
@@ -177,7 +179,7 @@ BEGIN
 END$$
 
 
--- Purpose: Update movie average rating and rating count after deleting a rating.
+-- 9) Update movie average rating and rating count after deleting a rating.
 DROP TRIGGER IF EXISTS trg_after_delete_rating_update_movie$$
 CREATE TRIGGER trg_after_delete_rating_update_movie
 AFTER DELETE ON mm_ratings
@@ -198,7 +200,7 @@ BEGIN
 END$$
 
 
--- Purpose: Prevent adding comments to deleted or unpublished movies.
+-- 10) Prevent adding comments to deleted or unpublished movies.
 DROP TRIGGER IF EXISTS trg_before_insert_comment_check_movie$$
 CREATE TRIGGER trg_before_insert_comment_check_movie
 BEFORE INSERT ON mm_comments
@@ -219,7 +221,7 @@ BEGIN
 END$$
 
 
--- Purpose: Increase movie comment count after adding a new comment.
+-- 11) Increase movie comment count after adding a new comment.
 DROP TRIGGER IF EXISTS trg_after_insert_comment_update_count$$
 CREATE TRIGGER trg_after_insert_comment_update_count
 AFTER INSERT ON mm_comments
@@ -231,7 +233,7 @@ BEGIN
 END$$
 
 
--- Purpose: Decrease movie comment count after deleting a comment.
+-- 12) Decrease movie comment count after deleting a comment.
 DROP TRIGGER IF EXISTS trg_after_delete_comment_update_count$$
 CREATE TRIGGER trg_after_delete_comment_update_count
 AFTER DELETE ON mm_comments
@@ -243,39 +245,52 @@ BEGIN
 END$$
 
 
--- Purpose: Prevent duplicate watchlist entries for the same user and movie.
-DROP TRIGGER IF EXISTS trg_before_insert_watchlist_prevent_duplicate$$
-CREATE TRIGGER trg_before_insert_watchlist_prevent_duplicate
-BEFORE INSERT ON mm_watchlists
+-- 13) Prevent duplicate watchlist entries for the same watchlist and movie.
+DROP TRIGGER IF EXISTS trg_before_insert_watchlist_item_prevent_duplicate$$
+CREATE TRIGGER trg_before_insert_watchlist_item_prevent_duplicate
+BEFORE INSERT ON mm_watchlist_items
 FOR EACH ROW
 BEGIN
-    IF (SELECT COUNT(*)
-        FROM mm_watchlists
-        WHERE user_id = NEW.user_id
-          AND movie_id = NEW.movie_id) > 0 THEN
+    IF EXISTS (
+        SELECT 1
+        FROM mm_watchlist_items
+        WHERE watchlist_id = NEW.watchlist_id
+          AND movie_id = NEW.movie_id
+    ) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Movie already exists in watchlist';
     END IF;
 END$$
 
-
--- Purpose: Prevent adding deleted or unpublished movies to the watchlist.
-DROP TRIGGER IF EXISTS trg_before_insert_watchlist_check_movie$$
-CREATE TRIGGER trg_before_insert_watchlist_check_movie
-BEFORE INSERT ON mm_watchlists
+-- 14) Prevent adding deleted or unpublished movies to the watchlist.
+DROP TRIGGER IF EXISTS trg_before_insert_watchlist_item_check_movie$$
+CREATE TRIGGER trg_before_insert_watchlist_item_check_movie
+BEFORE INSERT ON mm_watchlist_items
 FOR EACH ROW
 BEGIN
-    IF (SELECT COUNT(*)
+    IF NOT EXISTS (
+        SELECT 1
         FROM mm_movies
         WHERE movie_id = NEW.movie_id
-          AND status = 'published') = 0 THEN
+          AND status = 'published'
+    ) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Only published movies can be added to watchlist';
     END IF;
 END$$
 
 
--- Purpose: Log admin deletions of comments for moderation tracking.
+-- 15) Set updated_at automatically when movie data changes.
+DROP TRIGGER IF EXISTS trg_before_update_movie_set_updated_at$$
+CREATE TRIGGER trg_before_update_movie_set_updated_at
+BEFORE UPDATE ON mm_movies
+FOR EACH ROW
+BEGIN
+    SET NEW.updated_at = NOW();
+END$$
+
+
+-- 16) Log admin deletions of comments for moderation tracking.
 DROP TRIGGER IF EXISTS trg_after_delete_comment_log_admin$$
 CREATE TRIGGER trg_after_delete_comment_log_admin
 AFTER DELETE ON mm_comments
