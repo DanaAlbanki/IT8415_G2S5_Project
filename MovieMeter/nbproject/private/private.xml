@@ -3,10 +3,19 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/fatemamaitham/NetBeansProjects/MovieMeter/index.php</file>
-            <file>file:/Users/fatemamaitham/NetBeansProjects/MovieMeter/.gitattributes</file>
-            <file>file:/Users/fatemamaitham/NetBeansProjects/MovieMeter/.gitignore</file>
-            <file>file:/Users/fatemamaitham/NetBeansProjects/MovieMeter/DBConn.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/logout.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/includes/auth_check.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/index.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/movie-details.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/includes/header.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/includes/footer.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/admin/dashboard.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/config/DBConn.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/creator/dashboard.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/includes/config_setup</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/login.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/register.php</file>
+            <file>file:/Users/fatemamaitham/Documents/GitHub/IT8415_G2S5_Project/MovieMeter/config/config.php</file>
         </group>
     </open-files>
 </project-private>

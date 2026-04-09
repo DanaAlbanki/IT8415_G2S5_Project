@@ -21,3 +21,8 @@ uploads/
 
 # Test files (optional)
 tests/
+
+
+# Build/output folders
+build/
+dist/
