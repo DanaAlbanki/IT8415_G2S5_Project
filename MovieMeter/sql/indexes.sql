@@ -4,6 +4,13 @@
 CREATE INDEX idx_users_role_status ON mm_users(role_id, account_status);
 
 -- MOVIES
+CREATE INDEX idx_movies_title ON mm_movies(title);
+CREATE INDEX idx_movies_release_date ON mm_movies(release_date);
+CREATE INDEX idx_movies_creator_id ON mm_movies(creator_id);
+CREATE INDEX idx_movies_view_count ON mm_movies(view_count);
+CREATE INDEX idx_movies_average_rating ON mm_movies(average_rating);
+CREATE INDEX idx_movies_status ON mm_movies(status);
+CREATE INDEX idx_users_full_name ON mm_users(full_name);
 CREATE INDEX idx_movies_status_created_at ON mm_movies(status, created_at);
 CREATE INDEX idx_movies_status_release_date ON mm_movies(status, release_date);
 CREATE INDEX idx_movies_deleted_by ON mm_movies(deleted_by);
