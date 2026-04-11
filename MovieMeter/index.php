@@ -5,135 +5,265 @@ ini_set('display_errors', 1);
 require_once(__DIR__ . "/includes/auth_check.php");
 require_once(__DIR__ . "/config/DBConn.php");
 
-// Allow only viewer role
-if ($_SESSION["role_name"] !== "viewer") {
+if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
     die("Access denied.");
 }
 
 $conn = getConnection();
 
 $query = "
-SELECT 
-    m.movie_id,
-    m.title,
-    m.short_description,
-    m.release_date,
-    m.poster_image,
-    m.trailer_url,
-    m.status,
-    m.published_at
-FROM mm_movies m
-WHERE m.status = 'published'
-ORDER BY m.published_at DESC, m.created_at DESC
-LIMIT 10
+    SELECT 
+        m.movie_id,
+        m.title,
+        m.short_description,
+        m.release_date,
+        m.poster_image,
+        m.trailer_url,
+        m.status,
+        m.published_at
+    FROM mm_movies m
+    WHERE m.status = 'published'
+    ORDER BY m.published_at DESC, m.created_at DESC
+    LIMIT 10
 ";
 
 $result = mysqli_query($conn, $query);
 
 if (!$result) {
-    die('SQL Error: ' . mysqli_error($conn));
+    die("SQL Error: " . mysqli_error($conn));
+}
+
+$totalMovies = mysqli_num_rows($result);
+
+function e($value)
+{
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Home - MovieMeter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieMeter</title>
+
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
-<h2>Welcome, <?php echo htmlspecialchars($_SESSION["full_name"]); ?></h2>
-<p>
-    <a href="my-watchlist.php">My Watchlist</a> |
-    <a href="logout.php">Logout</a>
-</p>
-<h3>Latest Movies</h3>
-<div class="container my-4">
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body">
-            <h3 class="mb-3">Find Movies</h3>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="assets/images/logo.png" alt="MovieMeter Logo">
+        </div>
 
-            <form method="GET" action="search.php" class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Title</label>
-                    <input type="text" name="title" class="form-control" placeholder="Search by title">
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.php">Home</a></li>
+            <li><a href="search.php">Discover</a></li>
+            <li><a href="#">Categories</a></li>
+            <li><a href="#">For You</a></li>
+            <li><a href="my-watchlist.php">Watchlist</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO SLIDER -->
+    <section class="hero-slider">
+
+        <div class="slide active" style="background-image: url('assets/images/Tangled-Movie.jpg');">
+            <div class="overlay"></div>
+            <div class="slide-content">
+                <h1>Tangled</h1>
+                <p>
+                    Experience the magical journey of Rapunzel in a world full of adventure,
+                    emotion, and unforgettable moments.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#" class="primary-btn">View Details</a>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Creator</label>
-                    <input type="text" name="creator" class="form-control" placeholder="Search by creator">
+        <div class="slide" style="background-image: url('assets/images/three.jpeg');">
+            <div class="overlay"></div>
+            <div class="slide-content">
+                <h1>Harry Potter</h1>
+                <p>
+                    Enter the wizarding world and explore friendship, mystery,
+                    and dark secrets through one of the most iconic fantasy series ever made.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#" class="primary-btn">View Details</a>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-md-3">
-                    <label class="form-label">Date From</label>
-                    <input type="date" name="date_from" class="form-control">
+        <div class="slide" style="background-image: url('assets/images/IT.jpeg');">
+            <div class="overlay"></div>
+            <div class="slide-content">
+                <h1>IT</h1>
+                <p>
+                    A terrifying horror film about a group of kids who must confront
+                    a shape-shifting evil clown that feeds on fear and haunts their town.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#" class="primary-btn">View Details</a>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-md-3">
-                    <label class="form-label">Date To</label>
-                    <input type="date" name="date_to" class="form-control">
-                </div>
+        <button class="slider-btn prev-slide">&#10094;</button>
+        <button class="slider-btn next-slide">&#10095;</button>
 
-                <div class="col-md-4">
-                    <label class="form-label">Popularity</label>
-                    <select name="popularity" class="form-select">
-                        <option value="">Default</option>
-                        <option value="rating_high">Highest Rating</option>
-                        <option value="rating_count">Most Rated</option>
-                        <option value="views">Most Viewed</option>
-                        <option value="comments">Most Commented</option>
-                        <option value="newest">Newest Release</option>
-                        <option value="oldest">Oldest Release</option>
-                    </select>
-                </div>
+        <div class="slider-dots">
+            <span class="dot active" data-slide="0"></span>
+            <span class="dot" data-slide="1"></span>
+            <span class="dot" data-slide="2"></span>
+        </div>
+    </section>
 
-                <div class="col-md-2 d-grid">
-                    <label class="form-label invisible">Search</label>
-                    <button type="submit" class="btn btn-primary">Search</button>
+    <!-- SEARCH -->
+    <section class="search-section">
+        <div class="search-section-inner">
+            <div class="search-heading">
+                <h2>Search Movies</h2>
+                <p>Search by title, creator, date range, and popularity.</p>
+            </div>
+
+            <form id="searchForm" class="search-form-grid" method="GET" action="search.php">
+                <input type="text" id="searchTitle" name="title" placeholder="Search by movie title">
+                <input type="text" id="searchCreator" name="creator" placeholder="Search by creator">
+                <input type="date" id="fromDate" name="date_from">
+                <input type="date" id="toDate" name="date_to">
+
+                <select id="sortBy" name="popularity">
+                    <option value="">Default</option>
+                    <option value="rating_high">Highest Rating</option>
+                    <option value="rating_count">Most Rated</option>
+                    <option value="views">Most Viewed</option>
+                    <option value="comments">Most Commented</option>
+                    <option value="newest">Newest Release</option>
+                    <option value="oldest">Oldest Release</option>
+                </select>
+
+                <div class="search-form-buttons">
+                    <button type="submit" class="search-btn-main">Search</button>
+                    <button type="reset" class="reset-btn-main">Reset</button>
                 </div>
             </form>
         </div>
-    </div>
-</div>
+    </section>
 
-<?php if (mysqli_num_rows($result) > 0) { ?>
-    <?php while ($row = mysqli_fetch_assoc($result)) { ?>
-        <div style="border:1px solid #ccc; padding:15px; margin:15px 0;">
-
-            <h4><?php echo htmlspecialchars($row["title"]); ?></h4>
-
-            <p>
-                <?php echo htmlspecialchars($row["short_description"]); ?>
-            </p>
-
-            <?php if (!empty($row["poster_image"])) { ?>
-                <div style="margin:10px 0;">
-                    <img src="uploads/posters/<?php echo htmlspecialchars($row["poster_image"]); ?>" width="180" alt="Movie Poster">
-                </div>
-            <?php } ?>
-
-            <?php if (!empty($row["trailer_url"])) { ?>
-                <div style="margin:10px 0;">
-                    <video width="320" controls>
-                        <source src="uploads/trailers/<?php echo htmlspecialchars($row["trailer_url"]); ?>" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-            <?php } ?>
-
-            <p>
-                <strong>Release Date:</strong>
-                <?php echo htmlspecialchars($row["release_date"]); ?>
-            </p>
-
-            <a href="movie-details.php?id=<?php echo (int)$row["movie_id"]; ?>">
-                View More
-            </a>
+    <!-- MOVIES -->
+    <section class="movies-section" id="all-movies-section">
+        <div class="section-header">
+            <h2>Latest Movies</h2>
+            <p id="resultsCount">Found <?php echo $totalMovies; ?> results</p>
         </div>
-    <?php } ?>
-<?php } else { ?>
-    <p>No published movies found.</p>
-<?php } ?>
+
+        <div id="movies" class="movies">
+            <?php if ($totalMovies > 0) { ?>
+                <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+                    <article class="movie-card">
+                        <a href="movie-details.php?id=<?php echo (int)$row["movie_id"]; ?>" class="movie-card-link">
+                            <div class="movie-poster-wrap">
+                                <?php if (!empty($row["poster_image"])) { ?>
+                                    <img
+                                        src="uploads/posters/<?php echo e(rawurlencode($row["poster_image"])); ?>"
+                                        alt="<?php echo e($row["title"]); ?>">
+                                <?php } else { ?>
+                                    <div class="movie-no-poster">No Poster</div>
+                                <?php } ?>
+                            </div>
+
+                            <div class="movie-info">
+                                <h3><?php echo e($row["title"]); ?></h3>
+
+                                <p>
+                                    <?php
+                                    $desc = trim((string)($row["short_description"] ?? ""));
+                                    echo e(strlen($desc) > 120 ? substr($desc, 0, 120) . "..." : $desc);
+                                    ?>
+                                </p>
+
+                                <span class="movie-release">
+                                    Release: <?php echo e($row["release_date"]); ?>
+                                </span>
+
+                                <span class="movie-action">View Details</span>
+                            </div>
+                        </a>
+                    </article>
+                <?php } ?>
+            <?php } else { ?>
+                <p class="no-movies">No published movies found.</p>
+            <?php } ?>
+        </div>
+    </section>
+
+    <!-- PAGINATION -->
+    <div class="pagination-wrapper">
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>MovieMeter</h3>
+                <p>
+                    Discover, rate, and explore your favorite movies in one place.
+                    Find trending titles and build your personal watchlist.
+                </p>
+            </div>
+
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#all-movies-section">Latest Movies</a></li>
+                    <li><a href="search.php">Discover</a></li>
+                    <li><a href="my-watchlist.php">Watchlist</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Categories</h4>
+                <ul>
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Drama</a></li>
+                    <li><a href="#">Comedy</a></li>
+                    <li><a href="#">Fantasy</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-contact">
+                <h4>Contact</h4>
+                <p>support@moviemeter.com</p>
+                <p>+973 1700 0000</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 MovieMeter. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script type="module" src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/home.js"></script>
 
 </body>
+
 </html>
