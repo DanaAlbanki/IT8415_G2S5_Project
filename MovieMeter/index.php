@@ -71,11 +71,11 @@ function e($value)
 
         <ul class="nav-links" id="navLinks">
             <li><a href="index.php">Home</a></li>
-            <li><a href="search.php">Discover</a></li>
-            <li><a href="#">Categories</a></li>
-            <li><a href="#">For You</a></li>
-            <li><a href="my-watchlist.php">Watchlist</a></li>
-            <li><a href="#">Profile</a></li>
+            <li><a href="discover.php">Discover</a></li>
+            <li><a href="categories.php">Categories</a></li>
+            <li><a href="foryou.php">For You</a></li>
+            <li><a href="watchlist.php">Watchlist</a></li>
+            <li><a href="profile.php">Profile</a></li>
             <li><a href="logout.php">Logout</a></li>
         </ul>
     </nav>

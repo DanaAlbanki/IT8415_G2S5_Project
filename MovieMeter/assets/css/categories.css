@@ -1,0 +1,562 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(120, 55, 170, 0.12), transparent 20%),
+        linear-gradient(180deg, #1f1229 0%, #2a1a36 35%, #241430 100%);
+    color: #f8fafc;
+    overflow-x: hidden;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+/* =========================
+   FONTS
+========================= */
+.categories-hero h1,
+.section-header h2,
+.footer-brand h3,
+.footer-links h4,
+.footer-contact h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+}
+
+.nav-links a,
+.categories-hero p,
+.genre-chip,
+.movie-card h3,
+.pagination button,
+.pagination span,
+.footer p,
+.footer a,
+.footer li {
+    font-family: 'Inter', sans-serif;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+.navbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 26px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    background: transparent;
+    transition: background 0.35s ease, padding 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+}
+
+.navbar.scrolled {
+    background: rgba(63, 37, 95, 0.96);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.28);
+    padding: 12px 26px;
+    backdrop-filter: blur(8px);
+}
+
+.logo img {
+    width: 125px;
+    display: block;
+    margin-left: 50px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 22px;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #f3e8ff;
+    font-size: 18px;
+    font-weight: 600;
+    transition: 0.3s ease;
+    white-space: nowrap;
+}
+
+.nav-links a:hover {
+    color: #facc15;
+}
+
+.menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    z-index: 1001;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 28px;
+    height: 3px;
+    margin: 5px 0;
+    border-radius: 10px;
+    background: #ffffff;
+    transition: 0.3s ease;
+}
+
+/* =========================
+   HERO
+========================= */
+.categories-hero {
+    position: relative;
+    min-height: 58vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 130px 20px 70px;
+    background: url("../images/spritiedaway.jpeg") center/cover no-repeat;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to right,
+            rgba(19, 10, 28, 0.9) 0%,
+            rgba(19, 10, 28, 0.7) 35%,
+            rgba(19, 10, 28, 0.4) 62%,
+            rgba(19, 10, 28, 0.25) 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+}
+
+.categories-hero h1 {
+    margin: 0 0 18px;
+    font-size: 4.6rem;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.categories-hero p {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #e9d5ff;
+}
+
+/* =========================
+   SECTION HEADERS
+========================= */
+.genres-section,
+.movies-section {
+    padding: 60px 30px 10px;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 26px;
+}
+
+.section-header h2 {
+    margin: 0 0 10px;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.section-header p {
+    margin: 0;
+    color: #d8b4fe;
+    font-size: 15px;
+}
+
+/* =========================
+   GENRE BUTTONS
+========================= */
+.genres-list {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    padding-top: 10px;
+}
+
+.genre-chip {
+    border: none;
+    background: #5c3c7c;
+    color: #ffffff;
+    height: 52px;
+    padding: 0 22px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.genre-chip:hover {
+    background: #8b2d7a;
+    transform: translateY(-3px);
+}
+
+.genre-chip.active {
+    background: #facc15;
+    color: #1a1025;
+}
+
+/* =========================
+   MOVIES GRID
+========================= */
+.movies {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 28px;
+    padding: 20px 0;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+/* =========================
+   MOVIE CARD
+========================= */
+.movie-card {
+    width: 100%;
+    background: #3a234d;
+    border-radius: 22px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.movie-card:hover {
+    transform: translateY(-8px);
+}
+
+.movie-card img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    display: block;
+    background: #24142f;
+}
+
+.movie-card h3 {
+    font-size: 16px;
+    font-weight: 800;
+    margin: 0;
+    padding: 16px 16px 18px;
+    color: #ffffff;
+    line-height: 1.4;
+    min-height: 78px;
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    color: #f3e8ff;
+    padding: 32px 20px;
+    border-radius: 22px;
+    font-size: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* =========================
+   PAGINATION
+========================= */
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 28px 20px 70px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.pagination button {
+    border: none;
+    outline: none;
+    width: 66px;
+    height: 66px;
+    padding: 0;
+    border-radius: 50%;
+    background: #6c4494;
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+    transition: 0.3s ease;
+}
+
+.pagination button:hover {
+    background: #a43b91;
+    transform: translateY(-2px) scale(1.03);
+}
+
+.pagination button.active {
+    background: #8b2d7a;
+    color: #ffffff;
+}
+
+.pagination .dots {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: #6c4494;
+    color: #ffffff;
+    font-size: 1.6rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+}
+
+.pagination button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* =========================
+   FOOTER
+========================= */
+.footer {
+    background: #58376f;
+    color: #ffffff;
+    padding-top: 55px;
+}
+
+.footer-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 30px 35px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 30px;
+}
+
+.footer-brand h3,
+.footer-links h4,
+.footer-contact h4 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    color: #ffffff;
+}
+
+.footer-brand p,
+.footer-contact p,
+.footer-links a {
+    color: #e9d5ff;
+    font-size: 15px;
+    line-height: 1.8;
+    text-decoration: none;
+}
+
+.footer-links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 10px;
+}
+
+.footer-links a:hover {
+    color: #facc15;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding: 18px 20px;
+    background: #58376f;
+}
+
+.footer-bottom p {
+    margin: 0;
+    color: #f3e8ff;
+    font-size: 14px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 1280px) {
+    .movies {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .navbar {
+        padding: 14px 18px;
+    }
+
+    .navbar.scrolled {
+        padding: 12px 18px;
+    }
+
+    .logo img {
+        width: 110px;
+        margin-left: 0;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        position: absolute;
+        top: 100%;
+        right: 18px;
+        width: 220px;
+        background: rgba(42, 26, 54, 0.98);
+        backdrop-filter: blur(10px);
+        border-radius: 18px;
+        padding: 14px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: 0.3s ease;
+    }
+
+    .nav-links.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .nav-links a {
+        display: block;
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 16px;
+    }
+
+    .categories-hero h1 {
+        font-size: 3.6rem;
+    }
+
+    .categories-hero p {
+        font-size: 1.05rem;
+    }
+
+    .movies {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+    }
+
+    .movie-card img {
+        height: 290px;
+    }
+
+    .footer-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .categories-hero {
+        min-height: 48vh;
+        padding: 120px 16px 60px;
+    }
+
+    .categories-hero h1 {
+        font-size: 2.8rem;
+    }
+
+    .categories-hero p {
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+
+    .genres-section,
+    .movies-section {
+        padding: 45px 16px 10px;
+    }
+
+    .movies {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .movie-card img {
+        height: 260px;
+    }
+
+    .pagination {
+        gap: 10px;
+    }
+
+    .pagination button,
+    .pagination .dots {
+        width: 54px;
+        height: 54px;
+        font-size: 1.2rem;
+    }
+
+    .footer-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .movies {
+        grid-template-columns: 1fr;
+    }
+
+    .movie-card img {
+        height: 360px;
+    }
+
+    .section-header h2 {
+        font-size: 1.9rem;
+    }
+
+    .genre-chip {
+        width: 100%;
+    }
+}

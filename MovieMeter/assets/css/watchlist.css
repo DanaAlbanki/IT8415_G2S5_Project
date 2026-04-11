@@ -1,0 +1,131 @@
+/* =========================
+   WATCHLIST PAGE ONLY
+========================= */
+
+.active-link {
+    color: #facc15 !important;
+}
+
+/* HERO */
+.watchlist-hero-simple {
+    position: relative;
+    min-height: 58vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 130px 20px 70px;
+    background: url("../images/bridge.jpg") center/cover no-repeat;
+}
+
+.watchlist-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to right,
+            rgba(19, 10, 28, 0.78) 0%,
+            rgba(19, 10, 28, 0.58) 40%,
+            rgba(19, 10, 28, 0.34) 100%);
+}
+
+.watchlist-hero-content-simple {
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+}
+
+.watchlist-hero-content-simple h1 {
+    margin: 0 0 14px;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 5rem;
+    line-height: 1;
+    letter-spacing: 1px;
+    color: #ffffff;
+}
+
+.watchlist-hero-content-simple p {
+    margin: 0;
+    color: #eadcff;
+    font-size: 1.12rem;
+    line-height: 1.8;
+    font-family: "Inter", sans-serif;
+}
+
+/* SECTION */
+#watchlist-section {
+    padding-top: 60px;
+    padding-bottom: 70px;
+}
+
+/* SAME CARD AS INDEX, ONLY ONE REMOVE BUTTON */
+.watchlist-card {
+    padding-bottom: 18px;
+    cursor: default;
+}
+
+.watchlist-card-actions {
+    padding: 0 16px;
+}
+
+.watchlist-remove-btn {
+    width: 100%;
+    height: 46px;
+    border: none;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #facc15;
+    color: #1a1025;
+    text-decoration: none;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.25s ease;
+}
+
+.watchlist-remove-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+    .watchlist-hero-content-simple h1 {
+        font-size: 4rem;
+    }
+
+    .watchlist-hero-content-simple p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .watchlist-hero-simple {
+        min-height: 50vh;
+        padding: 120px 20px 55px;
+    }
+
+    .watchlist-hero-content-simple h1 {
+        font-size: 3.2rem;
+    }
+
+    .watchlist-hero-content-simple p {
+        font-size: 0.98rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .watchlist-hero-simple {
+        min-height: 44vh;
+        padding: 110px 16px 45px;
+    }
+
+    .watchlist-hero-content-simple h1 {
+        font-size: 2.7rem;
+    }
+
+    .watchlist-remove-btn {
+        height: 42px;
+        font-size: 13px;
+    }
+}
