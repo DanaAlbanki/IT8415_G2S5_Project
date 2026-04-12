@@ -5,7 +5,10 @@ ini_set('display_errors', 1);
 require_once(__DIR__ . "/includes/auth_check.php");
 require_once(__DIR__ . "/config/DBConn.php");
 
-if (!isset($_SESSION["role_name"]) || ($_SESSION["role_name"] !== "viewer" && $_SESSION["role_name"] !== "admin")) {
+if (
+    !isset($_SESSION["role_name"]) ||
+    ($_SESSION["role_name"] !== "viewer" && $_SESSION["role_name"] !== "admin")
+) {
     die("Access denied.");
 }
 
@@ -48,12 +51,19 @@ function getMovieIdFromTmdb($conn, $tmdbId)
         LIMIT 1
     ";
     $stmt = mysqli_prepare($conn, $sql);
+
+    if (!$stmt) {
+        return 0;
+    }
+
     mysqli_stmt_bind_param($stmt, "s", $tmdbId);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $row = mysqli_fetch_assoc($result);
 
-    return $row ? (int)$row["movie_id"] : 0;
+    mysqli_stmt_close($stmt);
+
+    return $row ? (int) $row["movie_id"] : 0;
 }
 
 function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
@@ -76,10 +86,10 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
         : "assets/images/notfound.png";
 
     $status = "published";
-    $creatorId = !empty($_SESSION["user_id"]) ? (int)$_SESSION["user_id"] : 2;
+    $creatorId = !empty($_SESSION["user_id"]) ? (int) $_SESSION["user_id"] : 1;
     $isApiImported = 1;
     $externalApiSource = "tmdb";
-    $externalApiId = (string)$movie["id"];
+    $externalApiId = (string) $movie["id"];
     $now = date("Y-m-d H:i:s");
 
     $insertSql = "
@@ -101,6 +111,11 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
     ";
 
     $insertStmt = mysqli_prepare($conn, $insertSql);
+
+    if (!$insertStmt) {
+        return 0;
+    }
+
     mysqli_stmt_bind_param(
         $insertStmt,
         "ssssssissssss",
@@ -120,10 +135,14 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
     );
 
     if (!mysqli_stmt_execute($insertStmt)) {
+        mysqli_stmt_close($insertStmt);
         return 0;
     }
 
-    return (int)mysqli_insert_id($conn);
+    $newMovieId = (int) mysqli_insert_id($conn);
+    mysqli_stmt_close($insertStmt);
+
+    return $newMovieId;
 }
 
 $conn = getConnection();
@@ -132,6 +151,7 @@ mysqli_set_charset($conn, "utf8mb4");
 $tmdbId = isset($_GET["id"]) ? trim($_GET["id"]) : "";
 $userId = isset($_SESSION["user_id"]) ? (int) $_SESSION["user_id"] : 0;
 $movieId = 0;
+$isInWatchlist = false;
 
 $userRating = 0;
 $comments = [];
@@ -165,17 +185,22 @@ if ($tmdbId !== "") {
                 ) AS comment_count
         ";
         $summaryStmt = mysqli_prepare($conn, $summarySql);
-        mysqli_stmt_bind_param($summaryStmt, "iii", $movieId, $movieId, $movieId);
-        mysqli_stmt_execute($summaryStmt);
-        $summaryResult = mysqli_stmt_get_result($summaryStmt);
-        $summaryRow = mysqli_fetch_assoc($summaryResult);
 
-        if ($summaryRow) {
-            $summary = [
-                "average_rating" => (float) $summaryRow["average_rating"],
-                "rating_count" => (int) $summaryRow["rating_count"],
-                "comment_count" => (int) $summaryRow["comment_count"]
-            ];
+        if ($summaryStmt) {
+            mysqli_stmt_bind_param($summaryStmt, "iii", $movieId, $movieId, $movieId);
+            mysqli_stmt_execute($summaryStmt);
+            $summaryResult = mysqli_stmt_get_result($summaryStmt);
+            $summaryRow = mysqli_fetch_assoc($summaryResult);
+
+            if ($summaryRow) {
+                $summary = [
+                    "average_rating" => (float) $summaryRow["average_rating"],
+                    "rating_count" => (int) $summaryRow["rating_count"],
+                    "comment_count" => (int) $summaryRow["comment_count"]
+                ];
+            }
+
+            mysqli_stmt_close($summaryStmt);
         }
 
         if ($userId > 0) {
@@ -186,13 +211,35 @@ if ($tmdbId !== "") {
                 LIMIT 1
             ";
             $ratingStmt = mysqli_prepare($conn, $ratingSql);
-            mysqli_stmt_bind_param($ratingStmt, "ii", $movieId, $userId);
-            mysqli_stmt_execute($ratingStmt);
-            $ratingResult = mysqli_stmt_get_result($ratingStmt);
-            $ratingRow = mysqli_fetch_assoc($ratingResult);
 
-            if ($ratingRow) {
-                $userRating = (int) $ratingRow["rating_value"];
+            if ($ratingStmt) {
+                mysqli_stmt_bind_param($ratingStmt, "ii", $movieId, $userId);
+                mysqli_stmt_execute($ratingStmt);
+                $ratingResult = mysqli_stmt_get_result($ratingStmt);
+                $ratingRow = mysqli_fetch_assoc($ratingResult);
+
+                if ($ratingRow) {
+                    $userRating = (int) $ratingRow["rating_value"];
+                }
+
+                mysqli_stmt_close($ratingStmt);
+            }
+
+            $watchlistSql = "
+                SELECT 1
+                FROM mm_watchlist_items wi
+                INNER JOIN mm_watchlists w ON wi.watchlist_id = w.watchlist_id
+                WHERE w.user_id = ? AND wi.movie_id = ?
+                LIMIT 1
+            ";
+            $watchlistStmt = mysqli_prepare($conn, $watchlistSql);
+
+            if ($watchlistStmt) {
+                mysqli_stmt_bind_param($watchlistStmt, "ii", $userId, $movieId);
+                mysqli_stmt_execute($watchlistStmt);
+                $watchlistResult = mysqli_stmt_get_result($watchlistStmt);
+                $isInWatchlist = ($watchlistResult && mysqli_num_rows($watchlistResult) > 0);
+                mysqli_stmt_close($watchlistStmt);
             }
         }
 
@@ -209,12 +256,17 @@ if ($tmdbId !== "") {
             ORDER BY c.created_at DESC, c.comment_id DESC
         ";
         $commentsStmt = mysqli_prepare($conn, $commentsSql);
-        mysqli_stmt_bind_param($commentsStmt, "i", $movieId);
-        mysqli_stmt_execute($commentsStmt);
-        $commentsResult = mysqli_stmt_get_result($commentsStmt);
 
-        while ($row = mysqli_fetch_assoc($commentsResult)) {
-            $comments[] = $row;
+        if ($commentsStmt) {
+            mysqli_stmt_bind_param($commentsStmt, "i", $movieId);
+            mysqli_stmt_execute($commentsStmt);
+            $commentsResult = mysqli_stmt_get_result($commentsStmt);
+
+            while ($row = mysqli_fetch_assoc($commentsResult)) {
+                $comments[] = $row;
+            }
+
+            mysqli_stmt_close($commentsStmt);
         }
     }
 }
@@ -224,7 +276,8 @@ $pageData = [
     "movieId" => $movieId,
     "userRating" => $userRating,
     "comments" => $comments,
-    "summary" => $summary
+    "summary" => $summary,
+    "isInWatchlist" => $isInWatchlist
 ];
 ?>
 <!DOCTYPE html>
@@ -233,7 +286,9 @@ $pageData = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Details</title>
+
     <link rel="stylesheet" href="assets/css/movie.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -251,10 +306,16 @@ $pageData = [
                 <p>No movie ID was provided.</p>
                 <a href="index.php" class="action-btn secondary-btn">Back Home</a>
             </section>
+        <?php } elseif ($movieId <= 0) { ?>
+            <section class="message-block">
+                <h1>Movie not found</h1>
+                <p>We could not load this movie.</p>
+                <a href="index.php" class="action-btn secondary-btn">Back Home</a>
+            </section>
         <?php } ?>
     </main>
 
-    <?php if ($tmdbId !== "") { ?>
+    <?php if ($tmdbId !== "" && $movieId > 0) { ?>
         <script>
             window.moviePageData = <?php echo json_encode($pageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
         </script>

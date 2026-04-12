@@ -1,4 +1,3 @@
-const WATCHLIST_KEY = "moviemeter_watchlist";
 const FALLBACK_IMAGE = "assets/images/notfound.png";
 
 const navbar = document.querySelector(".navbar");
@@ -31,74 +30,115 @@ window.addEventListener("scroll", () => {
     }
 });
 
-function getWatchlist() {
-    return JSON.parse(localStorage.getItem(WATCHLIST_KEY)) || [];
-}
+function updateWatchlistCount() {
+    if (!watchlistCount || !watchlistContainer) return;
 
-function saveWatchlist(watchlist) {
-    localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
-}
+    const cards = watchlistContainer.querySelectorAll(".watchlist-card");
+    const count = cards.length;
 
-function updateWatchlistCount(count) {
-    if (!watchlistCount) return;
     watchlistCount.textContent = `${count} ${count === 1 ? "movie" : "movies"} saved`;
 }
 
-function removeFromWatchlist(movieId) {
-    const watchlist = getWatchlist().filter((movie) => String(movie.id) !== String(movieId));
-    saveWatchlist(watchlist);
-    renderWatchlist();
-}
-
-function renderWatchlist() {
+function showEmptyState() {
     if (!watchlistContainer) return;
 
-    const watchlist = getWatchlist();
-    watchlistContainer.innerHTML = "";
-    updateWatchlistCount(watchlist.length);
+    watchlistContainer.innerHTML = `
+        <div class="empty-state">
+            Your watchlist is empty.
+        </div>
+    `;
 
-    if (!watchlist.length) {
-        watchlistContainer.innerHTML = `
-            <div class="empty-state">
-                Your watchlist is empty.
-            </div>
-        `;
+    updateWatchlistCount();
+}
+
+async function removeFromWatchlist(movieId, button) {
+    if (!movieId) {
+        alert("Missing movie id.");
         return;
     }
 
-    watchlist.forEach((movie) => {
-        const card = document.createElement("div");
-        card.className = "movie-card watchlist-card";
+    const oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Removing...";
 
-        card.innerHTML = `
-            <a href="movie.php?id=${movie.id}" class="movie-card-link">
-                <img src="${movie.poster || FALLBACK_IMAGE}" alt="${movie.title || "Movie Poster"}" class="watchlist-poster">
-                <h3>${movie.title || "Untitled Movie"}</h3>
-            </a>
+    try {
+        const formData = new FormData();
+        formData.append("movie_id", String(movieId));
 
-            <div class="watchlist-card-actions">
-                <button type="button" class="watchlist-remove-btn" data-id="${movie.id}">
-                    Remove
-                </button>
-            </div>
-        `;
+        const response = await fetch("remove-from-watchlist.php", {
+            method: "POST",
+            body: formData
+        });
 
-        const image = card.querySelector(".watchlist-poster");
+        const text = await response.text();
+
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            throw new Error(text || "Invalid server response.");
+        }
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Failed to remove movie.");
+        }
+
+        const card = button.closest(".watchlist-card");
+        if (card) {
+            card.remove();
+        }
+
+        if (watchlistContainer) {
+            const remainingCards = watchlistContainer.querySelectorAll(".watchlist-card");
+            if (remainingCards.length === 0) {
+                showEmptyState();
+            } else {
+                updateWatchlistCount();
+            }
+        }
+    } catch (error) {
+        console.error("Remove watchlist error:", error);
+        alert(error.message || "Error removing movie.");
+        button.disabled = false;
+        button.textContent = oldText;
+    }
+}
+
+function setupWatchlistCards() {
+    if (!watchlistContainer) return;
+
+    const cards = watchlistContainer.querySelectorAll(".watchlist-card");
+
+    if (!cards.length) {
+        showEmptyState();
+        return;
+    }
+
+    cards.forEach((card) => {
+        const image = card.querySelector(".watchlist-poster, img");
         if (image) {
             image.addEventListener("error", () => {
                 image.src = FALLBACK_IMAGE;
             });
         }
 
-        const removeBtn = card.querySelector(".watchlist-remove-btn");
+        const removeBtn = card.querySelector(".watchlist-remove-btn, .remove-watchlist-btn");
         if (removeBtn) {
             removeBtn.addEventListener("click", () => {
-                removeFromWatchlist(movie.id);
+                const movieId =
+                    removeBtn.dataset.movieId ||
+                    removeBtn.dataset.id ||
+                    card.dataset.movieId ||
+                    card.dataset.id;
+
+                removeFromWatchlist(movieId, removeBtn);
             });
         }
-
-        watchlistContainer.appendChild(card);
     });
+
+    updateWatchlistCount();
 }
 
-renderWatchlist();
+document.addEventListener("DOMContentLoaded", () => {
+    setupWatchlistCards();
+});
