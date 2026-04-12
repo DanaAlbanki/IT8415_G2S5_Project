@@ -94,6 +94,10 @@ img {
     white-space: nowrap;
 }
 
+.nav-links a.active-link {
+    color: #facc15 !important;
+}
+
 .nav-links a:hover {
     color: #facc15;
 }

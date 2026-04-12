@@ -70,7 +70,7 @@ function e($value)
         </button>
 
         <ul class="nav-links" id="navLinks">
-            <li><a href="index.php">Home</a></li>
+            <li><a href="index.php" class="active-link">Home</a></li>
             <li><a href="discover.php">Discover</a></li>
             <li><a href="categories.php">Categories</a></li>
             <li><a href="foryou.php">For You</a></li>

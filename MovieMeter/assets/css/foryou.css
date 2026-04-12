@@ -71,6 +71,7 @@ img {
     margin-left: 50px;
 }
 
+
 .nav-links {
     list-style: none;
     display: flex;
@@ -88,6 +89,10 @@ img {
     font-weight: 600;
     transition: 0.3s ease;
     white-space: nowrap;
+}
+
+.nav-links a.active-link {
+    color: #facc15 !important;
 }
 
 .nav-links a:hover {
