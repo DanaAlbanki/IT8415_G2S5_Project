@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="page-form-side">
             <div class="page-form">
                 <div class="brand">
-                    <img src="images/logo.png" alt="MovieMeter Logo">
+                    <img src="assets/images/logo.png" alt="MovieMeter Logo">
                 </div>
 
                 <h1 class="title">Welcome back</h1>
