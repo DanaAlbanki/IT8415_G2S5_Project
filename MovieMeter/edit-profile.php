@@ -337,7 +337,7 @@ $emailValue = htmlspecialchars($user["email"] ?? "", ENT_QUOTES, "UTF-8");
 <body>
 
     <header class="topbar">
-        <a href="profile.php" class="back-link">← Back to Profile</a>
+        <a href="profile.php" class="back-link">← Back </a>
     </header>
 
     <main class="edit-page">
