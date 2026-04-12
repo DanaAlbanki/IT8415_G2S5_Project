@@ -191,7 +191,7 @@ function createMovieCard(movie) {
     movieEl.appendChild(title);
 
     movieEl.addEventListener("click", () => {
-        window.location.href = `movie.html?id=${movie.id}`;
+        window.location.href = `movie.php?id=${movie.id}`;
     });
 
     return movieEl;
