@@ -85,6 +85,6 @@ $summaryStmt = mysqli_prepare($conn, $summarySql);
 mysqli_stmt_bind_param($summaryStmt, "iii", $movieId, $movieId, $movieId);
 mysqli_stmt_execute($summaryStmt);
 
-header("Location: movie-details.php?id=" . $movieId);
+header("Location: movie.php?id=" . $movieId);
 exit();
 ?>

@@ -39,7 +39,7 @@ if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
 
         <ul class="nav-links" id="navLinks">
             <li><a href="index.php">Home</a></li>
-            <li><a href="discover.php">Discover</a></li>
+            <li><a href="discover.php" class="active-link">Discover</a></li>
             <li><a href="categories.php">Categories</a></li>
             <li><a href="foryou.php">For You</a></li>
             <li><a href="watchlist.php">Watchlist</a></li>

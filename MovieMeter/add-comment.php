@@ -68,6 +68,6 @@ $updateMovieStmt = mysqli_prepare($conn, $updateMovieSql);
 mysqli_stmt_bind_param($updateMovieStmt, "ii", $movieId, $movieId);
 mysqli_stmt_execute($updateMovieStmt);
 
-header("Location: movie-details.php?id=" . $movieId);
+header("Location: movie.php?id=" . $movieId);
 exit();
 ?>

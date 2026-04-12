@@ -70,7 +70,7 @@ function e($value)
         </button>
 
         <ul class="nav-links" id="navLinks">
-            <li><a href="index.php">Home</a></li>
+            <li><a href="index.php" class="active-link">Home</a></li>
             <li><a href="discover.php">Discover</a></li>
             <li><a href="categories.php">Categories</a></li>
             <li><a href="foryou.php">For You</a></li>
@@ -178,7 +178,7 @@ function e($value)
             <?php if ($totalMovies > 0) { ?>
                 <?php while ($row = mysqli_fetch_assoc($result)) { ?>
                     <article class="movie-card">
-                        <a href="movie-details.php?id=<?php echo (int)$row["movie_id"]; ?>" class="movie-card-link">
+                        <a href="movie.php?id=<?php echo (int)$row["movie_id"]; ?>" class="movie-card-link">
                             <div class="movie-poster-wrap">
                                 <?php if (!empty($row["poster_image"])) { ?>
                                     <img

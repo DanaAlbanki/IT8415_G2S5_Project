@@ -69,7 +69,7 @@ $result = mysqli_stmt_get_result($stmt);
             <?php if (mysqli_num_rows($result) > 0) { ?>
                 <?php while ($row = mysqli_fetch_assoc($result)) { ?>
                     <article class="movie-card">
-                        <a href="movie-details.php?id=<?php echo (int)$row["movie_id"]; ?>" class="movie-card-link">
+                        <a href="movie.php?id=<?php echo (int)$row["movie_id"]; ?>" class="movie-card-link">
                             <?php if (!empty($row["poster_image"])) { ?>
                                 <img src="uploads/posters/<?php echo e($row["poster_image"]); ?>" alt="<?php echo e($row["title"]); ?>">
                             <?php } else { ?>

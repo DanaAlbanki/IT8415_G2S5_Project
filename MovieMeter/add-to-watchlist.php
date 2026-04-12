@@ -75,6 +75,6 @@ if (mysqli_num_rows($checkItemResult) === 0) {
     }
 }
 
-header("Location: movie-details.php?id=" . $movieId);
+header("Location: movie.php?id=" . $movieId);
 exit();
 ?>

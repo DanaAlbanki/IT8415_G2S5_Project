@@ -5,6 +5,7 @@ const FALLBACK_IMAGE = "assets/images/notfound.png";
 
 const LOCAL_RATING_KEY_PREFIX = "moviemeter_rating_";
 const LOCAL_COMMENTS_KEY_PREFIX = "moviemeter_comments_";
+const WATCHLIST_KEY = "moviemeter_watchlist";
 
 const container = document.getElementById("movie-detail");
 const params = new URLSearchParams(window.location.search);
@@ -82,10 +83,6 @@ function formatRuntime(minutes) {
 }
 
 function getTrailer(movie) {
-  if (movie.trailer_url) {
-    return toEmbedUrl(movie.trailer_url);
-  }
-
   const videos = movie.videos?.results || [];
 
   const trailer =
@@ -94,24 +91,6 @@ function getTrailer(movie) {
     videos.find((video) => video.site === "YouTube");
 
   return trailer ? `https://www.youtube.com/embed/${trailer.key}` : null;
-}
-
-function toEmbedUrl(url) {
-  if (!url) return null;
-
-  if (url.includes("youtube.com/embed/")) return url;
-
-  if (url.includes("watch?v=")) {
-    const id = url.split("watch?v=")[1].split("&")[0];
-    return `https://www.youtube.com/embed/${id}`;
-  }
-
-  if (url.includes("youtu.be/")) {
-    const id = url.split("youtu.be/")[1].split("?")[0];
-    return `https://www.youtube.com/embed/${id}`;
-  }
-
-  return url;
 }
 
 function renderInfoRow(label, value, id = "") {
@@ -127,27 +106,51 @@ function renderInfoRow(label, value, id = "") {
   `;
 }
 
-function addToWatchlist(movie) {
-  const watchlist = JSON.parse(localStorage.getItem("moviemeter_watchlist")) || [];
+function getWatchlist() {
+  return JSON.parse(localStorage.getItem(WATCHLIST_KEY)) || [];
+}
+
+function saveWatchlist(watchlist) {
+  localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
+}
+
+function isInWatchlist(movieId) {
+  const watchlist = getWatchlist();
+  return watchlist.some((item) => String(item.id) === String(movieId));
+}
+
+function toggleWatchlist(movie) {
+  const watchlist = getWatchlist();
   const exists = watchlist.some((item) => String(item.id) === String(movie.id));
 
+  let updatedWatchlist;
+
   if (exists) {
-    alert("This movie is already in your watchlist.");
-    return;
+    updatedWatchlist = watchlist.filter((item) => String(item.id) !== String(movie.id));
+  } else {
+    const movieData = {
+      id: movie.id,
+      title: movie.title || "Untitled Movie",
+      poster: movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE,
+      release_date: movie.release_date || "",
+      rating: movie.vote_average || ""
+    };
+
+    updatedWatchlist = [...watchlist, movieData];
   }
 
-  const movieData = {
-    id: movie.id,
-    title: movie.title || "Untitled Movie",
-    poster: movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE,
-    release_date: movie.release_date || "",
-    rating: movie.vote_average || ""
-  };
+  saveWatchlist(updatedWatchlist);
+  updateWatchlistButton(movie.id);
+}
 
-  watchlist.push(movieData);
-  localStorage.setItem("moviemeter_watchlist", JSON.stringify(watchlist));
+function updateWatchlistButton(movieId) {
+  const watchlistBtn = document.getElementById("watchlistBtn");
+  if (!watchlistBtn) return;
 
-  alert("Movie added to watchlist.");
+  const exists = isInWatchlist(movieId);
+
+  watchlistBtn.textContent = exists ? "Remove from Watchlist" : "Add to Watchlist";
+  watchlistBtn.classList.toggle("in-watchlist", exists);
 }
 
 function getLocalRating(movieId) {
@@ -226,25 +229,17 @@ function renderMovie(movie) {
   const year = getYear(movie.release_date);
   const fullTitle = year ? `${title} (${year})` : title;
 
-  const shortDescription = movie.short_description || movie.tagline || "";
-  const plot = movie.full_description || movie.overview || "No plot available.";
+  const shortDescription = movie.tagline || "";
+  const plot = movie.overview || "No plot available.";
   const genre = getGenres(movie);
   const actors = getActors(movie);
   const director = getDirector(movie);
   const runtime = formatRuntime(movie.runtime);
 
-  const averageRating =
-    movie.average_rating !== undefined && movie.average_rating !== null && movie.average_rating !== 0
-      ? movie.average_rating
-      : (movie.vote_average ? movie.vote_average.toFixed(1) : "N/A");
-
-  const ratingCount =
-    movie.rating_count !== undefined && movie.rating_count !== null && movie.rating_count !== 0
-      ? movie.rating_count
-      : (movie.vote_count || "N/A");
-
-  const viewCount = movie.view_count ?? "";
-  const status = movie.status || "published";
+  const averageRating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
+  const ratingCount = movie.vote_count || "N/A";
+  const viewCount = movie.popularity ? Math.round(movie.popularity) : "";
+  const status = "published";
 
   const poster = resolvePoster(movie);
   const backdrop = resolveBackdrop(movie, poster);
@@ -268,7 +263,7 @@ function renderMovie(movie) {
 
           <div class="button-row">
             ${trailerUrl ? `<a href="#trailer-section" class="action-btn primary-btn">Watch Trailer</a>` : ""}
-            <button id="watchlistBtn" class="action-btn watchlist-btn" type="button">Add to Watchlist</button>
+            <button id="watchlistBtn" class="action-btn watchlist-btn" type="button"></button>
           </div>
         </div>
       </div>
@@ -386,7 +381,10 @@ function renderMovie(movie) {
 
   const watchlistBtn = document.getElementById("watchlistBtn");
   if (watchlistBtn) {
-    watchlistBtn.addEventListener("click", () => addToWatchlist(movie));
+    updateWatchlistButton(movie.id);
+    watchlistBtn.addEventListener("click", () => {
+      toggleWatchlist(movie);
+    });
   }
 
   const stars = [...document.querySelectorAll(".star-btn")];

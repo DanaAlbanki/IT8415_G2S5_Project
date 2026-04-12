@@ -14,7 +14,7 @@ if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieMeter | Categories</title>
+    <title>Categories</title>
 
     <link rel="stylesheet" href="assets/css/categories.css">
 
