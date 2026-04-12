@@ -153,6 +153,20 @@ $userId = isset($_SESSION["user_id"]) ? (int) $_SESSION["user_id"] : 0;
 $movieId = 0;
 $isInWatchlist = false;
 
+$returnTo = "index.php";
+if (isset($_GET["return_to"]) && $_GET["return_to"] !== "") {
+    $candidate = trim($_GET["return_to"]);
+
+    if (
+        strpos($candidate, "http://") === false &&
+        strpos($candidate, "https://") === false &&
+        strpos($candidate, "//") === false &&
+        stripos($candidate, "javascript:") !== 0
+    ) {
+        $returnTo = $candidate;
+    }
+}
+
 $userRating = 0;
 $comments = [];
 $summary = [
@@ -296,7 +310,7 @@ $pageData = [
 <body class="movie-page">
 
     <header class="movie-topbar">
-        <a href="index.php" class="back-link">← Back to Home</a>
+        <a href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>" class="back-link">← Back</a>
     </header>
 
     <main id="movie-detail">
@@ -304,13 +318,13 @@ $pageData = [
             <section class="message-block">
                 <h1>Movie not found</h1>
                 <p>No movie ID was provided.</p>
-                <a href="index.php" class="action-btn secondary-btn">Back Home</a>
+                <a href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>" class="action-btn secondary-btn">Go Back</a>
             </section>
         <?php } elseif ($movieId <= 0) { ?>
             <section class="message-block">
                 <h1>Movie not found</h1>
                 <p>We could not load this movie.</p>
-                <a href="index.php" class="action-btn secondary-btn">Back Home</a>
+                <a href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>" class="action-btn secondary-btn">Go Back</a>
             </section>
         <?php } ?>
     </main>

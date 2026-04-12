@@ -235,8 +235,7 @@ function pageUrl($pageNumber)
             <?php if ($totalRows > 0) { ?>
                 <?php while ($movie = mysqli_fetch_assoc($result)) { ?>
                     <article class="movie-card">
-                        <a href="movie.php?id=<?php echo (int)$movie["movie_id"]; ?>" class="movie-card-link" style="text-decoration:none;color:inherit;">
-                            <?php if (!empty($movie["poster_image"])) { ?>
+<a href="movie.php?id=<?php echo (int)$movie["movie_id"]; ?>&return_to=<?php echo urlencode($_SERVER["REQUEST_URI"]); ?>" class="movie-card-link" style="text-decoration:none;color:inherit;">                            <?php if (!empty($movie["poster_image"])) { ?>
                                 <img
                                     src="uploads/posters/<?php echo e($movie["poster_image"]); ?>"
                                     alt="<?php echo e($movie["title"]); ?>">

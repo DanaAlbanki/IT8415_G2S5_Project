@@ -38,6 +38,15 @@ const navLinks = document.getElementById("navLinks");
 let currentSlide = 0;
 let autoSlide = null;
 
+function getReturnTo() {
+    const fileName = window.location.pathname.split("/").pop() || "index.php";
+    return `${fileName}${window.location.search}${window.location.hash}`;
+}
+
+function getMovieDetailsUrl(movieId) {
+    return `movie.php?id=${encodeURIComponent(movieId)}&return_to=${encodeURIComponent(getReturnTo())}`;
+}
+
 function showSlide(index) {
     if (!slides.length || !dots.length) return;
 
@@ -219,7 +228,7 @@ function attachEvents() {
 
                 if (data.results && data.results.length > 0) {
                     const movieId = data.results[0].id;
-                    window.location.href = `movie.php?id=${movieId}`;
+                    window.location.href = getMovieDetailsUrl(movieId);
                 } else {
                     alert("Movie not found.");
                 }
@@ -456,7 +465,7 @@ function createMovieCard(movie) {
     movieEl.appendChild(title);
 
     movieEl.addEventListener("click", () => {
-        window.location.href = `movie.php?id=${movie.id}`;
+        window.location.href = getMovieDetailsUrl(movie.id);
     });
 
     return movieEl;

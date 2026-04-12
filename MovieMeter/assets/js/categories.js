@@ -20,6 +20,40 @@ let totalPages = 1;
 
 init();
 
+function getReturnTo() {
+    const fileName = window.location.pathname.split("/").pop() || "categories.php";
+    return `${fileName}${window.location.search}${window.location.hash}`;
+}
+
+function getMovieDetailsUrl(movieId) {
+    return `movie.php?id=${encodeURIComponent(movieId)}&return_to=${encodeURIComponent(getReturnTo())}`;
+}
+
+function readStateFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const genre = Number(params.get("genre"));
+    const page = Number(params.get("page"));
+
+    return {
+        genre: Number.isFinite(genre) && genre > 0 ? genre : null,
+        page: Number.isFinite(page) && page > 0 ? page : 1
+    };
+}
+
+function updateUrlState() {
+    const fileName = window.location.pathname.split("/").pop() || "categories.php";
+    const params = new URLSearchParams(window.location.search);
+
+    if (selectedGenreId) {
+        params.set("genre", String(selectedGenreId));
+    }
+
+    params.set("page", String(currentPage));
+
+    const newUrl = `${fileName}?${params.toString()}`;
+    window.history.replaceState({}, "", newUrl);
+}
+
 async function init() {
     attachEvents();
     await loadGenres();
@@ -83,11 +117,19 @@ async function loadGenres() {
 
         renderGenres();
 
-        selectedGenreId = genres[0].id;
-        selectedGenreName = genres[0].name;
+        const state = readStateFromUrl();
+        const urlGenre = genres.find(item => item.id === state.genre);
+
+        if (urlGenre) {
+            selectedGenreId = urlGenre.id;
+            selectedGenreName = urlGenre.name;
+        } else {
+            selectedGenreId = genres[0].id;
+            selectedGenreName = genres[0].name;
+        }
 
         updateActiveGenreButton();
-        await loadMoviesByGenre(1);
+        await loadMoviesByGenre(state.page || 1);
     } catch (error) {
         console.error(error);
         genresList.innerHTML = `<div class="empty-state">Failed to load categories.</div>`;
@@ -149,6 +191,7 @@ async function loadMoviesByGenre(page = 1) {
         selectedCategoryTitle.textContent = `${selectedGenreName} Movies`;
         selectedCategorySubtitle.textContent = `Showing popular ${selectedGenreName.toLowerCase()} movies`;
 
+        updateUrlState();
         renderMovies(data.results || []);
         renderPagination();
     } catch (error) {
@@ -183,6 +226,9 @@ function createMovieCard(movie) {
     const image = document.createElement("img");
     image.src = movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE;
     image.alt = movie.title || "Movie Poster";
+    image.onerror = () => {
+        image.src = FALLBACK_IMAGE;
+    };
 
     const title = document.createElement("h3");
     title.textContent = movie.title || "Untitled Movie";
@@ -191,7 +237,7 @@ function createMovieCard(movie) {
     movieEl.appendChild(title);
 
     movieEl.addEventListener("click", () => {
-        window.location.href = `movie.php?id=${movie.id}`;
+        window.location.href = getMovieDetailsUrl(movie.id);
     });
 
     return movieEl;

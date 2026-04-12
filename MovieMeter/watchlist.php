@@ -97,8 +97,7 @@ $watchlistCount = count($watchlistMovies);
             <?php } else { ?>
                 <?php foreach ($watchlistMovies as $movie) { ?>
                     <div class="movie-card watchlist-card" data-movie-id="<?php echo (int) $movie["movie_id"]; ?>">
-                        <a href="movie.php?id=<?php echo urlencode($movie["external_api_id"]); ?>" class="movie-card-link">
-                            <img
+                    <a href="movie.php?id=<?php echo urlencode($movie["external_api_id"]); ?>&return_to=<?php echo urlencode($_SERVER["REQUEST_URI"]); ?>" class="movie-card-link">                            <img
                                 src="<?php echo htmlspecialchars(!empty($movie["poster_image"]) ? $movie["poster_image"] : "assets/images/notfound.png"); ?>"
                                 alt="<?php echo htmlspecialchars($movie["title"] ?: "Movie Poster"); ?>"
                                 class="watchlist-poster"

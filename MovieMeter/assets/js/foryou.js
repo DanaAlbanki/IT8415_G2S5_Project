@@ -19,6 +19,15 @@ const genrePool = [28, 12, 16, 35, 80, 18, 14, 27, 9648, 10749, 878, 53];
 
 init();
 
+function getReturnTo() {
+    const fileName = window.location.pathname.split("/").pop() || "foryou.php";
+    return `${fileName}${window.location.search}${window.location.hash}`;
+}
+
+function getMovieDetailsUrl(movieId) {
+    return `movie.php?id=${encodeURIComponent(movieId)}&return_to=${encodeURIComponent(getReturnTo())}`;
+}
+
 async function init() {
     attachEvents();
     await Promise.all([
@@ -140,7 +149,7 @@ function createMovieCard(movie) {
     movieEl.appendChild(title);
 
     movieEl.addEventListener("click", () => {
-        window.location.href = `movie.php?id=${movie.id}`;
+        window.location.href = getMovieDetailsUrl(movie.id);
     });
 
     return movieEl;
