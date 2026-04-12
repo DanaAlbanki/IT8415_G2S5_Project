@@ -43,7 +43,7 @@
     color: #ffffff;
 }
 
-.watchlist-hero-content-simple p {
+.watchlist-count-hero {
     margin: 0;
     color: #eadcff;
     font-size: 1.12rem;
@@ -94,7 +94,7 @@
         font-size: 4rem;
     }
 
-    .watchlist-hero-content-simple p {
+    .watchlist-count-hero {
         font-size: 1rem;
     }
 }
@@ -109,7 +109,7 @@
         font-size: 3.2rem;
     }
 
-    .watchlist-hero-content-simple p {
+    .watchlist-count-hero {
         font-size: 0.98rem;
     }
 }
