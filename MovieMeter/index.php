@@ -92,7 +92,7 @@ function e($value)
                     emotion, and unforgettable moments.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#" class="primary-btn">View Details</a>
+                    <a href="#" class="primary-btn hero-detail-btn" data-title="Tangled">View Details</a>
                 </div>
             </div>
         </div>
@@ -106,7 +106,7 @@ function e($value)
                     and dark secrets through one of the most iconic fantasy series ever made.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#" class="primary-btn">View Details</a>
+                   <a href="#" class="primary-btn hero-detail-btn" data-title="Harry Potter and the Philosopher's Stone">View Details</a>
                 </div>
             </div>
         </div>
@@ -120,7 +120,7 @@ function e($value)
                     a shape-shifting evil clown that feeds on fear and haunts their town.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#" class="primary-btn">View Details</a>
+                    <a href="#" class="primary-btn hero-detail-btn" data-title="It">View Details</a>
                 </div>
             </div>
         </div>
