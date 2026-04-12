@@ -2,16 +2,22 @@ import { API_KEY, BASE_URL, IMG_PATH } from './api.js';
 
 const BACKDROP_PATH = "https://image.tmdb.org/t/p/original";
 const FALLBACK_IMAGE = "assets/images/notfound.png";
-
-const LOCAL_RATING_KEY_PREFIX = "moviemeter_rating_";
-const LOCAL_COMMENTS_KEY_PREFIX = "moviemeter_comments_";
 const WATCHLIST_KEY = "moviemeter_watchlist";
 
 const container = document.getElementById("movie-detail");
 const params = new URLSearchParams(window.location.search);
-const movieId = params.get("id");
+const tmdbId = Number(params.get("id"));
 
-if (!movieId) {
+const pageData = window.moviePageData || {};
+let dbComments = Array.isArray(pageData.comments) ? pageData.comments : [];
+let dbUserRating = Number(pageData.userRating || 0);
+let dbSummary = pageData.summary || {
+  average_rating: 0,
+  rating_count: 0,
+  comment_count: 0
+};
+
+if (!tmdbId) {
   showMessage("Movie not found", "No movie ID was provided.");
 } else {
   loadMovie();
@@ -20,7 +26,7 @@ if (!movieId) {
 async function loadMovie() {
   try {
     const response = await fetch(
-      `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits,videos`
+      `${BASE_URL}/movie/${tmdbId}?api_key=${API_KEY}&append_to_response=credits,videos`
     );
 
     if (!response.ok) {
@@ -38,8 +44,8 @@ async function loadMovie() {
 function showMessage(title, text) {
   container.innerHTML = `
     <section class="message-block">
-      <h1>${title}</h1>
-      <p>${text}</p>
+      <h1>${escapeHTML(title)}</h1>
+      <p>${escapeHTML(text)}</p>
       <a href="index.php" class="action-btn secondary-btn">Back Home</a>
     </section>
   `;
@@ -95,13 +101,12 @@ function getTrailer(movie) {
 
 function renderInfoRow(label, value, id = "") {
   if (value === undefined || value === null || value === "") return "";
-
   const idAttr = id ? ` id="${id}"` : "";
 
   return `
     <div class="info-row">
-      <span>${label}</span>
-      <strong${idAttr}>${value}</strong>
+      <span>${escapeHTML(label)}</span>
+      <strong${idAttr}>${escapeHTML(String(value))}</strong>
     </div>
   `;
 }
@@ -133,7 +138,7 @@ function toggleWatchlist(movie) {
       title: movie.title || "Untitled Movie",
       poster: movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE,
       release_date: movie.release_date || "",
-      rating: movie.vote_average || ""
+      rating: Number(dbSummary.average_rating || 0).toFixed(1)
     };
 
     updatedWatchlist = [...watchlist, movieData];
@@ -148,32 +153,14 @@ function updateWatchlistButton(movieId) {
   if (!watchlistBtn) return;
 
   const exists = isInWatchlist(movieId);
-
   watchlistBtn.textContent = exists ? "Remove from Watchlist" : "Add to Watchlist";
   watchlistBtn.classList.toggle("in-watchlist", exists);
-}
-
-function getLocalRating(movieId) {
-  const value = Number(localStorage.getItem(`${LOCAL_RATING_KEY_PREFIX}${movieId}`));
-  return Number.isFinite(value) && value > 0 ? value : 0;
-}
-
-function saveLocalRating(movieId, rating) {
-  localStorage.setItem(`${LOCAL_RATING_KEY_PREFIX}${movieId}`, String(rating));
-}
-
-function getComments(movieId) {
-  return JSON.parse(localStorage.getItem(`${LOCAL_COMMENTS_KEY_PREFIX}${movieId}`)) || [];
-}
-
-function saveComments(movieId, comments) {
-  localStorage.setItem(`${LOCAL_COMMENTS_KEY_PREFIX}${movieId}`, JSON.stringify(comments));
 }
 
 function formatCommentDate(dateString) {
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString();
+  return date.toLocaleString();
 }
 
 function escapeHTML(text) {
@@ -182,37 +169,26 @@ function escapeHTML(text) {
   return div.innerHTML;
 }
 
-function getBaseCommentCount(movie) {
-  if (movie.comment_count !== undefined && movie.comment_count !== null && movie.comment_count !== "") {
-    return Number(movie.comment_count) || 0;
-  }
-  return 0;
-}
-
-function updateCommentCount(movie) {
-  const detailCommentCount = document.getElementById("detailCommentCount");
-  if (!detailCommentCount) return;
-
-  const baseCommentCount = getBaseCommentCount(movie);
-  const localComments = getComments(movie.id);
-  detailCommentCount.textContent = String(baseCommentCount + localComments.length);
-}
-
-function renderComments(movieId) {
+function renderCommentsList(comments) {
   const commentsList = document.getElementById("commentsList");
   if (!commentsList) return;
 
-  const comments = getComments(movieId);
-
   if (!comments.length) {
-    commentsList.innerHTML = "";
+    commentsList.innerHTML = `
+      <div class="comment-line">
+        <p class="comment-line-text">No comments yet.</p>
+      </div>
+    `;
     return;
   }
 
   commentsList.innerHTML = comments.map((comment) => `
     <div class="comment-line">
-      <p class="comment-line-text">${escapeHTML(comment.text)}</p>
-      <span class="comment-line-date">${formatCommentDate(comment.date)}</span>
+      <div class="comment-line-head">
+        <strong class="comment-line-user">${escapeHTML(comment.display_name || "User")}</strong>
+        <span class="comment-line-date">${escapeHTML(formatCommentDate(comment.created_at))}</span>
+      </div>
+      <p class="comment-line-text">${escapeHTML(comment.comment_text || "")}</p>
     </div>
   `).join("");
 }
@@ -222,6 +198,78 @@ function updateStarSelection(stars, selectedRating) {
     const value = Number(star.dataset.value);
     star.classList.toggle("active", value <= selectedRating);
   });
+}
+
+function updateSummaryUI(summary) {
+  dbSummary = summary;
+
+  const averageEl = document.getElementById("detailAverageRating");
+  const ratingCountEl = document.getElementById("detailRatingCount");
+  const commentCountEl = document.getElementById("detailCommentCount");
+
+  if (averageEl) {
+    averageEl.textContent = Number(summary.average_rating || 0).toFixed(1);
+  }
+
+  if (ratingCountEl) {
+    ratingCountEl.textContent = String(Number(summary.rating_count || 0));
+  }
+
+  if (commentCountEl) {
+    commentCountEl.textContent = String(Number(summary.comment_count || 0));
+  }
+}
+
+async function submitRating(ratingValue) {
+  const formData = new FormData();
+  formData.append("tmdb_id", String(tmdbId));
+  formData.append("rating_value", String(ratingValue));
+
+  const response = await fetch("add-rating.php", {
+    method: "POST",
+    body: formData
+  });
+
+  const text = await response.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error(text || "Invalid server response.");
+  }
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Failed to submit rating.");
+  }
+
+  return data;
+}
+
+async function submitComment(commentTextValue) {
+  const formData = new FormData();
+  formData.append("tmdb_id", String(tmdbId));
+  formData.append("comment_text", commentTextValue);
+
+  const response = await fetch("add-comment.php", {
+    method: "POST",
+    body: formData
+  });
+
+  const text = await response.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error(text || "Invalid server response.");
+  }
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Failed to post comment.");
+  }
+
+  return data;
 }
 
 function renderMovie(movie) {
@@ -236,30 +284,29 @@ function renderMovie(movie) {
   const director = getDirector(movie);
   const runtime = formatRuntime(movie.runtime);
 
-  const averageRating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
-  const ratingCount = movie.vote_count || "N/A";
+  const averageRating = Number(dbSummary.average_rating || 0).toFixed(1);
+  const ratingCount = Number(dbSummary.rating_count || 0);
+  const commentCount = Number(dbSummary.comment_count || 0);
   const viewCount = movie.popularity ? Math.round(movie.popularity) : "";
   const status = "published";
 
   const poster = resolvePoster(movie);
   const backdrop = resolveBackdrop(movie, poster);
   const trailerUrl = getTrailer(movie);
-  const localRating = getLocalRating(movie.id);
-  const initialCommentCount = getBaseCommentCount(movie) + getComments(movie.id).length;
 
   container.innerHTML = `
-    <section class="hero" style="background-image: url('${backdrop}')">
+    <section class="hero" style="background-image: url('${escapeHTML(backdrop)}')">
       <div class="hero-overlay"></div>
 
       <div class="hero-inner">
         <div class="poster-column">
-          <img src="${poster}" alt="${title}" class="poster-image">
+          <img src="${escapeHTML(poster)}" alt="${escapeHTML(title)}" class="poster-image">
         </div>
 
         <div class="content-column">
-          <h1 class="movie-title">${fullTitle}</h1>
+          <h1 class="movie-title">${escapeHTML(fullTitle)}</h1>
 
-          ${shortDescription ? `<p class="short-description">${shortDescription}</p>` : ""}
+          ${shortDescription ? `<p class="short-description">${escapeHTML(shortDescription)}</p>` : ""}
 
           <div class="button-row">
             ${trailerUrl ? `<a href="#trailer-section" class="action-btn primary-btn">Watch Trailer</a>` : ""}
@@ -272,16 +319,16 @@ function renderMovie(movie) {
     <section class="details-section">
       <div class="details-grid">
         <article class="detail-panel">
-          <h2>${fullTitle}</h2>
+          <h2>${escapeHTML(fullTitle)}</h2>
 
           ${renderInfoRow("Genre", genre)}
           ${renderInfoRow("Plot", plot)}
           ${renderInfoRow("Actors", actors)}
           ${renderInfoRow("Director", director)}
           ${renderInfoRow("Runtime", runtime)}
-          ${renderInfoRow("Average Rating", averageRating)}
-          ${renderInfoRow("Rating Count", ratingCount)}
-          ${renderInfoRow("Comment Count", initialCommentCount, "detailCommentCount")}
+          ${renderInfoRow("Average Rating", averageRating, "detailAverageRating")}
+          ${renderInfoRow("Rating Count", ratingCount, "detailRatingCount")}
+          ${renderInfoRow("Comment Count", commentCount, "detailCommentCount")}
           ${renderInfoRow("View Count", viewCount)}
           ${renderInfoRow("Status", status)}
         </article>
@@ -309,7 +356,7 @@ function renderMovie(movie) {
 
             <div class="engagement-actions">
               <button id="saveRatingBtn" class="engagement-btn engagement-btn-primary" type="button">Submit Rating</button>
-              <p id="ratingMessage" class="engagement-message">${localRating > 0 ? `Your rating: ${localRating}/5` : ""}</p>
+              <p id="ratingMessage" class="engagement-message">${dbUserRating > 0 ? `Your rating: ${dbUserRating}/5` : ""}</p>
             </div>
           </div>
 
@@ -321,7 +368,7 @@ function renderMovie(movie) {
                 id="commentText"
                 class="comment-textarea"
                 placeholder="Write your comment here..."
-                maxlength="300"
+                maxlength="1000"
                 required
               ></textarea>
 
@@ -346,8 +393,8 @@ function renderMovie(movie) {
         ? `
           <div class="trailer-frame">
             <iframe
-              src="${trailerUrl}"
-              title="${title} Trailer"
+              src="${escapeHTML(trailerUrl)}"
+              title="${escapeHTML(title)} Trailer"
               frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowfullscreen>
@@ -391,9 +438,10 @@ function renderMovie(movie) {
   const saveRatingBtn = document.getElementById("saveRatingBtn");
   const ratingMessage = document.getElementById("ratingMessage");
 
-  let selectedRating = localRating;
+  let selectedRating = dbUserRating;
 
   updateStarSelection(stars, selectedRating);
+  renderCommentsList(dbComments);
 
   stars.forEach((star) => {
     star.addEventListener("click", () => {
@@ -404,23 +452,37 @@ function renderMovie(movie) {
   });
 
   if (saveRatingBtn) {
-    saveRatingBtn.addEventListener("click", () => {
+    saveRatingBtn.addEventListener("click", async () => {
       if (!selectedRating) {
         ratingMessage.textContent = "Please choose a rating first.";
         return;
       }
 
-      saveLocalRating(movie.id, selectedRating);
-      ratingMessage.textContent = `Your rating: ${selectedRating}/5`;
+      saveRatingBtn.disabled = true;
+      ratingMessage.textContent = "Submitting rating...";
+
+      try {
+        const data = await submitRating(selectedRating);
+        dbUserRating = Number(data.user_rating || selectedRating);
+        ratingMessage.textContent = `Your rating: ${dbUserRating}/5`;
+        updateSummaryUI(data.summary);
+        updateStarSelection(stars, dbUserRating);
+      } catch (error) {
+        console.error(error);
+        ratingMessage.textContent = error.message || "Error submitting rating.";
+      } finally {
+        saveRatingBtn.disabled = false;
+      }
     });
   }
 
   const commentForm = document.getElementById("commentForm");
   const commentText = document.getElementById("commentText");
   const commentMessage = document.getElementById("commentMessage");
+  const commentSubmitBtn = commentForm ? commentForm.querySelector("button[type='submit']") : null;
 
-  if (commentForm) {
-    commentForm.addEventListener("submit", (e) => {
+  if (commentForm && commentText && commentSubmitBtn) {
+    commentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const text = commentText.value.trim();
@@ -430,22 +492,22 @@ function renderMovie(movie) {
         return;
       }
 
-      const comments = getComments(movie.id);
+      commentSubmitBtn.disabled = true;
+      commentMessage.textContent = "Posting comment...";
 
-      comments.unshift({
-        id: Date.now(),
-        text,
-        date: new Date().toISOString()
-      });
-
-      saveComments(movie.id, comments);
-      commentForm.reset();
-      commentMessage.textContent = "Comment posted.";
-      renderComments(movie.id);
-      updateCommentCount(movie);
+      try {
+        const data = await submitComment(text);
+        dbComments = Array.isArray(data.comments) ? data.comments : dbComments;
+        commentMessage.textContent = "Comment posted.";
+        commentForm.reset();
+        renderCommentsList(dbComments);
+        updateSummaryUI(data.summary);
+      } catch (error) {
+        console.error(error);
+        commentMessage.textContent = error.message || "Error posting comment.";
+      } finally {
+        commentSubmitBtn.disabled = false;
+      }
     });
   }
-
-  renderComments(movie.id);
-  updateCommentCount(movie);
 }
