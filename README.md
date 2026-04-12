@@ -130,7 +130,7 @@ Used to automate database operations.
 |----|------|
 | 202304661 | Fatema Maitham |
 | 202305590 | Maram Shubbar |
-| 202300316 | Dana Albanki |
+| 202200316 | Dana Albanki |
 | 202200277 | Zainab Mahdi |
 
 ---
