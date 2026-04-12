@@ -1,7 +1,7 @@
 import { API_KEY, BASE_URL, IMG_PATH } from './api.js';
 
 const BACKDROP_PATH = "https://image.tmdb.org/t/p/original";
-const FALLBACK_IMAGE = "images/no-image.png";
+const FALLBACK_IMAGE = "assets/images/notfound.png";
 
 const LOCAL_RATING_KEY_PREFIX = "moviemeter_rating_";
 const LOCAL_COMMENTS_KEY_PREFIX = "moviemeter_comments_";
@@ -45,14 +45,13 @@ function showMessage(title, text) {
 }
 
 function resolvePoster(movie) {
-  if (movie.poster_image) return movie.poster_image;
   if (movie.poster_path) return IMG_PATH + movie.poster_path;
   return FALLBACK_IMAGE;
 }
 
 function resolveBackdrop(movie, poster) {
   if (movie.backdrop_path) return BACKDROP_PATH + movie.backdrop_path;
-  return poster;
+  return poster || FALLBACK_IMAGE;
 }
 
 function getYear(releaseDate) {
@@ -62,18 +61,18 @@ function getYear(releaseDate) {
 
 function getGenres(movie) {
   if (!movie.genres || !movie.genres.length) return "N/A";
-  return movie.genres.map(genre => genre.name).join(", ");
+  return movie.genres.map((genre) => genre.name).join(", ");
 }
 
 function getActors(movie) {
   if (!movie.credits || !movie.credits.cast) return "N/A";
-  const cast = movie.credits.cast.slice(0, 3).map(actor => actor.name);
+  const cast = movie.credits.cast.slice(0, 3).map((actor) => actor.name);
   return cast.length ? cast.join(", ") : "N/A";
 }
 
 function getDirector(movie) {
   if (!movie.credits || !movie.credits.crew) return "N/A";
-  const director = movie.credits.crew.find(person => person.job === "Director");
+  const director = movie.credits.crew.find((person) => person.job === "Director");
   return director ? director.name : "N/A";
 }
 
@@ -90,9 +89,9 @@ function getTrailer(movie) {
   const videos = movie.videos?.results || [];
 
   const trailer =
-    videos.find(video => video.site === "YouTube" && video.type === "Trailer" && video.official) ||
-    videos.find(video => video.site === "YouTube" && video.type === "Trailer") ||
-    videos.find(video => video.site === "YouTube");
+    videos.find((video) => video.site === "YouTube" && video.type === "Trailer" && video.official) ||
+    videos.find((video) => video.site === "YouTube" && video.type === "Trailer") ||
+    videos.find((video) => video.site === "YouTube");
 
   return trailer ? `https://www.youtube.com/embed/${trailer.key}` : null;
 }
@@ -130,7 +129,7 @@ function renderInfoRow(label, value, id = "") {
 
 function addToWatchlist(movie) {
   const watchlist = JSON.parse(localStorage.getItem("moviemeter_watchlist")) || [];
-  const exists = watchlist.some(item => String(item.id) === String(movie.id));
+  const exists = watchlist.some((item) => String(item.id) === String(movie.id));
 
   if (exists) {
     alert("This movie is already in your watchlist.");
@@ -207,7 +206,7 @@ function renderComments(movieId) {
     return;
   }
 
-  commentsList.innerHTML = comments.map(comment => `
+  commentsList.innerHTML = comments.map((comment) => `
     <div class="comment-line">
       <p class="comment-line-text">${escapeHTML(comment.text)}</p>
       <span class="comment-line-date">${formatCommentDate(comment.date)}</span>
@@ -216,7 +215,7 @@ function renderComments(movieId) {
 }
 
 function updateStarSelection(stars, selectedRating) {
-  stars.forEach(star => {
+  stars.forEach((star) => {
     const value = Number(star.dataset.value);
     star.classList.toggle("active", value <= selectedRating);
   });
@@ -349,7 +348,7 @@ function renderMovie(movie) {
       </div>
 
       ${trailerUrl
-      ? `
+        ? `
           <div class="trailer-frame">
             <iframe
               src="${trailerUrl}"
@@ -360,14 +359,30 @@ function renderMovie(movie) {
             </iframe>
           </div>
         `
-      : `
+        : `
           <div class="no-trailer">
             Trailer not available for this movie.
           </div>
         `
-    }
+      }
     </section>
   `;
+
+  const posterImage = document.querySelector(".poster-image");
+  if (posterImage) {
+    posterImage.addEventListener("error", () => {
+      posterImage.src = FALLBACK_IMAGE;
+    });
+  }
+
+  const heroSection = document.querySelector(".hero");
+  if (heroSection && backdrop.includes("image.tmdb.org")) {
+    const testImage = new Image();
+    testImage.onerror = () => {
+      heroSection.style.backgroundImage = `url('${FALLBACK_IMAGE}')`;
+    };
+    testImage.src = backdrop;
+  }
 
   const watchlistBtn = document.getElementById("watchlistBtn");
   if (watchlistBtn) {
@@ -382,7 +397,7 @@ function renderMovie(movie) {
 
   updateStarSelection(stars, selectedRating);
 
-  stars.forEach(star => {
+  stars.forEach((star) => {
     star.addEventListener("click", () => {
       selectedRating = Number(star.dataset.value);
       updateStarSelection(stars, selectedRating);
