@@ -71,7 +71,7 @@ function renderWatchlist() {
         card.className = "movie-card watchlist-card";
 
         card.innerHTML = `
-            <a href="movie-details.php?id=${movie.id}" class="movie-card-link">
+            <a href="movie.php?id=${movie.id}" class="movie-card-link">
                 <img src="${movie.poster || FALLBACK_IMAGE}" alt="${movie.title || "Movie Poster"}" class="watchlist-poster">
                 <h3>${movie.title || "Untitled Movie"}</h3>
             </a>

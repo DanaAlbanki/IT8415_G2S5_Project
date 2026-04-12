@@ -39,6 +39,6 @@ if ($watchlistRow = mysqli_fetch_assoc($watchlistResult)) {
     }
 }
 
-header("Location: movie-details.php?id=" . $movieId);
+header("Location: movie.php?id=" . $movieId);
 exit();
 ?>

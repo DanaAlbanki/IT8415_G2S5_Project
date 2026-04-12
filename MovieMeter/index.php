@@ -178,7 +178,7 @@ function e($value)
             <?php if ($totalMovies > 0) { ?>
                 <?php while ($row = mysqli_fetch_assoc($result)) { ?>
                     <article class="movie-card">
-                        <a href="movie-details.php?id=<?php echo (int)$row["movie_id"]; ?>" class="movie-card-link">
+                        <a href="movie.php?id=<?php echo (int)$row["movie_id"]; ?>" class="movie-card-link">
                             <div class="movie-poster-wrap">
                                 <?php if (!empty($row["poster_image"])) { ?>
                                     <img

@@ -275,7 +275,7 @@ if (!$result) {
                                 | Views: <?php echo (int)$movie["view_count"]; ?>
                             </p>
 
-                            <a href="movie-details.php?id=<?php echo (int)$movie["movie_id"]; ?>" class="btn btn-outline-primary w-100">
+                            <a href="movie.php?id=<?php echo (int)$movie["movie_id"]; ?>" class="btn btn-outline-primary w-100">
                                 View More
                             </a>
                         </div>
