@@ -39,7 +39,7 @@ function showMessage(title, text) {
     <section class="message-block">
       <h1>${title}</h1>
       <p>${text}</p>
-      <a href="index.html" class="action-btn secondary-btn">Back Home</a>
+      <a href="index.php" class="action-btn secondary-btn">Back Home</a>
     </section>
   `;
 }

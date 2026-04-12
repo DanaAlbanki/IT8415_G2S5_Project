@@ -219,7 +219,7 @@ function attachEvents() {
 
                 if (data.results && data.results.length > 0) {
                     const movieId = data.results[0].id;
-                    window.location.href = `movie.html?id=${movieId}`;
+                    window.location.href = `movie.php?id=${movieId}`;
                 } else {
                     alert("Movie not found.");
                 }
@@ -456,7 +456,7 @@ function createMovieCard(movie) {
     movieEl.appendChild(title);
 
     movieEl.addEventListener("click", () => {
-        window.location.href = `movie.html?id=${movie.id}`;
+        window.location.href = `movie.php?id=${movie.id}`;
     });
 
     return movieEl;
