@@ -2,295 +2,352 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+require_once(__DIR__ . "/includes/auth_check.php");
 require_once(__DIR__ . "/config/DBConn.php");
+
+if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
+    die("Access denied.");
+}
 
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
-// Get filters
-$title      = isset($_GET["title"]) ? trim($_GET["title"]) : "";
-$creator    = isset($_GET["creator"]) ? trim($_GET["creator"]) : "";
-$date_from  = isset($_GET["date_from"]) ? trim($_GET["date_from"]) : "";
-$date_to    = isset($_GET["date_to"]) ? trim($_GET["date_to"]) : "";
-$popularity = isset($_GET["popularity"]) ? trim($_GET["popularity"]) : "";
+function e($value)
+{
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
 
-// Base query
-$sql = "
-SELECT 
-    m.movie_id,
-    m.title,
-    m.short_description,
-    m.release_date,
-    m.poster_image,
-    m.average_rating,
-    m.rating_count,
-    m.comment_count,
-    m.view_count,
-    m.published_at,
-    u.full_name AS creator_name
-FROM mm_movies m
-INNER JOIN mm_users u ON m.creator_id = u.user_id
-WHERE m.status = 'published'
-";
+$title = trim($_GET["title"] ?? "");
+$creator = trim($_GET["creator"] ?? "");
+$date_from = trim($_GET["date_from"] ?? "");
+$date_to = trim($_GET["date_to"] ?? "");
+$popularity = trim($_GET["popularity"] ?? "");
 
-$conditions = [];
+$page = isset($_GET["page"]) ? (int)$_GET["page"] : 1;
+$page = max(1, $page);
+
+$perPage = 10;
+$offset = ($page - 1) * $perPage;
+
+$orderOptions = [
+    "" => "m.created_at DESC",
+    "rating_high" => "m.average_rating DESC, m.rating_count DESC, m.title ASC",
+    "rating_count" => "m.rating_count DESC, m.average_rating DESC, m.title ASC",
+    "views" => "m.view_count DESC, m.title ASC",
+    "comments" => "m.comment_count DESC, m.title ASC",
+    "newest" => "m.release_date DESC, m.created_at DESC",
+    "oldest" => "m.release_date ASC, m.created_at ASC"
+];
+
+$orderBy = $orderOptions[$popularity] ?? $orderOptions[""];
+
+$where = ["m.status = 'published'"];
 $params = [];
 $types = "";
 
-// Search by title
+/*
+    Title search:
+    - uses FULLTEXT if you add the FULLTEXT index
+    - also keeps LIKE fallback
+*/
 if ($title !== "") {
-    $conditions[] = "m.title LIKE ?";
+    $where[] = "(
+        MATCH(m.title, m.short_description, m.full_description) AGAINST (? IN NATURAL LANGUAGE MODE)
+        OR m.title LIKE ?
+    )";
+    $params[] = $title;
     $params[] = "%" . $title . "%";
-    $types .= "s";
+    $types .= "ss";
 }
 
-// Search by creator
 if ($creator !== "") {
-    $conditions[] = "u.full_name LIKE ?";
+    $where[] = "(u.full_name LIKE ? OR u.username LIKE ?)";
     $params[] = "%" . $creator . "%";
-    $types .= "s";
+    $params[] = "%" . $creator . "%";
+    $types .= "ss";
 }
 
-// Search by date range
 if ($date_from !== "" && $date_to !== "") {
-    $conditions[] = "m.release_date BETWEEN ? AND ?";
+    $where[] = "m.release_date BETWEEN ? AND ?";
     $params[] = $date_from;
     $params[] = $date_to;
     $types .= "ss";
 } elseif ($date_from !== "") {
-    $conditions[] = "m.release_date >= ?";
+    $where[] = "m.release_date >= ?";
     $params[] = $date_from;
     $types .= "s";
 } elseif ($date_to !== "") {
-    $conditions[] = "m.release_date <= ?";
+    $where[] = "m.release_date <= ?";
     $params[] = $date_to;
     $types .= "s";
 }
 
-// Add conditions
-if (!empty($conditions)) {
-    $sql .= " AND " . implode(" AND ", $conditions);
-}
+$whereSQL = "WHERE " . implode(" AND ", $where);
 
-// Sort by popularity
-switch ($popularity) {
-    case "rating_high":
-        $sql .= " ORDER BY m.average_rating DESC, m.rating_count DESC, m.title ASC";
-        break;
+/* Count query */
+$countSQL = "
+    SELECT COUNT(*) AS total
+    FROM mm_movies m
+    INNER JOIN mm_users u ON m.creator_id = u.user_id
+    $whereSQL
+";
 
-    case "rating_count":
-        $sql .= " ORDER BY m.rating_count DESC, m.average_rating DESC, m.title ASC";
-        break;
+$countStmt = mysqli_prepare($conn, $countSQL);
 
-    case "views":
-        $sql .= " ORDER BY m.view_count DESC, m.title ASC";
-        break;
-
-    case "comments":
-        $sql .= " ORDER BY m.comment_count DESC, m.title ASC";
-        break;
-
-    case "newest":
-        $sql .= " ORDER BY m.release_date DESC, m.created_at DESC";
-        break;
-
-    case "oldest":
-        $sql .= " ORDER BY m.release_date ASC, m.created_at ASC";
-        break;
-
-    default:
-        $sql .= " ORDER BY m.created_at DESC";
-        break;
-}
-
-$stmt = mysqli_prepare($conn, $sql);
-
-if (!$stmt) {
-    die("Prepare failed: " . mysqli_error($conn));
+if (!$countStmt) {
+    die("Prepare failed (count): " . mysqli_error($conn));
 }
 
 if (!empty($params)) {
-    mysqli_stmt_bind_param($stmt, $types, ...$params);
+    mysqli_stmt_bind_param($countStmt, $types, ...$params);
 }
 
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
+mysqli_stmt_execute($countStmt);
+$countResult = mysqli_stmt_get_result($countStmt);
+$countRow = mysqli_fetch_assoc($countResult);
+$totalRows = (int)($countRow["total"] ?? 0);
+$totalPages = max(1, (int)ceil($totalRows / $perPage));
 
-if (!$result) {
-    die("Query failed: " . mysqli_error($conn));
+if ($page > $totalPages) {
+    $page = $totalPages;
+    $offset = ($page - 1) * $perPage;
+}
+
+/* Main data query */
+$sql = "
+    SELECT 
+        m.movie_id,
+        m.title,
+        m.short_description,
+        m.release_date,
+        m.poster_image,
+        m.average_rating,
+        m.rating_count,
+        m.comment_count,
+        m.view_count,
+        m.published_at,
+        u.full_name AS creator_name,
+        u.username AS creator_username
+    FROM mm_movies m
+    INNER JOIN mm_users u ON m.creator_id = u.user_id
+    $whereSQL
+    ORDER BY $orderBy
+    LIMIT ? OFFSET ?
+";
+
+$dataStmt = mysqli_prepare($conn, $sql);
+
+if (!$dataStmt) {
+    die("Prepare failed (data): " . mysqli_error($conn));
+}
+
+$dataParams = $params;
+$dataTypes = $types . "ii";
+$dataParams[] = $perPage;
+$dataParams[] = $offset;
+
+mysqli_stmt_bind_param($dataStmt, $dataTypes, ...$dataParams);
+mysqli_stmt_execute($dataStmt);
+$result = mysqli_stmt_get_result($dataStmt);
+
+function pageUrl($pageNumber)
+{
+    $query = $_GET;
+    $query["page"] = $pageNumber;
+    return "search.php?" . http_build_query($query);
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Search Movies</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
 
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: #f5f7fb;
-        }
-        .search-box {
-            background: #fff;
-            border-radius: 14px;
-            padding: 24px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-        }
-        .movie-card {
-            background: #fff;
-            border: none;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-            height: 100%;
-        }
-        .movie-card img {
-            width: 100%;
-            height: 320px;
-            object-fit: cover;
-            background: #eee;
-        }
-        .poster-placeholder {
-            width: 100%;
-            height: 320px;
-            background: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            font-weight: 600;
-        }
-        .meta {
-            font-size: 14px;
-            color: #666;
-        }
-        .desc {
-            min-height: 72px;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mb-0">Search Movies</h1>
-        <a href="index.php" class="btn btn-outline-secondary">Back to Home</a>
-    </div>
+    <nav class="navbar scrolled">
+        <div class="logo">
+            <img src="assets/images/logo.png" alt="MovieMeter Logo">
+        </div>
 
-    <div class="search-box mb-4">
-        <form method="GET" action="search.php" class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Search by Title</label>
-                <input type="text" name="title" class="form-control"
-                       value="<?php echo htmlspecialchars($title); ?>"
-                       placeholder="Enter movie title">
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.php">Home</a></li>
+            <li><a href="discover.php">Discover</a></li>
+            <li><a href="categories.php">Categories</a></li>
+            <li><a href="foryou.php">For You</a></li>
+            <li><a href="watchlist.php">Watchlist</a></li>
+            <li><a href="profile.php">Profile</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+
+    <section class="search-section" style="padding-top:130px;">
+        <div class="search-section-inner">
+            <div class="search-heading">
+                <h2>Search Movies</h2>
+                <p>Search by title, creator, date range, and popularity.</p>
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Search by Creator</label>
-                <input type="text" name="creator" class="form-control"
-                       value="<?php echo htmlspecialchars($creator); ?>"
-                       placeholder="Enter creator name">
-            </div>
+            <form class="search-form-grid" method="GET" action="search.php">
+                <input
+                    type="text"
+                    name="title"
+                    placeholder="Search by movie title"
+                    value="<?php echo e($title); ?>">
 
-            <div class="col-md-3">
-                <label class="form-label">Date From</label>
-                <input type="date" name="date_from" class="form-control"
-                       value="<?php echo htmlspecialchars($date_from); ?>">
-            </div>
+                <input
+                    type="text"
+                    name="creator"
+                    placeholder="Search by creator"
+                    value="<?php echo e($creator); ?>">
 
-            <div class="col-md-3">
-                <label class="form-label">Date To</label>
-                <input type="date" name="date_to" class="form-control"
-                       value="<?php echo htmlspecialchars($date_to); ?>">
-            </div>
+                <input
+                    type="date"
+                    name="date_from"
+                    value="<?php echo e($date_from); ?>">
 
-            <div class="col-md-4">
-                <label class="form-label">Popularity</label>
-                <select name="popularity" class="form-select">
-                    <option value="">Default</option>
-                    <option value="rating_high" <?php echo ($popularity === "rating_high") ? "selected" : ""; ?>>Highest Rating</option>
-                    <option value="rating_count" <?php echo ($popularity === "rating_count") ? "selected" : ""; ?>>Most Rated</option>
-                    <option value="views" <?php echo ($popularity === "views") ? "selected" : ""; ?>>Most Viewed</option>
-                    <option value="comments" <?php echo ($popularity === "comments") ? "selected" : ""; ?>>Most Commented</option>
-                    <option value="newest" <?php echo ($popularity === "newest") ? "selected" : ""; ?>>Newest Release</option>
-                    <option value="oldest" <?php echo ($popularity === "oldest") ? "selected" : ""; ?>>Oldest Release</option>
+                <input
+                    type="date"
+                    name="date_to"
+                    value="<?php echo e($date_to); ?>">
+
+                <select name="popularity">
+                    <option value="" <?php echo $popularity === "" ? "selected" : ""; ?>>Default</option>
+                    <option value="rating_high" <?php echo $popularity === "rating_high" ? "selected" : ""; ?>>Highest Rating</option>
+                    <option value="rating_count" <?php echo $popularity === "rating_count" ? "selected" : ""; ?>>Most Rated</option>
+                    <option value="views" <?php echo $popularity === "views" ? "selected" : ""; ?>>Most Viewed</option>
+                    <option value="comments" <?php echo $popularity === "comments" ? "selected" : ""; ?>>Most Commented</option>
+                    <option value="newest" <?php echo $popularity === "newest" ? "selected" : ""; ?>>Newest Release</option>
+                    <option value="oldest" <?php echo $popularity === "oldest" ? "selected" : ""; ?>>Oldest Release</option>
                 </select>
-            </div>
 
-            <div class="col-md-2 d-grid">
-                <label class="form-label invisible">Search</label>
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-        </form>
-    </div>
-
-    <?php
-    $hasFilters = ($title !== "" || $creator !== "" || $date_from !== "" || $date_to !== "" || $popularity !== "");
-    ?>
-
-    <div class="mb-3">
-        <h4 class="mb-0">
-            <?php
-            if ($hasFilters) {
-                echo "Search Results";
-            } else {
-                echo "All Published Movies";
-            }
-            ?>
-        </h4>
-    </div>
-
-    <div class="row g-4">
-        <?php if (mysqli_num_rows($result) > 0) { ?>
-            <?php while ($movie = mysqli_fetch_assoc($result)) { ?>
-                <div class="col-md-6 col-lg-4">
-                    <div class="movie-card">
-                        <?php if (!empty($movie["poster_image"])) { ?>
-                            <img src="uploads/posters/<?php echo htmlspecialchars($movie["poster_image"]); ?>" alt="Poster">
-                        <?php } else { ?>
-                            <div class="poster-placeholder">No Poster</div>
-                        <?php } ?>
-
-                        <div class="p-3">
-                            <h5><?php echo htmlspecialchars($movie["title"]); ?></h5>
-
-                            <p class="meta mb-2">
-                                <strong>Creator:</strong> <?php echo htmlspecialchars($movie["creator_name"]); ?><br>
-                                <strong>Release Date:</strong>
-                                <?php echo !empty($movie["release_date"]) ? htmlspecialchars($movie["release_date"]) : "N/A"; ?>
-                            </p>
-
-                            <p class="desc">
-                                <?php echo htmlspecialchars($movie["short_description"]); ?>
-                            </p>
-
-                            <p class="meta mb-3">
-                                ⭐ <?php echo number_format((float)$movie["average_rating"], 2); ?>
-                                | Ratings: <?php echo (int)$movie["rating_count"]; ?>
-                                | Comments: <?php echo (int)$movie["comment_count"]; ?>
-                                | Views: <?php echo (int)$movie["view_count"]; ?>
-                            </p>
-
-                            <a href="movie.php?id=<?php echo (int)$movie["movie_id"]; ?>" class="btn btn-outline-primary w-100">
-                                View More
-                            </a>
-                        </div>
-                    </div>
+                <div class="search-form-buttons">
+                    <button type="submit" class="search-btn-main">Search</button>
+                    <a href="search.php" class="reset-btn-main" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">Reset</a>
                 </div>
-            <?php } ?>
-        <?php } else { ?>
-            <div class="col-12">
-                <div class="alert alert-warning">
+            </form>
+        </div>
+    </section>
+
+    <section class="movies-section" id="all-movies-section">
+        <div class="section-header">
+            <h2><?php echo $totalRows > 0 ? "Search Results" : "No Results"; ?></h2>
+            <p>Found <?php echo $totalRows; ?> results</p>
+        </div>
+
+        <div class="movies">
+            <?php if ($totalRows > 0) { ?>
+                <?php while ($movie = mysqli_fetch_assoc($result)) { ?>
+                    <article class="movie-card">
+                        <a href="movie.php?id=<?php echo (int)$movie["movie_id"]; ?>" class="movie-card-link" style="text-decoration:none;color:inherit;">
+                            <?php if (!empty($movie["poster_image"])) { ?>
+                                <img
+                                    src="uploads/posters/<?php echo e($movie["poster_image"]); ?>"
+                                    alt="<?php echo e($movie["title"]); ?>">
+                            <?php } else { ?>
+                                <img
+                                    src="assets/images/notfound.png"
+                                    alt="No Poster">
+                            <?php } ?>
+
+                            <h3><?php echo e($movie["title"]); ?></h3>
+
+                            <div style="padding:0 16px 18px;">
+                                <p style="margin:0 0 10px; color:#d8b4fe; font-size:14px; line-height:1.7;">
+                                    <?php
+                                    $desc = trim((string)$movie["short_description"]);
+                                    echo e(strlen($desc) > 100 ? substr($desc, 0, 100) . "..." : $desc);
+                                    ?>
+                                </p>
+
+                                <p style="margin:0 0 6px; color:#f3e8ff; font-size:14px;">
+                                    <strong>Creator:</strong>
+                                    <?php echo e($movie["creator_name"] ?: $movie["creator_username"]); ?>
+                                </p>
+
+                                <p style="margin:0 0 6px; color:#f3e8ff; font-size:14px;">
+                                    <strong>Release:</strong>
+                                    <?php echo e($movie["release_date"] ?: "N/A"); ?>
+                                </p>
+
+                                <p style="margin:0; color:#f3e8ff; font-size:14px;">
+                                    <strong>Rating:</strong> <?php echo e($movie["average_rating"]); ?>
+                                    |
+                                    <strong>Rated:</strong> <?php echo (int)$movie["rating_count"]; ?>
+                                    |
+                                    <strong>Comments:</strong> <?php echo (int)$movie["comment_count"]; ?>
+                                    |
+                                    <strong>Views:</strong> <?php echo (int)$movie["view_count"]; ?>
+                                </p>
+                            </div>
+                        </a>
+                    </article>
+                <?php } ?>
+            <?php } else { ?>
+                <div class="empty-state">
                     No movies found matching your search.
                 </div>
-            </div>
-        <?php } ?>
-    </div>
-</div>
+            <?php } ?>
+        </div>
+    </section>
 
+    <?php if ($totalPages > 1) { ?>
+        <div class="pagination-wrapper">
+            <div class="pagination">
+                <?php if ($page > 1) { ?>
+                    <a href="<?php echo e(pageUrl($page - 1)); ?>" style="text-decoration:none;">
+                        <button type="button">←</button>
+                    </a>
+                <?php } ?>
+
+                <?php
+                $start = max(1, $page - 2);
+                $end = min($totalPages, $page + 2);
+
+                for ($i = $start; $i <= $end; $i++) {
+                ?>
+                    <a href="<?php echo e(pageUrl($i)); ?>" style="text-decoration:none;">
+                        <button type="button" class="<?php echo $i === $page ? 'active' : ''; ?>">
+                            <?php echo $i; ?>
+                        </button>
+                    </a>
+                <?php } ?>
+
+                <?php if ($page < $totalPages) { ?>
+                    <a href="<?php echo e(pageUrl($page + 1)); ?>" style="text-decoration:none;">
+                        <button type="button">→</button>
+                    </a>
+                <?php } ?>
+            </div>
+        </div>
+    <?php } ?>
+
+    <script>
+        const menuToggle = document.getElementById("menuToggle");
+        const navLinks = document.getElementById("navLinks");
+
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener("click", () => {
+                navLinks.classList.toggle("open");
+            });
+        }
+    </script>
 </body>
+
 </html>

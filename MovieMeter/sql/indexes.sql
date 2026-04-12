@@ -44,3 +44,6 @@ CREATE INDEX idx_deleted_movies_log_movie_id ON mm_deleted_movies_log(movie_id);
 CREATE INDEX idx_deleted_movies_log_deleted_by ON mm_deleted_movies_log(deleted_by);
 CREATE INDEX idx_deleted_movies_log_creator_id ON mm_deleted_movies_log(creator_id);
 CREATE INDEX idx_deleted_movies_log_deleted_at ON mm_deleted_movies_log(deleted_at);
+
+ALTER TABLE mm_movies
+ADD FULLTEXT INDEX ft_movies_search (title, short_description, full_description);
