@@ -45,11 +45,6 @@ $where = ["m.status = 'published'"];
 $params = [];
 $types = "";
 
-/*
-    Title search:
-    - uses FULLTEXT if you add the FULLTEXT index
-    - also keeps LIKE fallback
-*/
 if ($title !== "") {
     $where[] = "(
         MATCH(m.title, m.short_description, m.full_description) AGAINST (? IN NATURAL LANGUAGE MODE)
@@ -84,7 +79,6 @@ if ($date_from !== "" && $date_to !== "") {
 
 $whereSQL = "WHERE " . implode(" AND ", $where);
 
-/* Count query */
 $countSQL = "
     SELECT COUNT(*) AS total
     FROM mm_movies m
@@ -113,21 +107,11 @@ if ($page > $totalPages) {
     $offset = ($page - 1) * $perPage;
 }
 
-/* Main data query */
 $sql = "
     SELECT 
         m.movie_id,
         m.title,
-        m.short_description,
-        m.release_date,
-        m.poster_image,
-        m.average_rating,
-        m.rating_count,
-        m.comment_count,
-        m.view_count,
-        m.published_at,
-        u.full_name AS creator_name,
-        u.username AS creator_username
+        m.poster_image
     FROM mm_movies m
     INNER JOIN mm_users u ON m.creator_id = u.user_id
     $whereSQL
@@ -159,7 +143,6 @@ function pageUrl($pageNumber)
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -172,7 +155,6 @@ function pageUrl($pageNumber)
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-
 <body>
 
     <nav class="navbar scrolled">
@@ -201,7 +183,6 @@ function pageUrl($pageNumber)
         <div class="search-section-inner">
             <div class="search-heading">
                 <h2>Search Movies</h2>
-                <p>Search by title, creator, date range, and popularity.</p>
             </div>
 
             <form class="search-form-grid" method="GET" action="search.php">
@@ -248,7 +229,6 @@ function pageUrl($pageNumber)
     <section class="movies-section" id="all-movies-section">
         <div class="section-header">
             <h2><?php echo $totalRows > 0 ? "Search Results" : "No Results"; ?></h2>
-            <p>Found <?php echo $totalRows; ?> results</p>
         </div>
 
         <div class="movies">
@@ -267,35 +247,6 @@ function pageUrl($pageNumber)
                             <?php } ?>
 
                             <h3><?php echo e($movie["title"]); ?></h3>
-
-                            <div style="padding:0 16px 18px;">
-                                <p style="margin:0 0 10px; color:#d8b4fe; font-size:14px; line-height:1.7;">
-                                    <?php
-                                    $desc = trim((string)$movie["short_description"]);
-                                    echo e(strlen($desc) > 100 ? substr($desc, 0, 100) . "..." : $desc);
-                                    ?>
-                                </p>
-
-                                <p style="margin:0 0 6px; color:#f3e8ff; font-size:14px;">
-                                    <strong>Creator:</strong>
-                                    <?php echo e($movie["creator_name"] ?: $movie["creator_username"]); ?>
-                                </p>
-
-                                <p style="margin:0 0 6px; color:#f3e8ff; font-size:14px;">
-                                    <strong>Release:</strong>
-                                    <?php echo e($movie["release_date"] ?: "N/A"); ?>
-                                </p>
-
-                                <p style="margin:0; color:#f3e8ff; font-size:14px;">
-                                    <strong>Rating:</strong> <?php echo e($movie["average_rating"]); ?>
-                                    |
-                                    <strong>Rated:</strong> <?php echo (int)$movie["rating_count"]; ?>
-                                    |
-                                    <strong>Comments:</strong> <?php echo (int)$movie["comment_count"]; ?>
-                                    |
-                                    <strong>Views:</strong> <?php echo (int)$movie["view_count"]; ?>
-                                </p>
-                            </div>
                         </a>
                     </article>
                 <?php } ?>
@@ -349,5 +300,4 @@ function pageUrl($pageNumber)
         }
     </script>
 </body>
-
 </html>
