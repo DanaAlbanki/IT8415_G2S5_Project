@@ -1,0 +1,230 @@
+/* =========================
+   PROFILE PAGE ONLY
+========================= */
+
+.active-link {
+    color: #facc15 !important;
+}
+
+/* HERO */
+.profile-hero {
+    position: relative;
+    min-height: 58vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 130px 20px 70px;
+    background: url("../images/an1.jpeg") center/cover no-repeat;
+}
+
+.profile-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to right,
+            rgba(19, 10, 28, 0.78) 0%,
+            rgba(19, 10, 28, 0.58) 40%,
+            rgba(19, 10, 28, 0.34) 100%);
+}
+
+.profile-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+}
+
+.profile-hero-content h1 {
+    margin: 0 0 14px;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 5rem;
+    line-height: 1;
+    letter-spacing: 1px;
+    color: #ffffff;
+}
+
+.profile-hero-content p {
+    margin: 0;
+    color: #eadcff;
+    font-size: 1.12rem;
+    line-height: 1.8;
+    font-family: "Inter", sans-serif;
+}
+
+/* PAGE */
+.profile-main {
+    padding: 60px 20px 80px;
+}
+
+.profile-section-clean {
+    max-width: 1050px;
+    margin: 0 auto;
+}
+
+/* TOP */
+.profile-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.profile-avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: #facc15;
+    color: #1a1025;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 2.1rem;
+    letter-spacing: 1px;
+}
+
+.profile-intro h2 {
+    margin: 0 0 6px;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    color: #ffffff;
+}
+
+.profile-intro p {
+    margin: 0;
+    color: #d8b4fe;
+    font-size: 1rem;
+    font-family: "Inter", sans-serif;
+}
+
+/* INFO SECTION */
+.profile-info-list {
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.profile-info-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.profile-label {
+    color: #cbbbd5;
+    font-size: 0.88rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: "Inter", sans-serif;
+}
+
+.profile-value {
+    color: #ffffff;
+    font-size: 1rem;
+    line-height: 1.8;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
+}
+
+/* BUTTONS */
+.profile-actions {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.profile-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 24px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-family: "Inter", sans-serif;
+    transition: 0.25s ease;
+}
+
+.profile-btn-primary {
+    background: #facc15;
+    color: #1a1025;
+}
+
+.profile-btn-secondary {
+    background: #8b2d7a;
+    color: #ffffff;
+}
+
+.profile-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+    .profile-hero-content h1 {
+        font-size: 4rem;
+    }
+
+    .profile-hero-content p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-hero {
+        min-height: 50vh;
+        padding: 120px 20px 55px;
+    }
+
+    .profile-hero-content h1 {
+        font-size: 3.2rem;
+    }
+
+    .profile-hero-content p {
+        font-size: 0.98rem;
+    }
+
+    .profile-top {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-info-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .profile-actions {
+        flex-direction: column;
+    }
+
+    .profile-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-hero {
+        min-height: 44vh;
+        padding: 110px 16px 45px;
+    }
+
+    .profile-hero-content h1 {
+        font-size: 2.7rem;
+    }
+
+    .profile-avatar {
+        width: 72px;
+        height: 72px;
+        font-size: 1.8rem;
+    }
+
+    .profile-main {
+        padding: 45px 16px 70px;
+    }
+}
