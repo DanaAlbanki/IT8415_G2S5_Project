@@ -1,2 +1,31 @@
-MovieMeter/assets/js/api.js
-MovieMeter/config/mdb_config.php
+# Ignore config with sensitive data
+config/config.php
+config/mdb_config.php
+assets/js/api.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+nbproject/private/
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Uploads (optional)
+uploads/
+
+# Test files (optional)
+tests/
+
+# Build/output folders
+build/
+dist/
+
+nbproject/private/
