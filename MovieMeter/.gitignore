@@ -1,5 +1,7 @@
 # Ignore config with sensitive data
 config/config.php
+config/mdb_config.php
+assets/js/api.js
 
 # OS files
 .DS_Store
@@ -22,7 +24,8 @@ uploads/
 # Test files (optional)
 tests/
 
-
 # Build/output folders
 build/
 dist/
+
+nbproject/private/
