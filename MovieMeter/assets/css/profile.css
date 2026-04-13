@@ -106,7 +106,6 @@
     font-family: "Bebas Neue", sans-serif;
     font-size: 2.2rem;
     letter-spacing: 1px;
-    box-shadow: 0 10px 30px rgba(250, 204, 21, 0.22);
 }
 
 .profile-intro h2 {
@@ -152,12 +151,6 @@
     border-radius: 18px;
     background: #342243;
     transition: 0.25s ease;
-}
-
-.profile-info-row:hover {
-    transform: translateY(-2px);
-    border-color: rgba(250, 204, 21, 0.18);
-    background: #3a264b;
 }
 
 .profile-label {
