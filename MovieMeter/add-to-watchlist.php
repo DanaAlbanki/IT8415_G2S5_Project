@@ -199,10 +199,11 @@ if ($watchlistStmt) {
 
 if ($watchlistId <= 0) {
     $now = date("Y-m-d H:i:s");
+    $watchlistName = "My Watchlist";
 
     $createSql = "
-        INSERT INTO mm_watchlists (user_id, created_at)
-        VALUES (?, ?)
+        INSERT INTO mm_watchlists (user_id, watchlist_name, created_at)
+        VALUES (?, ?, ?)
     ";
     $createStmt = mysqli_prepare($conn, $createSql);
 
@@ -215,7 +216,7 @@ if ($watchlistId <= 0) {
         exit;
     }
 
-    mysqli_stmt_bind_param($createStmt, "is", $userId, $now);
+    mysqli_stmt_bind_param($createStmt, "iss", $userId, $watchlistName, $now);
 
     if (!mysqli_stmt_execute($createStmt)) {
         $dbError = mysqli_error($conn);

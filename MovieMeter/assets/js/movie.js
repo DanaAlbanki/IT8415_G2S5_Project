@@ -160,27 +160,27 @@ async function removeFromWatchlist() {
 }
 
 async function toggleWatchlistOnServer(button) {
-    if (!button) return;
+    if (!button || button.disabled) return;
+
+    const oldState = isInUserWatchlist;
 
     button.disabled = true;
-    button.textContent = "Please wait...";
 
     try {
         if (isInUserWatchlist) {
-            await removeFromWatchlist();
             isInUserWatchlist = false;
+            updateWatchlistButton();
+            await removeFromWatchlist();
         } else {
-            await addToWatchlist();
             isInUserWatchlist = true;
+            updateWatchlistButton();
+            await addToWatchlist();
         }
-
-        updateWatchlistButton();
     } catch (error) {
         console.error("Watchlist error:", error);
-        button.textContent = error && error.message ? error.message : "Watchlist error";
-        setTimeout(() => {
-            updateWatchlistButton();
-        }, 1500);
+        isInUserWatchlist = oldState;
+        updateWatchlistButton();
+        alert(error && error.message ? error.message : "Watchlist error");
     } finally {
         button.disabled = false;
     }
