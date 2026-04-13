@@ -140,9 +140,9 @@ Used to automate database operations.
 | Name | Role | Dev Type | Tasks |
 |---|---|---|---|
 | **Maram Shubbar** | Frontend & UI/UX Developer | Frontend | ERD, Home Page (UI + layout), Search System (AJAX + filters), Rating & Comments (AJAX frontend), jQuery integration (events + AJAX handling), API consumption (connect frontend to backend endpoints), Watchlist (UI + AJAX add/remove), Dark/light theme toggle |
-| **Dana Albanki** | Content & Creator Panel Developer | Full-stack | ERD, Creator Panel (add/edit/publish movies), Media Upload (images/videos), Movie Validation (forms + logic), Image Preview Before Upload (JavaScript), Connect creator panel with database, Edit/Delete logic with permissions |
+| **Zainab Mahdi** | Content & Creator Panel Developer | Full-stack | ERD, Creator Panel (add/edit/publish movies), Media Upload (images/videos), Movie Validation (forms + logic), Image Preview Before Upload (JavaScript), Connect creator panel with database, Edit/Delete logic with permissions |
 | **Fatema Maitham** | Backend & API Developer | Backend | Database Table Creation, Authentication (login/register), Session Management, Roles & Permissions, External API Integration (fetch & save movies), API endpoints (for AJAX requests), Watchlist API (add/remove backend logic), Pagination, Database Triggers |
-| **Zainab Mahdi** | Admin & Reports Developer | Backend | Database Table Creation, Admin Panel (manage users & movies), Manage Comments (admin control), Reporting System, Prepared Statements (secure queries) |
+| **Dana Albanki** | Admin & Reports Developer | Backend | Database Table Creation, Admin Panel (manage users & movies), Manage Comments (admin control), Reporting System, Prepared Statements (secure queries) |
 
 ---
 
