@@ -3,14 +3,14 @@ config/config.php
 config/mdb_config.php
 assets/js/api.js
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# IDE files
+# IDE files (NetBeans / VS Code)
 nbproject/private/
 .vscode/
 .idea/
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Logs
 *.log
@@ -21,11 +21,9 @@ nbproject/private/
 # Uploads (optional)
 uploads/
 
-# Test files (optional)
+# Tests (optional)
 tests/
 
 # Build/output folders
 build/
 dist/
-
-nbproject/private/
