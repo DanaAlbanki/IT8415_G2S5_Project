@@ -1,5 +1,5 @@
 # Ignore config with sensitive data
-config/config.php
+MovieMeter/config/config.php
 config/mdb_config.php
 assets/js/api.js
 
@@ -28,4 +28,4 @@ tests/
 build/
 dist/
 
-nbproject/private/
+MovieMeter/nbproject/private/private.properties
