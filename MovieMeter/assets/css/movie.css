@@ -485,3 +485,324 @@ button {
     color: #eadcff;
     font-size: 16px;
 }
+
+/* =========================
+   ACTORS + RECOMMENDATIONS
+========================= */
+
+.movie-extra-section {
+    width: min(1420px, calc(100% - 60px));
+    margin: 0 auto 42px;
+    padding: 0;
+}
+
+.extra-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 26px;
+}
+
+.extra-section-head.single-head {
+    justify-content: flex-start;
+}
+
+.extra-section-head h2 {
+    margin: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: 1px;
+    color: #ffffff;
+}
+
+/* toggle */
+.actors-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #f3e8ff;
+}
+
+.actors-toggle input {
+    display: none;
+}
+
+.actors-toggle-slider {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    transition: 0.25s ease;
+}
+
+.actors-toggle-slider::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: 0.25s ease;
+}
+
+.actors-toggle input:checked + .actors-toggle-slider {
+    background: #facc15;
+}
+
+.actors-toggle input:checked + .actors-toggle-slider::after {
+    transform: translateX(24px);
+}
+
+/* actors */
+.actors-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 28px;
+    padding: 0;
+}
+
+.actor-card {
+    width: 100%;
+    background: #3a234d;
+    border-radius: 22px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.actor-card:hover {
+    transform: translateY(-8px);
+}
+
+.actor-image-wrap {
+    width: 100%;
+    height: 320px;
+    background: #24142f;
+    overflow: hidden;
+}
+
+.actor-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.actor-info {
+    padding: 16px 16px 18px;
+    background: #4a2d63;
+    text-align: center;
+}
+
+.actor-info h3 {
+    margin: 0 0 6px;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.actor-info p {
+    margin: 0;
+    color: #eadcff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.actor-hidden-item {
+    display: none;
+}
+
+.actor-hidden-item.show {
+    display: block;
+}
+
+/* recommendations */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 28px;
+    padding: 0;
+}
+
+.recommendation-card {
+    width: 100%;
+    background: #3a234d;
+    border-radius: 22px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-8px);
+}
+
+.recommendation-poster {
+    width: 100%;
+    height: 360px;
+    object-fit: cover;
+    display: block;
+    background: #24142f;
+}
+
+.recommendation-info {
+    padding: 16px 16px 18px;
+    background: #4a2d63;
+}
+
+.recommendation-info h3 {
+    margin: 0;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.4;
+    min-height: 52px;
+}
+
+/* empty */
+.empty-extra-box {
+    width: 100%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    color: #f3e8ff;
+    padding: 32px 20px;
+    border-radius: 22px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+}
+
+/* responsive */
+@media (max-width: 1300px) {
+    .actors-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .recommendations-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1100px) {
+    .actors-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .recommendations-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .movie-extra-section {
+        width: min(100% - 36px, 1420px);
+    }
+
+    .extra-section-head h2 {
+        font-size: 3rem;
+    }
+
+    .actors-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .recommendations-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .actor-image-wrap,
+    .recommendation-poster {
+        height: 300px;
+    }
+}
+
+@media (max-width: 640px) {
+    .movie-extra-section {
+        width: min(100% - 24px, 1420px);
+    }
+
+    .extra-section-head {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .extra-section-head h2 {
+        font-size: 2.5rem;
+    }
+
+    .actors-grid,
+    .recommendations-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .actor-image-wrap,
+    .recommendation-poster {
+        height: 240px;
+    }
+
+    .actors-toggle {
+        font-size: 15px;
+    }
+}
+
+.details-section {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding-left: 34px;
+    padding-right: 34px;
+}
+
+.movie-extra-section {
+    max-width: 1320px;
+    margin: 0 auto 42px;
+    padding-left: 34px;
+    padding-right: 34px;
+}
+
+.trailer-section {
+    width: 100%;
+    margin-top: 34px;
+    padding: 55px 34px 70px;
+}
+
+.trailer-section .section-head,
+.trailer-section .trailer-frame,
+.trailer-section .no-trailer {
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 900px) {
+    .movie-extra-section {
+        max-width: 1320px;
+        padding-left: 34px;
+        padding-right: 34px;
+    }
+}
+
+@media (max-width: 640px) {
+    .movie-extra-section {
+        max-width: 1320px;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .trailer-section {
+        padding: 42px 16px 56px;
+    }
+}
