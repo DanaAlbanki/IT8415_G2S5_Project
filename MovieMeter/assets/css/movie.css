@@ -568,7 +568,7 @@ button {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 28px;
-    padding: 0;
+    align-items: start;
 }
 
 .actor-card {
