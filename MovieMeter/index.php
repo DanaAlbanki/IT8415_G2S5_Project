@@ -224,6 +224,7 @@ function e($value)
 
     <footer class="footer">
         <div class="footer-container">
+
             <div class="footer-brand">
                 <h3>MovieMeter</h3>
                 <p>
@@ -235,9 +236,10 @@ function e($value)
             <div class="footer-links">
                 <h4>Quick Links</h4>
                 <ul>
-                    <li><a href="#all-movies-section">Latest Movies</a></li>
-                    <li><a href="search.php">Discover</a></li>
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="discover.php">Discover</a></li>
                     <?php if ($isLoggedIn): ?>
+                        <li><a href="foryou.php">For You</a></li>
                         <li><a href="watchlist.php">Watchlist</a></li>
                     <?php else: ?>
                         <li><a href="login.php">Login</a></li>
@@ -248,17 +250,17 @@ function e($value)
             <div class="footer-links">
                 <h4>Categories</h4>
                 <ul>
-                    <li><a href="#">Action</a></li>
-                    <li><a href="#">Drama</a></li>
-                    <li><a href="#">Comedy</a></li>
-                    <li><a href="#">Fantasy</a></li>
+                    <li><a href="categories.php?genre=28">Action</a></li>
+                    <li><a href="categories.php?genre=18">Drama</a></li>
+                    <li><a href="categories.php?genre=35">Comedy</a></li>
+                    <li><a href="categories.php?genre=14">Fantasy</a></li>
                 </ul>
             </div>
 
             <div class="footer-contact">
                 <h4>Contact</h4>
-                <p>support@moviemeter.com</p>
-                <p>+973 1700 0000</p>
+                <p><a href="mailto:support@moviemeter.com">support@moviemeter.com</a></p>
+                <p><a href="tel:+97317000000">+973 1700 0000</a></p>
             </div>
         </div>
 

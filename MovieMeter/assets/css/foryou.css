@@ -41,6 +41,11 @@ img {
     font-family: "Inter", sans-serif;
 }
 
+.footer a {
+    color: #eadcf7;
+    text-decoration: none;
+}
+
 /* =========================
    NAVBAR
 ========================= */

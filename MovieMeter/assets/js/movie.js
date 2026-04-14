@@ -1,6 +1,7 @@
 import { API_KEY, BASE_URL, IMG_PATH } from "./api.js";
 
 const BACKDROP_PATH = "https://image.tmdb.org/t/p/original";
+const PROFILE_PATH = "https://image.tmdb.org/t/p/w300";
 const FALLBACK_IMAGE = "assets/images/notfound.png";
 
 const container = document.getElementById("movie-detail");
@@ -32,6 +33,14 @@ if (!tmdbId) {
     loadMovie();
 }
 
+function getReturnTo() {
+    return `movie.php?id=${encodeURIComponent(tmdbId)}`;
+}
+
+function getMovieDetailsUrl(movieId) {
+    return `movie.php?id=${encodeURIComponent(movieId)}&return_to=${encodeURIComponent(getReturnTo())}`;
+}
+
 function requireLogin() {
     if (!isLoggedIn) {
         window.location.href = "login.php";
@@ -43,7 +52,7 @@ function requireLogin() {
 async function loadMovie() {
     try {
         const response = await fetch(
-            `${BASE_URL}/movie/${encodeURIComponent(tmdbId)}?api_key=${API_KEY}&append_to_response=credits,videos`
+            `${BASE_URL}/movie/${encodeURIComponent(tmdbId)}?api_key=${API_KEY}&append_to_response=credits,videos,recommendations`
         );
 
         if (!response.ok) {
@@ -78,6 +87,10 @@ function resolveBackdrop(movie, poster) {
     return movie.backdrop_path ? BACKDROP_PATH + movie.backdrop_path : (poster || FALLBACK_IMAGE);
 }
 
+function resolveActorImage(actor) {
+    return actor.profile_path ? PROFILE_PATH + actor.profile_path : FALLBACK_IMAGE;
+}
+
 function getYear(releaseDate) {
     return releaseDate ? releaseDate.split("-")[0] : "";
 }
@@ -101,7 +114,12 @@ function getDirector(movie) {
 
 function formatRuntime(minutes) {
     if (!minutes || Number.isNaN(minutes)) return "N/A";
-    return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    if (!hours) return `${mins} min`;
+    if (!mins) return `${hours}h`;
+    return `${hours}h ${mins}m`;
 }
 
 function getTrailer(movie) {
@@ -280,6 +298,170 @@ async function submitComment(commentTextValue) {
     return await postForm(ADD_COMMENT_URL, formData, "Failed to post comment.");
 }
 
+function createActorCard(actor) {
+    const actorName = actor?.name || "Unknown Actor";
+    const characterName = actor?.character || "Cast";
+    const actorImage = resolveActorImage(actor);
+
+    return `
+        <article class="actor-card">
+            <div class="actor-image-wrap">
+                <img
+                    src="${escapeHTML(actorImage)}"
+                    alt="${escapeHTML(actorName)}"
+                    class="actor-image"
+                    onerror="this.src='${FALLBACK_IMAGE}'"
+                >
+            </div>
+            <div class="actor-info">
+                <h3>${escapeHTML(actorName)}</h3>
+                <p>${escapeHTML(characterName)}</p>
+            </div>
+        </article>
+    `;
+}
+
+function renderActorsSection(movie) {
+    const cast = movie?.credits?.cast || [];
+
+    if (!cast.length) {
+        return `
+            <section class="movie-extra-section actors-section">
+                <div class="extra-section-head">
+                    <h2>ACTORS</h2>
+                </div>
+                <div class="empty-extra-box">No cast information available.</div>
+            </section>
+        `;
+    }
+
+    const visibleCast = cast.slice(0, 6);
+    const hiddenCast = cast.slice(6);
+
+    return `
+        <section class="movie-extra-section actors-section">
+            <div class="extra-section-head">
+                <h2>ACTORS</h2>
+
+                ${hiddenCast.length ? `
+                    <label class="actors-toggle">
+                        <input type="checkbox" id="actorsToggle">
+                        <span class="actors-toggle-slider"></span>
+                        <span class="actors-toggle-text">Show all</span>
+                    </label>
+                ` : ""}
+            </div>
+
+            <div class="actors-grid" id="actorsGrid">
+                ${visibleCast.map(createActorCard).join("")}
+                ${hiddenCast.map(actor => `
+                    <div class="actor-hidden-item" data-hidden-actor="true">
+                        ${createActorCard(actor)}
+                    </div>
+                `).join("")}
+            </div>
+        </section>
+    `;
+}
+
+function createRecommendationCard(movie) {
+    const poster = resolvePoster(movie);
+    const title = movie?.title || "Untitled Movie";
+
+    return `
+        <article class="recommendation-card" data-recommendation-id="${escapeHTML(String(movie.id || ""))}">
+            <img
+                src="${escapeHTML(poster)}"
+                alt="${escapeHTML(title)}"
+                class="recommendation-poster"
+                onerror="this.src='${FALLBACK_IMAGE}'"
+            >
+
+            <div class="recommendation-info">
+                <h3>${escapeHTML(title)}</h3>
+            </div>
+        </article>
+    `;
+}
+
+function renderRecommendationsSection(movie) {
+    const recommendations = movie?.recommendations?.results || [];
+
+    if (!recommendations.length) {
+        return `
+            <section class="movie-extra-section recommendations-section">
+                <div class="extra-section-head single-head">
+                    <h2>RECOMMENDATIONS</h2>
+                </div>
+                <div class="empty-extra-box">No recommendations available for this movie.</div>
+            </section>
+        `;
+    }
+
+    const releasedOnly = recommendations.filter(item => item.release_date);
+
+    return `
+        <section class="movie-extra-section recommendations-section">
+            <div class="extra-section-head single-head">
+                <h2>RECOMMENDATIONS</h2>
+            </div>
+
+            <div class="recommendations-grid" id="recommendationsGrid">
+                ${releasedOnly.slice(0, 10).map(createRecommendationCard).join("")}
+            </div>
+        </section>
+    `;
+}
+
+function getGenreNamesFromIds(ids) {
+    const genreMap = {
+        28: "Action",
+        12: "Adventure",
+        16: "Animation",
+        35: "Comedy",
+        80: "Crime",
+        99: "Documentary",
+        18: "Drama",
+        10751: "Family",
+        14: "Fantasy",
+        36: "History",
+        27: "Horror",
+        10402: "Music",
+        9648: "Mystery",
+        10749: "Romance",
+        878: "Science Fiction",
+        10770: "TV Movie",
+        53: "Thriller",
+        10752: "War",
+        37: "Western"
+    };
+
+    return ids.map(id => genreMap[id]).filter(Boolean);
+}
+
+function setupActorsToggle() {
+    const toggle = document.getElementById("actorsToggle");
+    const hiddenItems = document.querySelectorAll("[data-hidden-actor='true']");
+
+    if (!toggle || !hiddenItems.length) return;
+
+    toggle.addEventListener("change", () => {
+        hiddenItems.forEach(item => {
+            item.classList.toggle("show", toggle.checked);
+        });
+    });
+}
+
+function setupRecommendationClicks() {
+    document.querySelectorAll("[data-recommendation-id]").forEach(card => {
+        card.addEventListener("click", () => {
+            const movieId = card.getAttribute("data-recommendation-id");
+            if (!movieId) return;
+            window.location.href = getMovieDetailsUrl(movieId);
+        });
+    });
+}
+
 function renderMovie(movie) {
     if (!container) return;
 
@@ -430,6 +612,10 @@ function renderMovie(movie) {
                 `
             }
         </section>
+
+        ${renderActorsSection(movie)}
+
+        ${renderRecommendationsSection(movie)}
     `;
 
     const posterImage = document.querySelector(".poster-image");
@@ -464,6 +650,8 @@ function renderMovie(movie) {
 
     updateStarSelection(stars, selectedRating);
     renderCommentsList(dbComments);
+    setupActorsToggle();
+    setupRecommendationClicks();
 
     stars.forEach((star) => {
         star.addEventListener("click", () => {

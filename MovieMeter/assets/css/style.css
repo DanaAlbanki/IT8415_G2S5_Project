@@ -555,6 +555,11 @@ img {
     text-decoration: none;
 }
 
+.footer a {
+    color: #eadcf7;
+    text-decoration: none;
+}
+
 .footer-links ul {
     list-style: none;
     padding: 0;

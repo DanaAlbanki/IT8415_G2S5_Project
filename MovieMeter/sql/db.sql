@@ -51,7 +51,7 @@ CREATE TABLE mm_movies (
     creator_id INT NOT NULL,
     deleted_by INT NULL,
     title VARCHAR(200) NOT NULL,
-    short_description VARCHAR(500) NOT NULL,
+    short_description TEXT NOT NULL,
     full_description TEXT NOT NULL,
     release_date DATE NULL,
     poster_image VARCHAR(255) NULL,
@@ -112,13 +112,10 @@ CREATE TABLE mm_movie_categories (
     PRIMARY KEY (movie_id, category_id)
 ) ENGINE=MyISAM;
 
--- 9) WATCHLISTS
 CREATE TABLE mm_watchlists (
     watchlist_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    watchlist_name VARCHAR(100) NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_watchlist_user_name (user_id, watchlist_name)
+    user_id INT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=MyISAM;
 
 -- 10) WATCHLIST ITEMS

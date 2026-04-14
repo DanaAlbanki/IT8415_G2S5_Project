@@ -96,10 +96,10 @@ VALUES
 (7,5,4,NOW());
  
 -- WATCHLISTS
-INSERT INTO mm_watchlists (user_id, watchlist_name, created_at)
+INSERT INTO mm_watchlists (user_id, created_at)
 VALUES
-(4,'Favorites',NOW()),
-(5,'Watch Later',NOW());
+(4,NOW()),
+(5,NOW());
  
 -- WATCHLIST ITEMS
 INSERT INTO mm_watchlist_items (watchlist_id, movie_id, added_at)

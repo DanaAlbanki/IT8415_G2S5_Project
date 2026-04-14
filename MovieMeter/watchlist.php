@@ -127,34 +127,33 @@ $watchlistCount = count($watchlistMovies);
     </section>
 
     <footer class="footer">
-    <div class="footer-container">
+        <div class="footer-container">
 
-        <div class="footer-brand">
-            <h3>MovieMeter</h3>
-            <p>
-                Discover, rate, and explore your favorite movies in one place.
-                Find trending titles and build your personal watchlist.
-            </p>
-        </div>
+            <div class="footer-brand">
+                <h3>MovieMeter</h3>
+                <p>
+                    Discover, rate, and explore your favorite movies in one place.
+                    Find trending titles and build your personal watchlist.
+                </p>
+            </div>
 
-        <div class="footer-links">
-            <h4>Quick Links</h4>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="discover.php">Discover Movies</a></li>
-                <li><a href="discover.php?sort=latest">Latest Movies</a></li>
-                <li><a href="discover.php?sort=top">Top Rated</a></li>
-                <li><a href="watchlist.php">My Watchlist</a></li>
-            </ul>
-        </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="discover.php">Discover</a></li>
+                    <li><a href="foryou.php">For You</a></li>
+                    <li><a href="watchlist.php">Watchlist</a></li>
+                </ul>
+            </div>
 
-        <div class="footer-links">
+            <div class="footer-links">
                 <h4>Categories</h4>
                 <ul>
-                    <li><a href="categories.php?genre=action">Action</a></li>
-                    <li><a href="categories.php?genre=drama">Drama</a></li>
-                    <li><a href="categories.php?genre=comedy">Comedy</a></li>
-                    <li><a href="categories.php?genre=fantasy">Fantasy</a></li>
+                    <li><a href="categories.php?genre=28">Action</a></li>
+                    <li><a href="categories.php?genre=18">Drama</a></li>
+                    <li><a href="categories.php?genre=35">Comedy</a></li>
+                    <li><a href="categories.php?genre=14">Fantasy</a></li>
                 </ul>
             </div>
 
