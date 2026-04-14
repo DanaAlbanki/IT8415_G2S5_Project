@@ -14,6 +14,7 @@ $latestMovies = mysqli_query($conn,"SELECT title, poster_image FROM mm_movies OR
 ?>
 
 <!DOCTYPE html>
+
 <html>
 <head>
 <link rel="stylesheet" href="../assets/css/style.css">
@@ -38,14 +39,21 @@ $latestMovies = mysqli_query($conn,"SELECT title, poster_image FROM mm_movies OR
 
 <div class="movies">
 <?php while($m=mysqli_fetch_assoc($latestMovies)){ ?>
+    
 <div class="movie-card">
-<img src="../assets/images/<?php echo $m["poster_image"]; ?>">
-<h3><?php echo $m["title"]; ?></h3>
+
+<img src="<?php echo (strpos($m["poster_image"], 'http') === 0) 
+? $m["poster_image"] 
+: '../assets/images/' . $m["poster_image"]; ?>">
+
+<h4><?php echo $m["title"]; ?></h4>
+
 </div>
 <?php } ?>
 </div>
 
 </div>
 
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>

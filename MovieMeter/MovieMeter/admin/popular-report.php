@@ -39,5 +39,6 @@ LIMIT 10
 </table>
 
 </div>
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>

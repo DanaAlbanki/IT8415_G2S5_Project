@@ -8,22 +8,30 @@ $conn = getConnection();
 
 if($_SERVER["REQUEST_METHOD"]=="POST"){
 
-$title=$_POST["title"];
-$desc=$_POST["desc"];
-$date=$_POST["date"];
+$title = mysqli_real_escape_string($conn, $_POST["title"]);
+$desc = mysqli_real_escape_string($conn, $_POST["desc"]);
+$date = $_POST["date"];
 
-$imageName=$_FILES["image"]["name"];
-$tmp=$_FILES["image"]["tmp_name"];
+$imageName = "";
 
-move_uploaded_file($tmp,"../assets/images/".$imageName);
+if(isset($_FILES["image"]) && $_FILES["image"]["error"] == 0){
+    $imageName = time() . "_" . basename($_FILES["image"]["name"]);
+    $target = "../assets/images/" . $imageName;
 
-mysqli_query($conn,"
+    move_uploaded_file($_FILES["image"]["tmp_name"], $target);
+}
+
+$sql = "
 INSERT INTO mm_movies(title, short_description, release_date, poster_image, status)
 VALUES('$title','$desc','$date','$imageName','published')
-");
+";
 
-header("Location: manage-movies.php");
-exit;
+if(mysqli_query($conn,$sql)){
+    header("Location: manage-movies.php");
+    exit;
+}else{
+    echo "Error: " . mysqli_error($conn);
+}
 }
 ?>
 
@@ -71,5 +79,6 @@ exit;
 </form>
 
 </div>
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>

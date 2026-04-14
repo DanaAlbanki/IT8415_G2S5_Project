@@ -53,5 +53,6 @@ $totalComments = mysqli_fetch_row(mysqli_query($conn,"SELECT COUNT(*) FROM mm_co
 
 </div>
 
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>

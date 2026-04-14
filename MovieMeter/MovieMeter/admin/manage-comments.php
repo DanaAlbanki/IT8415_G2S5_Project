@@ -52,5 +52,6 @@ ORDER BY c.comment_id DESC
 </table>
 
 </div>
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>

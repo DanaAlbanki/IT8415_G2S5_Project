@@ -47,5 +47,6 @@ exit;
 </form>
 
 </div>
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>

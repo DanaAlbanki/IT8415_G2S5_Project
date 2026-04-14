@@ -40,5 +40,6 @@ ORDER BY total DESC
 </table>
 
 </div>
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>

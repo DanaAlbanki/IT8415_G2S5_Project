@@ -7,9 +7,10 @@ if ($_SESSION["role_name"] !== "admin") die("Access denied.");
 $conn = getConnection();
 
 $result = mysqli_query($conn,"
-SELECT user_id, full_name, email, role_id 
-FROM mm_users
-ORDER BY user_id DESC
+SELECT u.user_id, u.full_name, u.email, r.role_name
+FROM mm_users u
+LEFT JOIN mm_roles r ON u.role_id = r.role_id
+ORDER BY u.user_id DESC
 ");
 ?>
 
@@ -56,5 +57,6 @@ onclick="return confirm('Are you sure?');">Delete</a>
 </table>
 
 </div>
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>

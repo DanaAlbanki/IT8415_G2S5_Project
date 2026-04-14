@@ -2,18 +2,13 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
-
+require_once(__DIR__ . "/includes/auth_check.php");
 require_once(__DIR__ . "/config/DBConn.php");
 
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit();
-}
-
-$userId = (int) $_SESSION["user_id"];
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
+
+$userId = (int) $_SESSION["user_id"];
 
 $sql = "
     SELECT 
@@ -21,6 +16,7 @@ $sql = "
         u.full_name,
         u.username,
         u.email,
+        u.profile_image,
         u.created_at,
         r.role_name
     FROM mm_users u
@@ -47,15 +43,14 @@ if (!$user) {
     die("User not found.");
 }
 
-$fullName = htmlspecialchars($user["full_name"] ?? "User");
-$username = htmlspecialchars($user["username"] ?? "username");
-$email = htmlspecialchars($user["email"] ?? "No email");
-$roleName = htmlspecialchars($user["role_name"] ?? "Member");
+$fullName = htmlspecialchars($user["full_name"] ?? "User", ENT_QUOTES, "UTF-8");
+$username = htmlspecialchars($user["username"] ?? "username", ENT_QUOTES, "UTF-8");
+$email = htmlspecialchars($user["email"] ?? "No email", ENT_QUOTES, "UTF-8");
+$roleName = htmlspecialchars($user["role_name"] ?? "Member", ENT_QUOTES, "UTF-8");
 
 $avatarLetterSource = trim($user["full_name"] ?? $user["username"] ?? "U");
 $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
 
-// Member Since
 $memberSince = "N/A";
 if (!empty($user["created_at"])) {
     $timestamp = strtotime($user["created_at"]);
@@ -63,14 +58,20 @@ if (!empty($user["created_at"])) {
         $memberSince = date("F Y", $timestamp);
     }
 }
+
+$profileImage = trim($user["profile_image"] ?? "");
+$profileImagePath = "";
+
+if ($profileImage !== "") {
+    $profileImagePath = "uploads/" . ltrim($profileImage, "/");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile | MovieMeter</title>
+    <title>Profile</title>
 
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/profile.css">
@@ -80,10 +81,8 @@ if (!empty($user["created_at"])) {
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-
 <body>
 
-    <!-- NAVBAR -->
     <nav class="navbar">
         <div class="logo">
             <img src="assets/images/logo.png" alt="MovieMeter Logo">
@@ -106,7 +105,6 @@ if (!empty($user["created_at"])) {
         </ul>
     </nav>
 
-    <!-- HERO -->
     <section class="profile-hero">
         <div class="profile-hero-overlay"></div>
         <div class="profile-hero-content">
@@ -115,11 +113,24 @@ if (!empty($user["created_at"])) {
         </div>
     </section>
 
-    <!-- PROFILE SECTION -->
     <main class="profile-main">
         <section class="profile-section-clean">
             <div class="profile-top">
-                <div class="profile-avatar"><?php echo $avatarLetter; ?></div>
+                <?php if ($profileImagePath !== ""): ?>
+                    <img
+                        src="<?php echo htmlspecialchars($profileImagePath, ENT_QUOTES, "UTF-8"); ?>"
+                        alt="Profile Image"
+                        class="profile-avatar-image"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    >
+                    <div class="profile-avatar profile-avatar-fallback" style="display:none;">
+                        <?php echo htmlspecialchars($avatarLetter, ENT_QUOTES, "UTF-8"); ?>
+                    </div>
+                <?php else: ?>
+                    <div class="profile-avatar">
+                        <?php echo htmlspecialchars($avatarLetter, ENT_QUOTES, "UTF-8"); ?>
+                    </div>
+                <?php endif; ?>
 
                 <div class="profile-intro">
                     <h2><?php echo $fullName; ?></h2>
@@ -145,7 +156,7 @@ if (!empty($user["created_at"])) {
 
                 <div class="profile-info-row">
                     <div class="profile-label">Member Since</div>
-                    <div class="profile-value"><?php echo htmlspecialchars($memberSince); ?></div>
+                    <div class="profile-value"><?php echo htmlspecialchars($memberSince, ENT_QUOTES, "UTF-8"); ?></div>
                 </div>
             </div>
 
@@ -156,7 +167,6 @@ if (!empty($user["created_at"])) {
         </section>
     </main>
 
-    <!-- FOOTER -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-brand">
@@ -171,8 +181,8 @@ if (!empty($user["created_at"])) {
                 <h4>Quick Links</h4>
                 <ul>
                     <li><a href="index.php">Home</a></li>
-                    <li><a href="discover.php#latest-section">Latest Movies</a></li>
-                    <li><a href="discover.php#top-rated-section">Top Rated</a></li>
+                    <li><a href="discover.php">Discover</a></li>
+                    <li><a href="foryou.php">For You</a></li>
                     <li><a href="watchlist.php">Watchlist</a></li>
                 </ul>
             </div>
@@ -180,17 +190,17 @@ if (!empty($user["created_at"])) {
             <div class="footer-links">
                 <h4>Categories</h4>
                 <ul>
-                    <li><a href="categories.php">Action</a></li>
-                    <li><a href="categories.php">Drama</a></li>
-                    <li><a href="categories.php">Comedy</a></li>
-                    <li><a href="categories.php">Fantasy</a></li>
+                    <li><a href="categories.php?genre=28">Action</a></li>
+                    <li><a href="categories.php?genre=18">Drama</a></li>
+                    <li><a href="categories.php?genre=35">Comedy</a></li>
+                    <li><a href="categories.php?genre=14">Fantasy</a></li>
                 </ul>
             </div>
 
             <div class="footer-contact">
                 <h4>Contact</h4>
-                <p>support@moviemeter.com</p>
-                <p>+973 1700 0000</p>
+                <p><a href="mailto:support@moviemeter.com">support@moviemeter.com</a></p>
+                <p><a href="tel:+97317000000">+973 1700 0000</a></p>
             </div>
         </div>
 
@@ -200,27 +210,31 @@ if (!empty($user["created_at"])) {
     </footer>
 
     <script>
-        const navbar = document.querySelector('.navbar');
-        const menuToggle = document.getElementById('menuToggle');
-        const navLinks = document.getElementById('navLinks');
+        const navbar = document.querySelector(".navbar");
+        const menuToggle = document.getElementById("menuToggle");
+        const navLinks = document.getElementById("navLinks");
 
-        if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
-                navLinks.classList.toggle('open');
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener("click", () => {
+                navLinks.classList.toggle("open");
             });
         }
 
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('open');
+        document.querySelectorAll(".nav-links a").forEach((link) => {
+            link.addEventListener("click", () => {
+                if (navLinks) {
+                    navLinks.classList.remove("open");
+                }
             });
         });
 
-        window.addEventListener('scroll', () => {
+        window.addEventListener("scroll", () => {
+            if (!navbar) return;
+
             if (window.scrollY > 60) {
-                navbar.classList.add('scrolled');
+                navbar.classList.add("scrolled");
             } else {
-                navbar.classList.remove('scrolled');
+                navbar.classList.remove("scrolled");
             }
         });
     </script>

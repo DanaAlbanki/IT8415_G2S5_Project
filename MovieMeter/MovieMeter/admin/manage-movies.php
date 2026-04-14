@@ -42,8 +42,10 @@ ORDER BY movie_id DESC
 <?php while($row=mysqli_fetch_assoc($result)){ ?>
 <tr>
 <td>
-<img src="../assets/images/<?php echo $row["poster_image"]; ?>" style="width:70px;border-radius:8px;">
-</td>
+<img src="<?php echo (strpos($row["poster_image"], 'http') === 0) 
+? $row["poster_image"] 
+: '../assets/images/' . $row["poster_image"]; ?>"
+style="width:60px;height:90px;object-fit:cover;border-radius:6px;">
 
 <td><?php echo $row["title"]; ?></td>
 <td><?php echo $row["release_date"]; ?></td>
@@ -61,5 +63,6 @@ onclick="return confirm('Delete this movie?');">Delete</a>
 </table>
 
 </div>
+<?php include("../includes/admin_footer.php"); ?>
 </body>
 </html>
