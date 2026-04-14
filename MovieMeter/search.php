@@ -2,12 +2,13 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once(__DIR__ . "/includes/auth_check.php");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once(__DIR__ . "/config/DBConn.php");
 
-if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
-    die("Access denied.");
-}
+$isLoggedIn = isset($_SESSION['user_id']);
 
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
@@ -23,7 +24,7 @@ $date_from = trim($_GET["date_from"] ?? "");
 $date_to = trim($_GET["date_to"] ?? "");
 $popularity = trim($_GET["popularity"] ?? "");
 
-$page = isset($_GET["page"]) ? (int)$_GET["page"] : 1;
+$page = isset($_GET["page"]) ? (int) $_GET["page"] : 1;
 $page = max(1, $page);
 
 $perPage = 10;
@@ -99,8 +100,8 @@ if (!empty($params)) {
 mysqli_stmt_execute($countStmt);
 $countResult = mysqli_stmt_get_result($countStmt);
 $countRow = mysqli_fetch_assoc($countResult);
-$totalRows = (int)($countRow["total"] ?? 0);
-$totalPages = max(1, (int)ceil($totalRows / $perPage));
+$totalRows = (int) ($countRow["total"] ?? 0);
+$totalPages = max(1, (int) ceil($totalRows / $perPage));
 
 if ($page > $totalPages) {
     $page = $totalPages;
@@ -172,10 +173,16 @@ function pageUrl($pageNumber)
             <li><a href="index.php">Home</a></li>
             <li><a href="discover.php">Discover</a></li>
             <li><a href="categories.php">Categories</a></li>
-            <li><a href="foryou.php">For You</a></li>
-            <li><a href="watchlist.php">Watchlist</a></li>
-            <li><a href="profile.php">Profile</a></li>
-            <li><a href="logout.php">Logout</a></li>
+
+            <?php if ($isLoggedIn): ?>
+                <li><a href="foryou.php">For You</a></li>
+                <li><a href="watchlist.php">Watchlist</a></li>
+                <li><a href="profile.php">Profile</a></li>
+                <li><a href="logout.php">Logout</a></li>
+            <?php else: ?>
+                <li><a href="login.php">Login</a></li>
+                <li><a href="register.php">Sign Up</a></li>
+            <?php endif; ?>
         </ul>
     </nav>
 
@@ -235,7 +242,8 @@ function pageUrl($pageNumber)
             <?php if ($totalRows > 0) { ?>
                 <?php while ($movie = mysqli_fetch_assoc($result)) { ?>
                     <article class="movie-card">
-<a href="movie.php?id=<?php echo (int)$movie["movie_id"]; ?>&return_to=<?php echo urlencode($_SERVER["REQUEST_URI"]); ?>" class="movie-card-link" style="text-decoration:none;color:inherit;">                            <?php if (!empty($movie["poster_image"])) { ?>
+                        <a href="movie.php?id=<?php echo (int) $movie["movie_id"]; ?>&return_to=<?php echo urlencode($_SERVER["REQUEST_URI"]); ?>" class="movie-card-link" style="text-decoration:none;color:inherit;">
+                            <?php if (!empty($movie["poster_image"])) { ?>
                                 <img
                                     src="uploads/posters/<?php echo e($movie["poster_image"]); ?>"
                                     alt="<?php echo e($movie["title"]); ?>">

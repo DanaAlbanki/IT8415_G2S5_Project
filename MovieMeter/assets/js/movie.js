@@ -14,6 +14,8 @@ const ADD_RATING_URL = `${window.location.origin}${basePath}add-rating.php`;
 const ADD_COMMENT_URL = `${window.location.origin}${basePath}add-comment.php`;
 
 const pageData = window.moviePageData || {};
+const isLoggedIn = Boolean(pageData.isLoggedIn || false);
+
 let dbComments = Array.isArray(pageData.comments) ? pageData.comments : [];
 let dbUserRating = Number(pageData.userRating || 0);
 let dbSummary = pageData.summary || {
@@ -28,6 +30,14 @@ if (!tmdbId) {
     showMessage("Movie not found", "No movie ID was provided.");
 } else {
     loadMovie();
+}
+
+function requireLogin() {
+    if (!isLoggedIn) {
+        window.location.href = "login.php";
+        return false;
+    }
+    return true;
 }
 
 async function loadMovie() {
@@ -121,6 +131,12 @@ function updateWatchlistButton() {
     const watchlistBtn = document.getElementById("watchlistBtn");
     if (!watchlistBtn) return;
 
+    if (!isLoggedIn) {
+        watchlistBtn.textContent = "Login to Add to Watchlist";
+        watchlistBtn.classList.remove("in-watchlist");
+        return;
+    }
+
     watchlistBtn.textContent = isInUserWatchlist ? "Remove from Watchlist" : "Add to Watchlist";
     watchlistBtn.classList.toggle("in-watchlist", isInUserWatchlist);
 }
@@ -162,8 +178,9 @@ async function removeFromWatchlist() {
 async function toggleWatchlistOnServer(button) {
     if (!button || button.disabled) return;
 
-    const oldState = isInUserWatchlist;
+    if (!requireLogin()) return;
 
+    const oldState = isInUserWatchlist;
     button.disabled = true;
 
     try {
@@ -287,6 +304,14 @@ function renderMovie(movie) {
     const backdrop = resolveBackdrop(movie, poster);
     const trailerUrl = getTrailer(movie);
 
+    const ratingMessageText = isLoggedIn
+        ? (dbUserRating > 0 ? `Your rating: ${dbUserRating}/5` : "")
+        : "Login to rate this movie.";
+
+    const commentMessageText = isLoggedIn
+        ? ""
+        : "Login to post a comment.";
+
     container.innerHTML = `
         <section class="hero" style="background-image: url('${escapeHTML(backdrop)}')">
             <div class="hero-overlay"></div>
@@ -348,8 +373,10 @@ function renderMovie(movie) {
                         </div>
 
                         <div class="engagement-actions">
-                            <button id="saveRatingBtn" class="engagement-btn engagement-btn-primary" type="button">Submit Rating</button>
-                            <p id="ratingMessage" class="engagement-message">${dbUserRating > 0 ? `Your rating: ${dbUserRating}/5` : ""}</p>
+                            <button id="saveRatingBtn" class="engagement-btn engagement-btn-primary" type="button">
+                                ${isLoggedIn ? "Submit Rating" : "Login to Rate"}
+                            </button>
+                            <p id="ratingMessage" class="engagement-message">${escapeHTML(ratingMessageText)}</p>
                         </div>
                     </div>
 
@@ -360,14 +387,16 @@ function renderMovie(movie) {
                             <textarea
                                 id="commentText"
                                 class="comment-textarea"
-                                placeholder="Write your comment here..."
+                                placeholder="${isLoggedIn ? "Write your comment here..." : "Login to write a comment..."}"
                                 maxlength="1000"
-                                required
+                                ${isLoggedIn ? "required" : ""}
                             ></textarea>
 
                             <div class="engagement-actions">
-                                <button type="submit" class="engagement-btn engagement-btn-secondary">Post Comment</button>
-                                <p id="commentMessage" class="engagement-message"></p>
+                                <button type="submit" class="engagement-btn engagement-btn-secondary">
+                                    ${isLoggedIn ? "Post Comment" : "Login to Comment"}
+                                </button>
+                                <p id="commentMessage" class="engagement-message">${escapeHTML(commentMessageText)}</p>
                             </div>
                         </form>
                     </div>
@@ -438,31 +467,47 @@ function renderMovie(movie) {
 
     stars.forEach((star) => {
         star.addEventListener("click", () => {
+            if (!requireLogin()) return;
+
             selectedRating = Number(star.dataset.value);
             updateStarSelection(stars, selectedRating);
-            ratingMessage.textContent = `Selected: ${selectedRating}/5`;
+            if (ratingMessage) {
+                ratingMessage.textContent = `Selected: ${selectedRating}/5`;
+            }
         });
     });
 
     if (saveRatingBtn) {
         saveRatingBtn.addEventListener("click", async () => {
+            if (!requireLogin()) return;
+
             if (!selectedRating) {
-                ratingMessage.textContent = "Please choose a rating first.";
+                if (ratingMessage) {
+                    ratingMessage.textContent = "Please choose a rating first.";
+                }
                 return;
             }
 
             saveRatingBtn.disabled = true;
-            ratingMessage.textContent = "Submitting rating...";
+            if (ratingMessage) {
+                ratingMessage.textContent = "Submitting rating...";
+            }
 
             try {
                 const data = await submitRating(selectedRating);
                 dbUserRating = Number(data.user_rating || selectedRating);
-                ratingMessage.textContent = `Your rating: ${dbUserRating}/5`;
+
+                if (ratingMessage) {
+                    ratingMessage.textContent = `Your rating: ${dbUserRating}/5`;
+                }
+
                 updateSummaryUI(data.summary);
                 updateStarSelection(stars, dbUserRating);
             } catch (error) {
                 console.error(error);
-                ratingMessage.textContent = error.message || "Error submitting rating.";
+                if (ratingMessage) {
+                    ratingMessage.textContent = error.message || "Error submitting rating.";
+                }
             } finally {
                 saveRatingBtn.disabled = false;
             }
@@ -478,26 +523,38 @@ function renderMovie(movie) {
         commentForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
+            if (!requireLogin()) return;
+
             const text = commentText.value.trim();
 
             if (!text) {
-                commentMessage.textContent = "Please write a comment first.";
+                if (commentMessage) {
+                    commentMessage.textContent = "Please write a comment first.";
+                }
                 return;
             }
 
             commentSubmitBtn.disabled = true;
-            commentMessage.textContent = "Posting comment...";
+            if (commentMessage) {
+                commentMessage.textContent = "Posting comment...";
+            }
 
             try {
                 const data = await submitComment(text);
                 dbComments = Array.isArray(data.comments) ? data.comments : dbComments;
-                commentMessage.textContent = "Comment posted.";
+
+                if (commentMessage) {
+                    commentMessage.textContent = "Comment posted.";
+                }
+
                 commentForm.reset();
                 renderCommentsList(dbComments);
                 updateSummaryUI(data.summary);
             } catch (error) {
                 console.error(error);
-                commentMessage.textContent = error.message || "Error posting comment.";
+                if (commentMessage) {
+                    commentMessage.textContent = error.message || "Error posting comment.";
+                }
             } finally {
                 commentSubmitBtn.disabled = false;
             }

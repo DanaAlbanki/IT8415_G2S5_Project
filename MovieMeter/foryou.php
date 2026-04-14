@@ -3,10 +3,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once(__DIR__ . "/includes/auth_check.php");
-
-if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
-    die("Access denied.");
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -106,7 +102,7 @@ if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
                     <li><a href="index.php">Home</a></li>
                     <li><a href="discover.php">Latest Movies</a></li>
                     <li><a href="discover.php">Top Rated</a></li>
-                    <li><a href="my-watchlist.php">Watchlist</a></li>
+                    <li><a href="watchlist.php">Watchlist</a></li>
                 </ul>
             </div>
 

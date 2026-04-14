@@ -139,11 +139,13 @@ function setupWatchlistCards() {
         const removeBtn = card.querySelector(".watchlist-remove-btn, .remove-watchlist-btn");
         if (removeBtn) {
             removeBtn.addEventListener("click", () => {
-                const movieId =
+                const movieId = parseInt(
                     removeBtn.dataset.movieId ||
                     removeBtn.dataset.id ||
                     card.dataset.movieId ||
-                    card.dataset.id;
+                    card.dataset.id,
+                    10
+                );
 
                 removeFromWatchlist(movieId, removeBtn);
             });

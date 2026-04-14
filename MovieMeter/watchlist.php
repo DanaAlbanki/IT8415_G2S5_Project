@@ -5,10 +5,6 @@ ini_set('display_errors', 1);
 require_once(__DIR__ . "/includes/auth_check.php");
 require_once(__DIR__ . "/config/DBConn.php");
 
-if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
-    die("Access denied.");
-}
-
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
@@ -30,7 +26,13 @@ $sql = "
       AND m.status = 'published'
     ORDER BY wi.added_at DESC, m.title ASC
 ";
+
 $stmt = mysqli_prepare($conn, $sql);
+
+if (!$stmt) {
+    die("Database error: " . mysqli_error($conn));
+}
+
 mysqli_stmt_bind_param($stmt, "i", $userId);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
@@ -38,6 +40,9 @@ $result = mysqli_stmt_get_result($stmt);
 while ($row = mysqli_fetch_assoc($result)) {
     $watchlistMovies[] = $row;
 }
+
+mysqli_stmt_close($stmt);
+mysqli_close($conn);
 
 $watchlistCount = count($watchlistMovies);
 ?>
@@ -97,12 +102,13 @@ $watchlistCount = count($watchlistMovies);
             <?php } else { ?>
                 <?php foreach ($watchlistMovies as $movie) { ?>
                     <div class="movie-card watchlist-card" data-movie-id="<?php echo (int) $movie["movie_id"]; ?>">
-                    <a href="movie.php?id=<?php echo urlencode($movie["external_api_id"]); ?>&return_to=<?php echo urlencode($_SERVER["REQUEST_URI"]); ?>" class="movie-card-link">                            <img
-                                src="<?php echo htmlspecialchars(!empty($movie["poster_image"]) ? $movie["poster_image"] : "assets/images/notfound.png"); ?>"
-                                alt="<?php echo htmlspecialchars($movie["title"] ?: "Movie Poster"); ?>"
+                        <a href="movie.php?id=<?php echo urlencode($movie["external_api_id"]); ?>&return_to=<?php echo urlencode($_SERVER["REQUEST_URI"]); ?>" class="movie-card-link">
+                            <img
+                                src="<?php echo htmlspecialchars(!empty($movie["poster_image"]) ? $movie["poster_image"] : "assets/images/notfound.png", ENT_QUOTES, "UTF-8"); ?>"
+                                alt="<?php echo htmlspecialchars($movie["title"] ?: "Movie Poster", ENT_QUOTES, "UTF-8"); ?>"
                                 class="watchlist-poster"
                                 onerror="this.src='assets/images/notfound.png'">
-                            <h3><?php echo htmlspecialchars($movie["title"] ?: "Untitled Movie"); ?></h3>
+                            <h3><?php echo htmlspecialchars($movie["title"] ?: "Untitled Movie", ENT_QUOTES, "UTF-8"); ?></h3>
                         </a>
 
                         <div class="watchlist-card-actions">
@@ -121,39 +127,43 @@ $watchlistCount = count($watchlistMovies);
     </section>
 
     <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-brand">
-                <h3>MovieMeter</h3>
-                <p>
-                    Discover, rate, and explore your favorite movies in one place.
-                    Find trending titles and build your personal watchlist.
-                </p>
-            </div>
+    <div class="footer-container">
 
-            <div class="footer-links">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="index.php">Home</a></li>
-                    <li><a href="discover.php">Discover</a></li>
-                    <li><a href="watchlist.php">Watchlist</a></li>
-                </ul>
-            </div>
+        <div class="footer-brand">
+            <h3>MovieMeter</h3>
+            <p>
+                Discover, rate, and explore your favorite movies in one place.
+                Find trending titles and build your personal watchlist.
+            </p>
+        </div>
 
-            <div class="footer-links">
+        <div class="footer-links">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="discover.php">Discover Movies</a></li>
+                <li><a href="discover.php?sort=latest">Latest Movies</a></li>
+                <li><a href="discover.php?sort=top">Top Rated</a></li>
+                <li><a href="watchlist.php">My Watchlist</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-links">
                 <h4>Categories</h4>
                 <ul>
-                    <li><a href="categories.php">Action</a></li>
-                    <li><a href="categories.php">Drama</a></li>
-                    <li><a href="categories.php">Comedy</a></li>
-                    <li><a href="categories.php">Fantasy</a></li>
+                    <li><a href="categories.php?genre=action">Action</a></li>
+                    <li><a href="categories.php?genre=drama">Drama</a></li>
+                    <li><a href="categories.php?genre=comedy">Comedy</a></li>
+                    <li><a href="categories.php?genre=fantasy">Fantasy</a></li>
                 </ul>
             </div>
 
             <div class="footer-contact">
                 <h4>Contact</h4>
-                <p>support@moviemeter.com</p>
-                <p>+973 1700 0000</p>
+                <p><a href="mailto:support@moviemeter.com">support@moviemeter.com</a></p>
+                <p><a href="tel:+97317000000">+973 1700 0000</a></p>
             </div>
+
         </div>
 
         <div class="footer-bottom">
@@ -161,6 +171,6 @@ $watchlistCount = count($watchlistMovies);
         </div>
     </footer>
 
-   <script src="assets/js/watchlist.js"></script>
+    <script src="assets/js/watchlist.js"></script>
 </body>
 </html>

@@ -2,11 +2,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once(__DIR__ . "/includes/auth_check.php");
-
-if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
-    die("Access denied.");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
+
+$isLoggedIn = isset($_SESSION["user_id"]);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,10 +41,16 @@ if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
             <li><a href="index.php">Home</a></li>
             <li><a href="discover.php" class="active-link">Discover</a></li>
             <li><a href="categories.php">Categories</a></li>
-            <li><a href="foryou.php">For You</a></li>
-            <li><a href="watchlist.php">Watchlist</a></li>
-            <li><a href="profile.php">Profile</a></li>
-            <li><a href="logout.php">Logout</a></li>
+
+            <?php if ($isLoggedIn): ?>
+                <li><a href="foryou.php">For You</a></li>
+                <li><a href="watchlist.php">Watchlist</a></li>
+                <li><a href="profile.php">Profile</a></li>
+                <li><a href="logout.php">Logout</a></li>
+            <?php else: ?>
+                <li><a href="login.php">Login</a></li>
+                <li><a href="register.php">Sign Up</a></li>
+            <?php endif; ?>
         </ul>
     </nav>
 
@@ -106,17 +112,21 @@ if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
                     <li><a href="index.php">Home</a></li>
                     <li><a href="discover.php#latest-section">Latest Movies</a></li>
                     <li><a href="discover.php#top-rated-section">Top Rated</a></li>
-                    <li><a href="my-watchlist.php">Watchlist</a></li>
+                    <?php if ($isLoggedIn): ?>
+                        <li><a href="watchlist.php">Watchlist</a></li>
+                    <?php else: ?>
+                        <li><a href="login.php">Login</a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
 
             <div class="footer-links">
                 <h4>Categories</h4>
                 <ul>
-                    <li><a href="categories.php">Action</a></li>
-                    <li><a href="categories.php">Drama</a></li>
-                    <li><a href="categories.php">Comedy</a></li>
-                    <li><a href="categories.php">Fantasy</a></li>
+                    <li><a href="categories.php" data-genre-link="28">Action</a></li>
+                    <li><a href="categories.php" data-genre-link="18">Drama</a></li>
+                    <li><a href="categories.php" data-genre-link="35">Comedy</a></li>
+                    <li><a href="categories.php" data-genre-link="14">Fantasy</a></li>
                 </ul>
             </div>
 
@@ -134,3 +144,4 @@ if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
 
     <script type="module" src="assets/js/main.js"></script>
 </body>
+</html>

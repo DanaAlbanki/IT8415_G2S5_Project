@@ -2,12 +2,13 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once(__DIR__ . "/includes/auth_check.php");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once(__DIR__ . "/config/DBConn.php");
 
-if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "viewer") {
-    die("Access denied.");
-}
+$isLoggedIn = isset($_SESSION['user_id']);
 
 $conn = getConnection();
 
@@ -73,14 +74,19 @@ function e($value)
             <li><a href="index.php" class="active-link">Home</a></li>
             <li><a href="discover.php">Discover</a></li>
             <li><a href="categories.php">Categories</a></li>
-            <li><a href="foryou.php">For You</a></li>
-            <li><a href="watchlist.php">Watchlist</a></li>
-            <li><a href="profile.php">Profile</a></li>
-            <li><a href="logout.php">Logout</a></li>
+
+            <?php if ($isLoggedIn): ?>
+                <li><a href="foryou.php">For You</a></li>
+                <li><a href="watchlist.php">Watchlist</a></li>
+                <li><a href="profile.php">Profile</a></li>
+                <li><a href="logout.php">Logout</a></li>
+            <?php else: ?>
+                <li><a href="login.php">Login</a></li>
+                <li><a href="register.php">Sign Up</a></li>
+            <?php endif; ?>
         </ul>
     </nav>
 
-    <!-- HERO SLIDER -->
     <section class="hero-slider">
 
         <div class="slide active" style="background-image: url('assets/images/Tangled-Movie.jpg');">
@@ -106,7 +112,7 @@ function e($value)
                     and dark secrets through one of the most iconic fantasy series ever made.
                 </p>
                 <div class="hero-buttons">
-                   <a href="#" class="primary-btn hero-detail-btn" data-title="Harry Potter and the Philosopher's Stone">View Details</a>
+                    <a href="#" class="primary-btn hero-detail-btn" data-title="Harry Potter and the Philosopher's Stone">View Details</a>
                 </div>
             </div>
         </div>
@@ -135,7 +141,6 @@ function e($value)
         </div>
     </section>
 
-    <!-- SEARCH -->
     <section class="search-section">
         <div class="search-section-inner">
             <div class="search-heading">
@@ -167,7 +172,6 @@ function e($value)
         </div>
     </section>
 
-    <!-- MOVIES -->
     <section class="movies-section" id="all-movies-section">
         <div class="section-header">
             <h2>Latest Movies</h2>
@@ -178,7 +182,8 @@ function e($value)
             <?php if ($totalMovies > 0) { ?>
                 <?php while ($row = mysqli_fetch_assoc($result)) { ?>
                     <article class="movie-card">
-<a href="movie.php?id=<?php echo (int)$row["movie_id"]; ?>&return_to=<?php echo urlencode($_SERVER["REQUEST_URI"]); ?>" class="movie-card-link">                            <div class="movie-poster-wrap">
+                        <a href="movie.php?id=<?php echo (int)$row['movie_id']; ?>&return_to=<?php echo urlencode($_SERVER['REQUEST_URI']); ?>" class="movie-card-link">
+                            <div class="movie-poster-wrap">
                                 <?php if (!empty($row["poster_image"])) { ?>
                                     <img
                                         src="uploads/posters/<?php echo e(rawurlencode($row["poster_image"])); ?>"
@@ -213,12 +218,10 @@ function e($value)
         </div>
     </section>
 
-    <!-- PAGINATION -->
     <div class="pagination-wrapper">
         <div id="pagination" class="pagination"></div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-brand">
@@ -234,7 +237,11 @@ function e($value)
                 <ul>
                     <li><a href="#all-movies-section">Latest Movies</a></li>
                     <li><a href="search.php">Discover</a></li>
-                    <li><a href="my-watchlist.php">Watchlist</a></li>
+                    <?php if ($isLoggedIn): ?>
+                        <li><a href="watchlist.php">Watchlist</a></li>
+                    <?php else: ?>
+                        <li><a href="login.php">Login</a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
 
@@ -259,7 +266,7 @@ function e($value)
             <p>© 2026 MovieMeter. All rights reserved.</p>
         </div>
     </footer>
-    
+
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/home.js"></script>
 

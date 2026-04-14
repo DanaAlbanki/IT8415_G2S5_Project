@@ -2,15 +2,13 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once(__DIR__ . "/includes/auth_check.php");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once(__DIR__ . "/config/DBConn.php");
 
-if (
-    !isset($_SESSION["role_name"]) ||
-    ($_SESSION["role_name"] !== "viewer" && $_SESSION["role_name"] !== "admin")
-) {
-    die("Access denied.");
-}
+$isLoggedIn = isset($_SESSION["user_id"]);
 
 function fetchTmdbMovie($tmdbId)
 {
@@ -50,6 +48,7 @@ function getMovieIdFromTmdb($conn, $tmdbId)
         WHERE external_api_id = ?
         LIMIT 1
     ";
+
     $stmt = mysqli_prepare($conn, $sql);
 
     if (!$stmt) {
@@ -86,7 +85,7 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
         : "assets/images/notfound.png";
 
     $status = "published";
-    $creatorId = !empty($_SESSION["user_id"]) ? (int) $_SESSION["user_id"] : 1;
+    $creatorId = 2; // Zainab creator id 
     $isApiImported = 1;
     $externalApiSource = "tmdb";
     $externalApiId = (string) $movie["id"];
@@ -198,6 +197,7 @@ if ($tmdbId !== "") {
                       AND c.comment_status = 'visible'
                 ) AS comment_count
         ";
+
         $summaryStmt = mysqli_prepare($conn, $summarySql);
 
         if ($summaryStmt) {
@@ -224,6 +224,7 @@ if ($tmdbId !== "") {
                 WHERE movie_id = ? AND user_id = ?
                 LIMIT 1
             ";
+
             $ratingStmt = mysqli_prepare($conn, $ratingSql);
 
             if ($ratingStmt) {
@@ -246,6 +247,7 @@ if ($tmdbId !== "") {
                 WHERE w.user_id = ? AND wi.movie_id = ?
                 LIMIT 1
             ";
+
             $watchlistStmt = mysqli_prepare($conn, $watchlistSql);
 
             if ($watchlistStmt) {
@@ -269,6 +271,7 @@ if ($tmdbId !== "") {
               AND c.comment_status = 'visible'
             ORDER BY c.created_at DESC, c.comment_id DESC
         ";
+
         $commentsStmt = mysqli_prepare($conn, $commentsSql);
 
         if ($commentsStmt) {
@@ -288,6 +291,7 @@ if ($tmdbId !== "") {
 $pageData = [
     "tmdbId" => $tmdbId,
     "movieId" => $movieId,
+    "isLoggedIn" => $isLoggedIn,
     "userRating" => $userRating,
     "comments" => $comments,
     "summary" => $summary,
