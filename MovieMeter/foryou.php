@@ -22,113 +22,119 @@ require_once(__DIR__ . "/includes/auth_check.php");
 
 <body>
 
-    <nav class="navbar">
-        <div class="logo">
-            <img src="assets/images/logo.png" alt="MovieMeter Logo">
+<nav class="navbar">
+    <div class="logo">
+        <img src="assets/images/logo.png" alt="MovieMeter Logo">
+    </div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <ul class="nav-links" id="navLinks">
+        <li><a href="index.php">Home</a></li>
+        <li><a href="discover.php">Discover</a></li>
+        <li><a href="categories.php">Categories</a></li>
+        <li><a href="foryou.php" class="active-link">For You</a></li>
+        <li><a href="watchlist.php">Watchlist</a></li>
+        <li><a href="profile.php">Profile</a></li>
+        <li><a href="logout.php">Logout</a></li>
+    </ul>
+</nav>
+
+<section class="for-you-hero">
+    <div class="overlay"></div>
+    <div class="hero-content">
+        <h1>For You</h1>
+        <p>
+            Fresh picks, trending titles, and movies you might like — all in your style.
+        </p>
+    </div>
+</section>
+
+<main class="recommendation-page">
+
+    <section class="recommendation-section">
+        <div class="section-top">
+            <div class="section-header left-align">
+                <h2>Trending Now</h2>
+                <p>Popular movies people are watching right now.</p>
+            </div>
+
+            <button id="refreshTrending" class="refresh-btn" type="button">Refresh</button>
         </div>
 
-        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-
-        <ul class="nav-links" id="navLinks">
-            <li><a href="index.php">Home</a></li>
-            <li><a href="discover.php">Discover</a></li>
-            <li><a href="categories.php">Categories</a></li>
-            <li><a href="foryou.php" class="active-link">For You</a></li>
-            <li><a href="watchlist.php">Watchlist</a></li>
-            <li><a href="profile.php">Profile</a></li>
-            <li><a href="logout.php">Logout</a></li>
-        </ul>
-    </nav>
-
-    <section class="for-you-hero">
-        <div class="overlay"></div>
-        <div class="hero-content">
-            <h1>For You</h1>
-            <p>
-                Fresh picks, trending titles, and movies you might like — all in your style.
-            </p>
-        </div>
+        <p id="trendingStatus" class="loading-text"></p>
+        <div id="trendingMovies" class="movies-row"></div>
     </section>
 
-    <main class="recommendation-page">
-
-        <section class="recommendation-section">
-            <div class="section-top">
-                <div class="section-header left-align">
-                    <h2>Trending Now</h2>
-                    <p>Popular movies people are watching right now.</p>
-                </div>
-
-                <button id="refreshTrending" class="refresh-btn" type="button">Refresh</button>
+    <section class="recommendation-section">
+        <div class="section-top">
+            <div class="section-header left-align">
+                <h2>You Might Like</h2>
+                <p>Another handpicked set from different genres.</p>
             </div>
 
-            <p id="trendingStatus" class="loading-text"></p>
-            <div id="trendingMovies" class="movies-row"></div>
-        </section>
-
-        <section class="recommendation-section">
-            <div class="section-top">
-                <div class="section-header left-align">
-                    <h2>You Might Like</h2>
-                    <p>Another handpicked set from different genres.</p>
-                </div>
-
-                <button id="refreshForYou" class="refresh-btn" type="button">Refresh</button>
-            </div>
-
-            <p id="forYouStatus" class="loading-text"></p>
-            <div id="forYouMovies" class="movies-row"></div>
-        </section>
-
-    </main>
-
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-brand">
-                <h3>MovieMeter</h3>
-                <p>
-                    Discover, rate, and explore your favorite movies in one place.
-                    Find trending titles and build your personal watchlist.
-                </p>
-            </div>
-
-            <div class="footer-links">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="index.php">Home</a></li>
-                    <li><a href="discover.php">Latest Movies</a></li>
-                    <li><a href="discover.php">Top Rated</a></li>
-                    <li><a href="watchlist.php">Watchlist</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-links">
-                <h4>Categories</h4>
-                <ul>
-                    <li><a href="categories.php">Action</a></li>
-                    <li><a href="categories.php">Drama</a></li>
-                    <li><a href="categories.php">Comedy</a></li>
-                    <li><a href="categories.php">Fantasy</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-contact">
-                <h4>Contact</h4>
-                <p>support@moviemeter.com</p>
-                <p>+973 1700 0000</p>
-            </div>
+            <button id="refreshForYou" class="refresh-btn" type="button">Refresh</button>
         </div>
 
-        <div class="footer-bottom">
-            <p>© 2026 MovieMeter. All rights reserved.</p>
-        </div>
-    </footer>
+        <p id="forYouStatus" class="loading-text"></p>
+        <div id="forYouMovies" class="movies-row"></div>
+    </section>
 
-    <script type="module" src="assets/js/foryou.js"></script>
+</main>
+
+<!-- ✅ FIXED FOOTER -->
+<footer class="footer">
+    <div class="footer-container">
+
+        <div class="footer-brand">
+            <h3>MovieMeter</h3>
+            <p>
+                Discover, rate, and explore your favorite movies in one place.
+                Find trending titles and build your personal watchlist.
+            </p>
+        </div>
+
+        <!-- ✅ Quick Links (clean + consistent) -->
+        <div class="footer-links">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="discover.php">Discover</a></li>
+                <li><a href="foryou.php">For You</a></li>
+                <li><a href="watchlist.php">Watchlist</a></li>
+            </ul>
+        </div>
+
+        <!-- ✅ Categories (WORKING FILTER LINKS) -->
+        <div class="footer-links">
+            <h4>Categories</h4>
+            <ul>
+                <li><a href="categories.php?genre=28">Action</a></li>
+                <li><a href="categories.php?genre=18">Drama</a></li>
+                <li><a href="categories.php?genre=35">Comedy</a></li>
+                <li><a href="categories.php?genre=14">Fantasy</a></li>
+            </ul>
+        </div>
+
+        <!-- Contact -->
+        <div class="footer-contact">
+            <h4>Contact</h4>
+            <p><a href="mailto:support@moviemeter.com">support@moviemeter.com</a></p>
+            <p><a href="tel:+97317000000">+973 1700 0000</a></p>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 MovieMeter. All rights reserved.</p>
+    </div>
+</footer>
+
+<script type="module" src="assets/js/foryou.js"></script>
+
 </body>
-
 </html>
