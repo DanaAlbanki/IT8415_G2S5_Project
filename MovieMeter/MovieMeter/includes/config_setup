@@ -1,0 +1,13 @@
+In config/ folder
+Create a file called config.php and paste the following code inside it:
+replace my id with yours
+<?php
+$host = "localhost";
+$user = "u202304661";
+$pass = "";
+$db   = "db202304661";
+?>
+
+Save the file inside your project folder.
+
+Make sure the database name is correct and matches phpMyAdmin.
