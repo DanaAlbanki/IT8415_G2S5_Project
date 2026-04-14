@@ -1,0 +1,291 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #1d1127;
+    color: #ffffff;
+    font-family: "Inter", sans-serif;
+}
+
+.active-link {
+    color: #facc15 !important;
+}
+
+.edit-profile-page {
+    min-height: calc(100vh - 140px);
+    padding: 130px 20px 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-profile-card {
+    width: 100%;
+    max-width: 760px;
+    background: linear-gradient(180deg, #2a1a36 0%, #241430 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 30px;
+    padding: 38px 32px 32px;
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, 0.40),
+        0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.edit-profile-header {
+    text-align: center;
+    margin-bottom: 26px;
+}
+
+.edit-profile-header h1 {
+    margin: 0;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 3rem;
+    letter-spacing: 1px;
+    color: #ffffff;
+}
+
+.edit-profile-header p {
+    margin: 8px 0 0;
+    color: #d8b4fe;
+    font-size: 0.98rem;
+}
+
+.edit-message {
+    margin-bottom: 22px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.edit-message.success {
+    background: rgba(34, 197, 94, 0.16);
+    color: #dcfce7;
+    border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.edit-message.error {
+    background: rgba(239, 68, 68, 0.16);
+    color: #fee2e2;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.avatar-area { 
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.avatar-upload-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-shell {
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    flex-shrink: 0;
+}
+
+.avatar-preview-image,
+.avatar-fallback {
+    width: 100%;
+    height: 100%;
+}
+
+.avatar-preview-image {
+    display: block;
+    object-fit: cover;
+}
+
+.avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1025;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 2.6rem;
+    letter-spacing: 1px;
+}
+
+.camera-upload-btn {
+    position: absolute;
+    right: -6px;
+    bottom: 6px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid #241430;
+    outline: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #8b2d7a, #a43c93);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.25s ease;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+    z-index: 2;
+}
+
+.camera-upload-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+}
+
+.camera-upload-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: #ffffff;
+}
+
+.hidden-file-input {
+    display: none;
+}
+
+.edit-profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field-group label {
+    color: #d7c5e3;
+    font-size: 0.84rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.field-group input {
+    width: 100%;
+    height: 56px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    outline: none;
+    border-radius: 16px;
+    background: #342243;
+    color: #ffffff;
+    padding: 0 16px;
+    font-size: 0.97rem;
+    transition: 0.2s ease;
+}
+
+.field-group input::placeholder {
+    color: #bda9ca;
+}
+
+.field-group input:focus {
+    border-color: rgba(250, 204, 21, 0.55);
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.08);
+}
+
+.edit-actions {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.edit-btn {
+    min-width: 180px;
+    min-height: 54px;
+    border: none;
+    border-radius: 16px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.98rem;
+    font-weight: 800;
+    font-family: "Inter", sans-serif;
+    transition: 0.25s ease;
+    cursor: pointer;
+    padding: 0 24px;
+}
+
+.edit-btn-primary {
+    background: #facc15;
+    color: #1a1025;
+}
+
+.edit-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.edit-btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.edit-btn-secondary {
+    background: linear-gradient(135deg, #8b2d7a, #a43c93);
+    color: #ffffff;
+}
+
+.edit-btn-secondary:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .edit-profile-page {
+        padding: 110px 16px 75px;
+    }
+
+    .edit-profile-card {
+        padding: 30px 20px 24px;
+        border-radius: 24px;
+    }
+
+    .edit-profile-header h1 {
+        font-size: 2.45rem;
+    }
+
+    .avatar-shell {
+        width: 96px;
+        height: 96px;
+    }
+
+    .camera-upload-btn {
+        width: 48px;
+        height: 48px;
+    }
+
+    .edit-actions {
+        flex-direction: column;
+    }
+
+    .edit-btn {
+        width: 100%;
+        min-width: unset;
+    }
+}
+
+@media (max-width: 480px) {
+    .camera-upload-btn {
+        right: -4px;
+        bottom: 4px;
+    }
+
+    .avatar-shell {
+        width: 88px;
+        height: 88px;
+    }
+
+    .avatar-fallback {
+        font-size: 2.1rem;
+    }
+
+    .edit-profile-header h1 {
+        font-size: 2.15rem;
+    }
+}
