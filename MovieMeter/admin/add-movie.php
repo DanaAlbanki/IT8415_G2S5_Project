@@ -10,7 +10,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
 
     $title = mysqli_real_escape_string($conn, $_POST["title"]);
     $desc = mysqli_real_escape_string($conn, $_POST["desc"]);
-    $fullDesc = mysqli_real_escape_string($conn, $_POST["desc"]); // نفس الوصف مؤقت
+    $fullDesc = mysqli_real_escape_string($conn, $_POST["desc"]); 
     $date = $_POST["date"];
     $creator_id = $_SESSION["user_id"]; 
 
