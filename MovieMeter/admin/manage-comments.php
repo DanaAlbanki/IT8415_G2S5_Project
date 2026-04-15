@@ -1,31 +1,57 @@
 <?php
-require_once("../config/database.php");
+require_once(__DIR__ . "/../includes/auth_check.php");
+require_once(__DIR__ . "/../config/DBConn.php");
 
-$result = $conn->query("SELECT * FROM mm_comments");
+if ($_SESSION["role_name"] !== "admin") die("Access denied.");
+
+$conn = getConnection();
+
+$result = mysqli_query($conn,"
+SELECT c.comment_id, c.comment_text, u.full_name, m.title
+FROM mm_comments c
+JOIN mm_users u ON c.user_id=u.user_id
+JOIN mm_movies m ON c.movie_id=m.movie_id
+ORDER BY c.comment_id DESC
+");
 ?>
 
-<h2>Manage Comments</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
 
-<table border="1">
+<?php include("../includes/admin_nav.php"); ?>
+
+<div class="admin-container">
+
+<h1 class="admin-title">Manage Comments</h1>
+
+<table class="admin-table">
 <tr>
-<th>ID</th>
-<th>Movie</th>
 <th>User</th>
-<th>Text</th>
-<th>Status</th>
-<th>Action</th>
+<th>Movie</th>
+<th>Comment</th>
+<th>Actions</th>
 </tr>
 
-<?php while($row = $result->fetch_assoc()): ?>
+<?php while($row=mysqli_fetch_assoc($result)){ ?>
 <tr>
-<td><?php echo $row['comment_id']; ?></td>
-<td><?php echo $row['movie_id']; ?></td>
-<td><?php echo $row['user_id']; ?></td>
-<td><?php echo $row['comment_text']; ?></td>
-<td><?php echo $row['comment_status']; ?></td>
+<td><?php echo $row["full_name"]; ?></td>
+<td><?php echo $row["title"]; ?></td>
+<td><?php echo $row["comment_text"]; ?></td>
 <td>
-<a href="delete-comment.php?id=<?php echo $row['comment_id']; ?>">Delete</a>
+<a href="edit-comment.php?id=<?php echo $row["comment_id"]; ?>" class="btn btn-edit">Edit</a>
+<a href="delete-comment.php?id=<?php echo $row["comment_id"]; ?>" class="btn btn-delete" onclick="return confirm('Delete comment?')">Delete</a>
 </td>
 </tr>
-<?php endwhile; ?>
+<?php } ?>
+
 </table>
+
+</div>
+<?php include("../includes/admin_footer.php"); ?>
+</body>
+</html>

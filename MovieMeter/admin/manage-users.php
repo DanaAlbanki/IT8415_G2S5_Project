@@ -1,31 +1,62 @@
 <?php
-require_once("../config/database.php");
+require_once(__DIR__ . "/../includes/auth_check.php");
+require_once(__DIR__ . "/../config/DBConn.php");
 
-$result = $conn->query("SELECT * FROM mm_users");
+if ($_SESSION["role_name"] !== "admin") die("Access denied.");
+
+$conn = getConnection();
+
+$result = mysqli_query($conn,"
+SELECT u.user_id, u.full_name, u.email, r.role_name
+FROM mm_users u
+LEFT JOIN mm_roles r ON u.role_id = r.role_id
+ORDER BY u.user_id DESC
+");
 ?>
 
-<h2>Manage Users</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/admin.css">
+</head>
 
-<table border="1">
+<body>
+
+<?php include("../includes/admin_nav.php"); ?>
+
+<div class="admin-container">
+
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<h1 class="admin-title">Manage Users</h1>
+<a href="add-user.php" class="btn btn-add">+ Add User</a>
+</div>
+
+<table class="admin-table">
 <tr>
-<th>ID</th>
 <th>Name</th>
-<th>Username</th>
 <th>Email</th>
-<th>Status</th>
-<th>Action</th>
+<th>Role</th>
+<th>Actions</th>
 </tr>
 
-<?php while($row = $result->fetch_assoc()): ?>
+<?php while($row=mysqli_fetch_assoc($result)){ ?>
 <tr>
-<td><?php echo $row['user_id']; ?></td>
-<td><?php echo $row['full_name']; ?></td>
-<td><?php echo $row['username']; ?></td>
-<td><?php echo $row['email']; ?></td>
-<td><?php echo $row['account_status']; ?></td>
+<td><?php echo htmlspecialchars($row["full_name"]); ?></td>
+<td><?php echo htmlspecialchars($row["email"]); ?></td>
+<td><?php echo $row["role_name"]; ?></td>
 <td>
-<a href="delete-user.php?id=<?php echo $row['user_id']; ?>">Delete</a>
+<a href="edit-user.php?id=<?php echo $row["user_id"]; ?>" class="btn btn-edit">Edit</a>
+<a href="delete-user.php?id=<?php echo $row["user_id"]; ?>" 
+class="btn btn-delete"
+onclick="return confirm('Are you sure?');">Delete</a>
 </td>
 </tr>
-<?php endwhile; ?>
+<?php } ?>
+
 </table>
+
+</div>
+<?php include("../includes/admin_footer.php"); ?>
+</body>
+</html>

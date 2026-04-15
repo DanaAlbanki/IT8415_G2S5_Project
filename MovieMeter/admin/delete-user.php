@@ -1,9 +1,13 @@
 <?php
-require_once("../config/database.php");
+require_once(__DIR__ . "/../includes/auth_check.php");
+require_once(__DIR__ . "/../config/DBConn.php");
 
-$id = $_GET['id'];
+if ($_SESSION["role_name"] !== "admin") die("Access denied.");
 
-$conn->query("DELETE FROM mm_users WHERE user_id = $id");
+$conn=getConnection();
+$id=$_GET["id"];
+
+mysqli_query($conn,"DELETE FROM mm_users WHERE user_id=$id");
 
 header("Location: manage-users.php");
-?>
+exit;
