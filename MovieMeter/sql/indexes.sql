@@ -17,10 +17,6 @@ CREATE INDEX idx_movies_deleted_by ON mm_movies(deleted_by);
 CREATE INDEX idx_movies_published_at ON mm_movies(published_at);
 CREATE INDEX idx_movies_external_api_id ON mm_movies(external_api_id);
 
--- MOVIE MEDIA
-CREATE INDEX idx_movie_media_movie_primary ON mm_movie_media(movie_id, is_primary);
-CREATE INDEX idx_movie_media_movie_type ON mm_movie_media(movie_id, media_type);
-
 -- COMMENTS
 CREATE INDEX idx_comments_movie_status_created ON mm_comments(movie_id, comment_status, created_at);
 CREATE INDEX idx_comments_deleted_by ON mm_comments(deleted_by);

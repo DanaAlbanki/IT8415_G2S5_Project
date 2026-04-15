@@ -71,18 +71,7 @@ CREATE TABLE mm_movies (
     deleted_reason VARCHAR(255) NULL
 ) ENGINE=MyISAM;
 
--- 5) MOVIE MEDIA
-CREATE TABLE mm_movie_media (
-    media_id INT AUTO_INCREMENT PRIMARY KEY,
-    movie_id INT NOT NULL,
-    media_type ENUM('image','video','audio') NOT NULL,
-    file_path VARCHAR(255) NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
-    is_primary TINYINT(1) DEFAULT 0,
-    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=MyISAM;
-
--- 6) COMMENTS
+-- 5) COMMENTS
 CREATE TABLE mm_comments (
     comment_id INT AUTO_INCREMENT PRIMARY KEY,
     movie_id INT NOT NULL,
@@ -95,7 +84,7 @@ CREATE TABLE mm_comments (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=MyISAM;
 
--- 7) RATINGS
+-- 6) RATINGS
 CREATE TABLE mm_ratings (
     movie_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -105,20 +94,21 @@ CREATE TABLE mm_ratings (
     CHECK (rating_value BETWEEN 1 AND 5)
 ) ENGINE=MyISAM;
 
--- 8) MOVIE_CATEGORIES
+-- 7) MOVIE_CATEGORIES
 CREATE TABLE mm_movie_categories (
     movie_id INT NOT NULL,
     category_id INT NOT NULL,
     PRIMARY KEY (movie_id, category_id)
 ) ENGINE=MyISAM;
 
+-- 8) WATCHLISTS
 CREATE TABLE mm_watchlists (
     watchlist_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=MyISAM;
 
--- 10) WATCHLIST ITEMS
+-- 9) WATCHLIST ITEMS
 CREATE TABLE mm_watchlist_items (
     watchlist_id INT NOT NULL,
     movie_id INT NOT NULL,
@@ -126,7 +116,7 @@ CREATE TABLE mm_watchlist_items (
     PRIMARY KEY (watchlist_id, movie_id)
 ) ENGINE=MyISAM;
 
--- 11) ADMIN LOGS
+-- 10) ADMIN LOGS
 CREATE TABLE mm_admin_logs (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     admin_id INT NOT NULL,
@@ -137,7 +127,7 @@ CREATE TABLE mm_admin_logs (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=MyISAM;
 
--- 12) DELETED MOVIES LOG
+-- 11) DELETED MOVIES LOG
 CREATE TABLE mm_deleted_movies_log (
     deleted_log_id INT AUTO_INCREMENT PRIMARY KEY,
     deleted_by INT NOT NULL,

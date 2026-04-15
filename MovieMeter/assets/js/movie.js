@@ -22,7 +22,8 @@ let dbUserRating = Number(pageData.userRating || 0);
 let dbSummary = pageData.summary || {
     average_rating: 0,
     rating_count: 0,
-    comment_count: 0
+    comment_count: 0,
+    view_count: 0
 };
 
 let isInUserWatchlist = Boolean(pageData.isInWatchlist || false);
@@ -265,11 +266,12 @@ function updateStarSelection(stars, selectedRating) {
 }
 
 function updateSummaryUI(summary) {
-    dbSummary = summary || dbSummary;
+    dbSummary = { ...dbSummary, ...(summary || {}) };
 
     const averageEl = document.getElementById("detailAverageRating");
     const ratingCountEl = document.getElementById("detailRatingCount");
     const commentCountEl = document.getElementById("detailCommentCount");
+    const viewCountEl = document.getElementById("detailViewCount");
 
     if (averageEl) {
         averageEl.textContent = Number(dbSummary.average_rating || 0).toFixed(1);
@@ -281,6 +283,10 @@ function updateSummaryUI(summary) {
 
     if (commentCountEl) {
         commentCountEl.textContent = String(Number(dbSummary.comment_count || 0));
+    }
+
+    if (viewCountEl) {
+        viewCountEl.textContent = String(Number(dbSummary.view_count || 0));
     }
 }
 
@@ -479,7 +485,7 @@ function renderMovie(movie) {
     const averageRating = Number(dbSummary.average_rating || 0).toFixed(1);
     const ratingCount = Number(dbSummary.rating_count || 0);
     const commentCount = Number(dbSummary.comment_count || 0);
-    const viewCount = movie.popularity ? Math.round(movie.popularity) : "";
+    const viewCount = Number(dbSummary.view_count || 0);
     const status = "published";
 
     const poster = resolvePoster(movie);
@@ -529,7 +535,7 @@ function renderMovie(movie) {
                     ${renderInfoRow("Average Rating", averageRating, "detailAverageRating")}
                     ${renderInfoRow("Rating Count", ratingCount, "detailRatingCount")}
                     ${renderInfoRow("Comment Count", commentCount, "detailCommentCount")}
-                    ${renderInfoRow("View Count", viewCount)}
+                    ${renderInfoRow("View Count", viewCount, "detailViewCount")}
                     ${renderInfoRow("Status", status)}
                 </article>
             </div>

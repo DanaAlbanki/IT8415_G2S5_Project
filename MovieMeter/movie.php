@@ -13,7 +13,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
 function fetchTmdbMovie($tmdbId)
 {
     $apiKey = "d29868793eba2f4ccb7cb36fa101c2a8";
-    $url = "https://api.themoviedb.org/3/movie/" . urlencode($tmdbId) . "?api_key=" . $apiKey . "&language=en-US";
+    $url = "https://api.themoviedb.org/3/movie/" . urlencode($tmdbId) . "?api_key=" . $apiKey . "&language=en-US&append_to_response=videos";
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
@@ -65,16 +65,225 @@ function getMovieIdFromTmdb($conn, $tmdbId)
     return $row ? (int) $row["movie_id"] : 0;
 }
 
+function getTrailerUrlFromMovie($movie)
+{
+    if (empty($movie["videos"]["results"]) || !is_array($movie["videos"]["results"])) {
+        return null;
+    }
+
+    $videos = $movie["videos"]["results"];
+    $selectedVideo = null;
+
+    foreach ($videos as $video) {
+        if (
+            ($video["site"] ?? "") === "YouTube" &&
+            ($video["type"] ?? "") === "Trailer" &&
+            !empty($video["official"]) &&
+            !empty($video["key"])
+        ) {
+            $selectedVideo = $video;
+            break;
+        }
+    }
+
+    if (!$selectedVideo) {
+        foreach ($videos as $video) {
+            if (
+                ($video["site"] ?? "") === "YouTube" &&
+                ($video["type"] ?? "") === "Trailer" &&
+                !empty($video["key"])
+            ) {
+                $selectedVideo = $video;
+                break;
+            }
+        }
+    }
+
+    if (!$selectedVideo) {
+        foreach ($videos as $video) {
+            if (
+                ($video["site"] ?? "") === "YouTube" &&
+                !empty($video["key"])
+            ) {
+                $selectedVideo = $video;
+                break;
+            }
+        }
+    }
+
+    if (!$selectedVideo) {
+        return null;
+    }
+
+    return "https://www.youtube.com/embed/" . trim((string) $selectedVideo["key"]);
+}
+
+function syncMovieGenresToCategories($conn, $movieId, $movie)
+{
+    if (!$movieId || empty($movie["genres"]) || !is_array($movie["genres"])) {
+        return;
+    }
+
+    foreach ($movie["genres"] as $genre) {
+        $categoryName = trim($genre["name"] ?? "");
+
+        if ($categoryName === "") {
+            continue;
+        }
+
+        $categoryId = 0;
+
+        $findCategorySql = "
+            SELECT category_id
+            FROM mm_categories
+            WHERE category_name = ?
+            LIMIT 1
+        ";
+
+        $findCategoryStmt = mysqli_prepare($conn, $findCategorySql);
+
+        if ($findCategoryStmt) {
+            mysqli_stmt_bind_param($findCategoryStmt, "s", $categoryName);
+            mysqli_stmt_execute($findCategoryStmt);
+            $findCategoryResult = mysqli_stmt_get_result($findCategoryStmt);
+            $existingCategory = mysqli_fetch_assoc($findCategoryResult);
+
+            if ($existingCategory) {
+                $categoryId = (int) $existingCategory["category_id"];
+            }
+
+            mysqli_stmt_close($findCategoryStmt);
+        }
+
+        if ($categoryId <= 0) {
+            $description = $categoryName . " movies";
+
+            $insertCategorySql = "
+                INSERT INTO mm_categories (
+                    category_name,
+                    description,
+                    created_at
+                ) VALUES (?, ?, NOW())
+            ";
+
+            $insertCategoryStmt = mysqli_prepare($conn, $insertCategorySql);
+
+            if ($insertCategoryStmt) {
+                mysqli_stmt_bind_param($insertCategoryStmt, "ss", $categoryName, $description);
+
+                if (mysqli_stmt_execute($insertCategoryStmt)) {
+                    $categoryId = (int) mysqli_insert_id($conn);
+                }
+
+                mysqli_stmt_close($insertCategoryStmt);
+            }
+
+            if ($categoryId <= 0) {
+                $findAgainStmt = mysqli_prepare($conn, $findCategorySql);
+
+                if ($findAgainStmt) {
+                    mysqli_stmt_bind_param($findAgainStmt, "s", $categoryName);
+                    mysqli_stmt_execute($findAgainStmt);
+                    $findAgainResult = mysqli_stmt_get_result($findAgainStmt);
+                    $existingCategory = mysqli_fetch_assoc($findAgainResult);
+
+                    if ($existingCategory) {
+                        $categoryId = (int) $existingCategory["category_id"];
+                    }
+
+                    mysqli_stmt_close($findAgainStmt);
+                }
+            }
+        }
+
+        if ($categoryId <= 0) {
+            continue;
+        }
+
+        $checkLinkSql = "
+            SELECT 1
+            FROM mm_movie_categories
+            WHERE movie_id = ? AND category_id = ?
+            LIMIT 1
+        ";
+
+        $checkLinkStmt = mysqli_prepare($conn, $checkLinkSql);
+
+        $alreadyLinked = false;
+
+        if ($checkLinkStmt) {
+            mysqli_stmt_bind_param($checkLinkStmt, "ii", $movieId, $categoryId);
+            mysqli_stmt_execute($checkLinkStmt);
+            $checkLinkResult = mysqli_stmt_get_result($checkLinkStmt);
+            $alreadyLinked = ($checkLinkResult && mysqli_num_rows($checkLinkResult) > 0);
+            mysqli_stmt_close($checkLinkStmt);
+        }
+
+        if (!$alreadyLinked) {
+            $insertLinkSql = "
+                INSERT INTO mm_movie_categories (movie_id, category_id)
+                VALUES (?, ?)
+            ";
+
+            $insertLinkStmt = mysqli_prepare($conn, $insertLinkSql);
+
+            if ($insertLinkStmt) {
+                mysqli_stmt_bind_param($insertLinkStmt, "ii", $movieId, $categoryId);
+                mysqli_stmt_execute($insertLinkStmt);
+                mysqli_stmt_close($insertLinkStmt);
+            }
+        }
+    }
+}
+
+function updateExistingMovieFromTmdb($conn, $movieId, $movie)
+{
+    $releaseDate = !empty($movie["release_date"]) ? $movie["release_date"] : null;
+    $posterImage = !empty($movie["poster_path"])
+        ? "https://image.tmdb.org/t/p/w500" . $movie["poster_path"]
+        : "assets/images/notfound.png";
+    $trailerUrl = getTrailerUrlFromMovie($movie);
+    $now = date("Y-m-d H:i:s");
+
+    $updateSql = "
+        UPDATE mm_movies
+        SET release_date = ?,
+            poster_image = ?,
+            trailer_url = ?,
+            updated_at = ?
+        WHERE movie_id = ?
+    ";
+
+    $updateStmt = mysqli_prepare($conn, $updateSql);
+
+    if ($updateStmt) {
+        mysqli_stmt_bind_param(
+            $updateStmt,
+            "ssssi",
+            $releaseDate,
+            $posterImage,
+            $trailerUrl,
+            $now,
+            $movieId
+        );
+        mysqli_stmt_execute($updateStmt);
+        mysqli_stmt_close($updateStmt);
+    }
+}
+
 function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
 {
     $existingMovieId = getMovieIdFromTmdb($conn, $tmdbId);
-    if ($existingMovieId > 0) {
-        return $existingMovieId;
+    $movie = fetchTmdbMovie($tmdbId);
+
+    if (!$movie || empty($movie["id"])) {
+        return $existingMovieId > 0 ? $existingMovieId : 0;
     }
 
-    $movie = fetchTmdbMovie($tmdbId);
-    if (!$movie || empty($movie["id"])) {
-        return 0;
+    if ($existingMovieId > 0) {
+        syncMovieGenresToCategories($conn, $existingMovieId, $movie);
+        updateExistingMovieFromTmdb($conn, $existingMovieId, $movie);
+        return $existingMovieId;
     }
 
     $title = trim($movie["title"] ?? $movie["name"] ?? "Untitled");
@@ -83,9 +292,10 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
     $posterImage = !empty($movie["poster_path"])
         ? "https://image.tmdb.org/t/p/w500" . $movie["poster_path"]
         : "assets/images/notfound.png";
+    $trailerUrl = getTrailerUrlFromMovie($movie);
 
     $status = "published";
-    $creatorId = 2; // Zainab creator id 
+    $creatorId = 2;
     $isApiImported = 1;
     $externalApiSource = "tmdb";
     $externalApiId = (string) $movie["id"];
@@ -98,6 +308,7 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
             full_description,
             release_date,
             poster_image,
+            trailer_url,
             status,
             creator_id,
             is_api_imported,
@@ -106,7 +317,7 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
             created_at,
             updated_at,
             published_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ";
 
     $insertStmt = mysqli_prepare($conn, $insertSql);
@@ -117,12 +328,13 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
 
     mysqli_stmt_bind_param(
         $insertStmt,
-        "ssssssissssss",
+        "sssssssissssss",
         $title,
         $overview,
         $overview,
         $releaseDate,
         $posterImage,
+        $trailerUrl,
         $status,
         $creatorId,
         $isApiImported,
@@ -140,6 +352,8 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
 
     $newMovieId = (int) mysqli_insert_id($conn);
     mysqli_stmt_close($insertStmt);
+
+    syncMovieGenresToCategories($conn, $newMovieId, $movie);
 
     return $newMovieId;
 }
@@ -171,15 +385,36 @@ $comments = [];
 $summary = [
     "average_rating" => 0,
     "rating_count" => 0,
-    "comment_count" => 0
+    "comment_count" => 0,
+    "view_count" => 0
 ];
 
 if ($tmdbId !== "") {
     $movieId = getOrCreateMovieIdFromTmdb($conn, $tmdbId);
 
     if ($movieId > 0) {
+        if (!isset($_SESSION["viewed_movies"])) {
+            $_SESSION["viewed_movies"] = [];
+        }
+
+        if (!in_array($movieId, $_SESSION["viewed_movies"], true)) {
+            $viewStmt = mysqli_prepare(
+                $conn,
+                "UPDATE mm_movies SET view_count = view_count + 1 WHERE movie_id = ?"
+            );
+
+            if ($viewStmt) {
+                mysqli_stmt_bind_param($viewStmt, "i", $movieId);
+                mysqli_stmt_execute($viewStmt);
+                mysqli_stmt_close($viewStmt);
+            }
+
+            $_SESSION["viewed_movies"][] = $movieId;
+        }
+
         $summarySql = "
             SELECT
+                m.view_count,
                 COALESCE((
                     SELECT AVG(r.rating_value)
                     FROM mm_ratings r
@@ -196,12 +431,15 @@ if ($tmdbId !== "") {
                     WHERE c.movie_id = ?
                       AND c.comment_status = 'visible'
                 ) AS comment_count
+            FROM mm_movies m
+            WHERE m.movie_id = ?
+            LIMIT 1
         ";
 
         $summaryStmt = mysqli_prepare($conn, $summarySql);
 
         if ($summaryStmt) {
-            mysqli_stmt_bind_param($summaryStmt, "iii", $movieId, $movieId, $movieId);
+            mysqli_stmt_bind_param($summaryStmt, "iiii", $movieId, $movieId, $movieId, $movieId);
             mysqli_stmt_execute($summaryStmt);
             $summaryResult = mysqli_stmt_get_result($summaryStmt);
             $summaryRow = mysqli_fetch_assoc($summaryResult);
@@ -210,7 +448,8 @@ if ($tmdbId !== "") {
                 $summary = [
                     "average_rating" => (float) $summaryRow["average_rating"],
                     "rating_count" => (int) $summaryRow["rating_count"],
-                    "comment_count" => (int) $summaryRow["comment_count"]
+                    "comment_count" => (int) $summaryRow["comment_count"],
+                    "view_count" => (int) $summaryRow["view_count"]
                 ];
             }
 

@@ -48,18 +48,6 @@ VALUES
 (3,'Dune','Desert world','Future prophecy','2021-10-22','published',NOW()),
 (2,'Avatar','Alien planet','Pandora story','2009-12-18','published',NOW());
  
--- MOVIE MEDIA
-INSERT INTO mm_movie_media (movie_id, media_type, file_path, file_name, is_primary, uploaded_at)
-VALUES
-(1,'image','uploads/johnwick.jpg','johnwick.jpg',1,NOW()),
-(2,'image','uploads/madmax.jpg','madmax.jpg',1,NOW()),
-(3,'image','uploads/gladiator.jpg','gladiator.jpg',1,NOW()),
-(4,'image','uploads/darkknight.jpg','darkknight.jpg',1,NOW()),
-(5,'image','uploads/endgame.jpg','endgame.jpg',1,NOW()),
-(6,'image','uploads/inception.jpg','inception.jpg',1,NOW()),
-(7,'image','uploads/interstellar.jpg','interstellar.jpg',1,NOW()),
-(8,'image','uploads/titanic.jpg','titanic.jpg',1,NOW());
- 
 -- MOVIE CATEGORIES
 INSERT INTO mm_movie_categories (movie_id, category_id) VALUES
 (1,1),(2,1),(3,1),(4,1),(5,1), -- Action (5 required)

@@ -94,29 +94,7 @@ BEGIN
     END IF;
 END$$
 
-
--- 5) Validate movie media before inserting media for a movie.
-DROP TRIGGER IF EXISTS trg_before_insert_movie_media_check_movie$$
-CREATE TRIGGER trg_before_insert_movie_media_check_movie
-BEFORE INSERT ON mm_movie_media
-FOR EACH ROW
-BEGIN
-    IF (SELECT COUNT(*)
-        FROM mm_movies
-        WHERE movie_id = NEW.movie_id
-          AND status <> 'deleted') = 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Invalid movie_id for media';
-    END IF;
-
-    IF CHAR_LENGTH(TRIM(NEW.file_path)) = 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'file_path cannot be empty';
-    END IF;
-END$$
-
-
--- 6) Prevent adding a rating for a deleted or unpublished movie.
+-- 5) Prevent adding a rating for a deleted or unpublished movie.
 DROP TRIGGER IF EXISTS trg_before_insert_rating_check_movie$$
 CREATE TRIGGER trg_before_insert_rating_check_movie
 BEFORE INSERT ON mm_ratings
@@ -134,6 +112,16 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Rating must be between 1 and 5';
     END IF;
+END$$
+
+
+-- 6) Set updated_at automatically when movie data changes.
+DROP TRIGGER IF EXISTS trg_before_update_movie_set_updated_at$$
+CREATE TRIGGER trg_before_update_movie_set_updated_at
+BEFORE UPDATE ON mm_movies
+FOR EACH ROW
+BEGIN
+    SET NEW.updated_at = NOW();
 END$$
 
 
@@ -279,18 +267,7 @@ BEGIN
     END IF;
 END$$
 
-
--- 15) Set updated_at automatically when movie data changes.
-DROP TRIGGER IF EXISTS trg_before_update_movie_set_updated_at$$
-CREATE TRIGGER trg_before_update_movie_set_updated_at
-BEFORE UPDATE ON mm_movies
-FOR EACH ROW
-BEGIN
-    SET NEW.updated_at = NOW();
-END$$
-
-
--- 16) Log admin deletions of comments for moderation tracking.
+-- 15) Log admin deletions of comments for moderation tracking.
 DROP TRIGGER IF EXISTS trg_after_delete_comment_log_admin$$
 CREATE TRIGGER trg_after_delete_comment_log_admin
 AFTER DELETE ON mm_comments
