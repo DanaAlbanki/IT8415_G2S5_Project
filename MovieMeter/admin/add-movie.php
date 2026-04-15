@@ -8,30 +8,51 @@ $conn = getConnection();
 
 if($_SERVER["REQUEST_METHOD"]=="POST"){
 
-$title = mysqli_real_escape_string($conn, $_POST["title"]);
-$desc = mysqli_real_escape_string($conn, $_POST["desc"]);
-$date = $_POST["date"];
+    $title = mysqli_real_escape_string($conn, $_POST["title"]);
+    $desc = mysqli_real_escape_string($conn, $_POST["desc"]);
+    $fullDesc = mysqli_real_escape_string($conn, $_POST["desc"]); // نفس الوصف مؤقت
+    $date = $_POST["date"];
+    $creator_id = $_SESSION["user_id"]; 
 
-$imageName = "";
+    $imageName = "default.png"; 
 
-if(isset($_FILES["image"]) && $_FILES["image"]["error"] == 0){
-    $imageName = time() . "_" . basename($_FILES["image"]["name"]);
-    $target = "../assets/images/" . $imageName;
+    if(isset($_FILES["image"]) && $_FILES["image"]["error"] == 0){
 
-    move_uploaded_file($_FILES["image"]["tmp_name"], $target);
-}
+        $imageName = time() . "_" . basename($_FILES["image"]["name"]);
+        $target = "../assets/images/" . $imageName;
 
-$sql = "
-INSERT INTO mm_movies(title, short_description, release_date, poster_image, status)
-VALUES('$title','$desc','$date','$imageName','published')
-";
+        if(!move_uploaded_file($_FILES["image"]["tmp_name"], $target)){
+            $imageName = "default.png";
+        }
+    }
 
-if(mysqli_query($conn,$sql)){
-    header("Location: manage-movies.php");
-    exit;
-}else{
-    echo "Error: " . mysqli_error($conn);
-}
+    $sql = "
+    INSERT INTO mm_movies(
+        creator_id,
+        title,
+        short_description,
+        full_description,
+        release_date,
+        poster_image,
+        status
+    )
+    VALUES(
+        '$creator_id',
+        '$title',
+        '$desc',
+        '$fullDesc',
+        '$date',
+        '$imageName',
+        'published'
+    )
+    ";
+
+    if(mysqli_query($conn,$sql)){
+        header("Location: manage-movies.php");
+        exit;
+    }else{
+        echo "Error: " . mysqli_error($conn);
+    }
 }
 ?>
 
@@ -59,7 +80,7 @@ if(mysqli_query($conn,$sql)){
 
 <div class="form-group">
     <label>Description</label>
-    <textarea name="desc"></textarea>
+    <textarea name="desc" required></textarea>
 </div>
 
 <div class="form-group">
@@ -79,6 +100,8 @@ if(mysqli_query($conn,$sql)){
 </form>
 
 </div>
+
 <?php include("../includes/admin_footer.php"); ?>
+
 </body>
 </html>
