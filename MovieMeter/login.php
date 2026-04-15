@@ -56,10 +56,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // Redirect by role
                 if ($user["role_name"] == "admin") {
-                    header("Location: admin_dashboard.php");
+                    header("Location: admin/dashboard.php");
                     exit();
                 } elseif ($user["role_name"] == "creator") {
-                    header("Location: creator_dashboard.php");
+                    header("Location: creator/dashboard.php");
                     exit();
                 } else {
                     header("Location: index.php");
