@@ -38,7 +38,7 @@ function getMovieIdFromTmdb($conn, $tmdbId)
 
     mysqli_stmt_close($stmt);
 
-    return $row ? (int) $row["movie_id"] : 0;
+    return $row ? (int)$row["movie_id"] : 0;
 }
 
 $conn = getConnection();
@@ -48,8 +48,12 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     respondJson(false, "Invalid request method.", [], 405);
 }
 
-$userId = (int) $_SESSION["user_id"];
+$userId = (int)($_SESSION["user_id"] ?? 0);
 $tmdbId = trim($_POST["tmdb_id"] ?? "");
+
+if ($userId <= 0) {
+    respondJson(false, "You must be logged in.", [], 401);
+}
 
 if ($tmdbId === "") {
     respondJson(false, "Invalid movie.", [], 422);
@@ -83,32 +87,26 @@ $watchlistRow = mysqli_fetch_assoc($watchlistResult);
 mysqli_stmt_close($watchlistStmt);
 
 if ($watchlistRow) {
-    $watchlistId = (int) $watchlistRow["watchlist_id"];
+    $watchlistId = (int)$watchlistRow["watchlist_id"];
 }
 
 if ($watchlistId <= 0) {
-    $watchlistName = "My Watchlist";
-    $now = date("Y-m-d H:i:s");
-
-    $createSql = "
-        INSERT INTO mm_watchlists (user_id, watchlist_name, created_at)
-        VALUES (?, ?, ?)
-    ";
-
+    $createSql = "INSERT INTO mm_watchlists (user_id) VALUES (?)";
     $createStmt = mysqli_prepare($conn, $createSql);
 
     if (!$createStmt) {
         respondJson(false, "Failed to create watchlist.", [], 500);
     }
 
-    mysqli_stmt_bind_param($createStmt, "iss", $userId, $watchlistName, $now);
+    mysqli_stmt_bind_param($createStmt, "i", $userId);
 
     if (!mysqli_stmt_execute($createStmt)) {
         mysqli_stmt_close($createStmt);
+        mysqli_close($conn);
         respondJson(false, "Failed to create watchlist.", [], 500);
     }
 
-    $watchlistId = (int) mysqli_insert_id($conn);
+    $watchlistId = (int)mysqli_insert_id($conn);
     mysqli_stmt_close($createStmt);
 }
 
@@ -122,6 +120,7 @@ $checkSql = "
 $checkStmt = mysqli_prepare($conn, $checkSql);
 
 if (!$checkStmt) {
+    mysqli_close($conn);
     respondJson(false, "Database error.", [], 500);
 }
 
@@ -140,25 +139,23 @@ if ($checkResult && mysqli_num_rows($checkResult) > 0) {
 
 mysqli_stmt_close($checkStmt);
 
-$now = date("Y-m-d H:i:s");
-
 $insertSql = "
-    INSERT INTO mm_watchlist_items (watchlist_id, movie_id, added_at)
-    VALUES (?, ?, ?)
+    INSERT INTO mm_watchlist_items (watchlist_id, movie_id)
+    VALUES (?, ?)
 ";
 
 $insertStmt = mysqli_prepare($conn, $insertSql);
 
 if (!$insertStmt) {
+    mysqli_close($conn);
     respondJson(false, "Failed to add movie to watchlist.", [], 500);
 }
 
-mysqli_stmt_bind_param($insertStmt, "iis", $watchlistId, $movieId, $now);
+mysqli_stmt_bind_param($insertStmt, "ii", $watchlistId, $movieId);
 
 if (!mysqli_stmt_execute($insertStmt)) {
     mysqli_stmt_close($insertStmt);
     mysqli_close($conn);
-
     respondJson(false, "Failed to add movie to watchlist.", [], 500);
 }
 
