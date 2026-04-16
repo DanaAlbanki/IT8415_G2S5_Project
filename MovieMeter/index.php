@@ -269,6 +269,8 @@ function e($value)
         </div>
     </footer>
 
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/home.js"></script>
 
