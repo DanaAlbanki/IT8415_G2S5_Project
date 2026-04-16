@@ -236,6 +236,9 @@ body {
     transform: translateY(-2px);
 }
 
+div#avatarFallback {
+    background: #facc15;
+}
 @media (max-width: 768px) {
     .edit-profile-page {
         padding: 110px 16px 75px;
