@@ -553,7 +553,11 @@ $pageData = [
 <body class="movie-page">
 
     <header class="movie-topbar">
-        <a href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>" class="back-link">← Back</a>
+        <a
+            href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>"
+            class="back-link"
+            onclick="event.preventDefault(); goBackSmart(this.href);"
+        >← Back</a>
     </header>
 
     <main id="movie-detail">
@@ -561,13 +565,21 @@ $pageData = [
             <section class="message-block">
                 <h1>Movie not found</h1>
                 <p>No movie ID was provided.</p>
-                <a href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>" class="action-btn secondary-btn">Go Back</a>
+                <a
+                    href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>"
+                    class="action-btn secondary-btn"
+                    onclick="event.preventDefault(); goBackSmart(this.href);"
+                >Go Back</a>
             </section>
         <?php } elseif ($movieId <= 0) { ?>
             <section class="message-block">
                 <h1>Movie not found</h1>
                 <p>We could not load this movie.</p>
-                <a href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>" class="action-btn secondary-btn">Go Back</a>
+                    <a
+                        href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>"
+                        class="action-btn secondary-btn"
+                        onclick="event.preventDefault(); goBackSmart(this.href);"
+                    >Go Back</a>
             </section>
         <?php } ?>
     </main>
@@ -579,5 +591,22 @@ $pageData = [
         <script type="module" src="assets/js/movie.js"></script>
     <?php } ?>
 
+    <script>
+        function goBackSmart(fallbackUrl) {
+            try {
+                if (window.history.length > 1 && document.referrer) {
+                    const referrerUrl = new URL(document.referrer, window.location.origin);
+
+                    if (referrerUrl.origin === window.location.origin) {
+                        window.history.back();
+                        return;
+                    }
+                }
+            } catch (e) {
+            }
+
+            window.location.href = fallbackUrl;
+        }
+    </script>
 </body>
 </html>
