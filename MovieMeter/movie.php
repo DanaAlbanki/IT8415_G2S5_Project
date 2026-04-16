@@ -588,6 +588,7 @@ $pageData = [
         <script>
             window.moviePageData = <?php echo json_encode($pageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
         </script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script type="module" src="assets/js/movie.js"></script>
     <?php } ?>
 

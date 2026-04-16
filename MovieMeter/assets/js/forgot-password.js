@@ -1,12 +1,12 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("forgotForm");
-    const emailInput = document.getElementById("email");
+$(document).ready(function () {
+    const $form = $("#forgotForm");
+    const $emailInput = $("#email");
 
-    if (!form || !emailInput) return;
+    if (!$form.length || !$emailInput.length) return;
 
-    form.addEventListener("submit", function (e) {
-        const email = emailInput.value.trim();
-        emailInput.value = email;
+    $form.on("submit", function (e) {
+        const email = $emailInput.val().trim();
+        $emailInput.val(email);
 
         if (email === "") {
             e.preventDefault();

@@ -2,15 +2,15 @@ import { API_KEY, BASE_URL, IMG_PATH } from "./api.js";
 
 const FALLBACK_IMAGE = "images/no-image.png";
 
-const genresList = document.getElementById("genresList");
-const categoryMovies = document.getElementById("categoryMovies");
-const selectedCategoryTitle = document.getElementById("selectedCategoryTitle");
-const selectedCategorySubtitle = document.getElementById("selectedCategorySubtitle");
-const pagination = document.getElementById("pagination");
+const $genresList = $("#genresList");
+const $categoryMovies = $("#categoryMovies");
+const $selectedCategoryTitle = $("#selectedCategoryTitle");
+const $selectedCategorySubtitle = $("#selectedCategorySubtitle");
+const $pagination = $("#pagination");
 
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
-const navbar = document.querySelector(".navbar");
+const $menuToggle = $("#menuToggle");
+const $navLinks = $("#navLinks");
+const $navbar = $(".navbar");
 
 let genres = [];
 let selectedGenreId = null;
@@ -60,58 +60,53 @@ async function init() {
 }
 
 function attachEvents() {
-    if (menuToggle) {
-        menuToggle.addEventListener("click", () => {
-            navLinks.classList.toggle("open");
+    if ($menuToggle.length) {
+        $menuToggle.on("click", function () {
+            $navLinks.toggleClass("open");
         });
     }
 
-    document.querySelectorAll(".nav-links a").forEach(link => {
-        link.addEventListener("click", () => {
-            navLinks.classList.remove("open");
-        });
+    $(".nav-links a").on("click", function () {
+        $navLinks.removeClass("open");
     });
 
-    window.addEventListener("scroll", () => {
-        if (window.scrollY > 60) {
-            navbar.classList.add("scrolled");
+    $(window).on("scroll", function () {
+        if ($(window).scrollTop() > 60) {
+            $navbar.addClass("scrolled");
         } else {
-            navbar.classList.remove("scrolled");
+            $navbar.removeClass("scrolled");
         }
     });
 
-    document.querySelectorAll("[data-genre-link]").forEach(link => {
-        link.addEventListener("click", async (e) => {
-            e.preventDefault();
+    $("[data-genre-link]").on("click", async function (e) {
+        e.preventDefault();
 
-            const genreId = Number(link.getAttribute("data-genre-link"));
-            const genre = genres.find(item => item.id === genreId);
+        const genreId = Number($(this).attr("data-genre-link"));
+        const genre = genres.find(item => item.id === genreId);
 
-            if (!genre) return;
+        if (!genre) return;
 
-            selectedGenreId = genre.id;
-            selectedGenreName = genre.name;
+        selectedGenreId = genre.id;
+        selectedGenreName = genre.name;
 
-            updateActiveGenreButton();
-            await loadMoviesByGenre(1);
-            scrollToMoviesSection();
-        });
+        updateActiveGenreButton();
+        await loadMoviesByGenre(1);
+        scrollToMoviesSection();
     });
 }
 
 async function loadGenres() {
     try {
-        const response = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`);
+        const data = await $.ajax({
+            url: `${BASE_URL}/genre/movie/list?api_key=${API_KEY}`,
+            method: "GET",
+            dataType: "json"
+        });
 
-        if (!response.ok) {
-            throw new Error("Failed to load genres");
-        }
-
-        const data = await response.json();
         genres = data.genres || [];
 
         if (!genres.length) {
-            genresList.innerHTML = `<div class="empty-state">No categories found.</div>`;
+            $genresList.html(`<div class="empty-state">No categories found.</div>`);
             return;
         }
 
@@ -132,21 +127,21 @@ async function loadGenres() {
         await loadMoviesByGenre(state.page || 1);
     } catch (error) {
         console.error(error);
-        genresList.innerHTML = `<div class="empty-state">Failed to load categories.</div>`;
-        categoryMovies.innerHTML = `<div class="empty-state">Failed to load category movies.</div>`;
+        $genresList.html(`<div class="empty-state">Failed to load categories.</div>`);
+        $categoryMovies.html(`<div class="empty-state">Failed to load category movies.</div>`);
     }
 }
 
 function renderGenres() {
-    genresList.innerHTML = "";
+    $genresList.html("");
 
     genres.forEach(genre => {
-        const button = document.createElement("button");
-        button.className = "genre-chip";
-        button.textContent = genre.name;
-        button.dataset.genreId = genre.id;
+        const $button = $("<button></button>");
+        $button.addClass("genre-chip");
+        $button.text(genre.name);
+        $button.attr("data-genre-id", genre.id);
 
-        button.addEventListener("click", async () => {
+        $button.on("click", async function () {
             selectedGenreId = genre.id;
             selectedGenreName = genre.name;
 
@@ -155,14 +150,14 @@ function renderGenres() {
             scrollToMoviesSection();
         });
 
-        genresList.appendChild(button);
+        $genresList.append($button);
     });
 }
 
 function updateActiveGenreButton() {
-    document.querySelectorAll(".genre-chip").forEach(button => {
-        const genreId = Number(button.dataset.genreId);
-        button.classList.toggle("active", genreId === selectedGenreId);
+    $(".genre-chip").each(function () {
+        const genreId = Number($(this).attr("data-genre-id"));
+        $(this).toggleClass("active", genreId === selectedGenreId);
     });
 }
 
@@ -172,81 +167,78 @@ async function loadMoviesByGenre(page = 1) {
     try {
         currentPage = page;
 
-        selectedCategoryTitle.textContent = `${selectedGenreName} Movies`;
-        selectedCategorySubtitle.textContent = "Loading movies...";
-        categoryMovies.innerHTML = "";
-        pagination.innerHTML = "";
+        $selectedCategoryTitle.text(`${selectedGenreName} Movies`);
+        $selectedCategorySubtitle.text("Loading movies...");
+        $categoryMovies.html("");
+        $pagination.html("");
 
         const url = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${selectedGenreId}&sort_by=popularity.desc&page=${page}&include_adult=false`;
-        const response = await fetch(url);
 
-        if (!response.ok) {
-            throw new Error("Failed to load movies");
-        }
-
-        const data = await response.json();
+        const data = await $.ajax({
+            url: url,
+            method: "GET",
+            dataType: "json"
+        });
 
         totalPages = Math.min(Math.max(1, data.total_pages || 1), 500);
 
-        selectedCategoryTitle.textContent = `${selectedGenreName} Movies`;
-        selectedCategorySubtitle.textContent = `Showing popular ${selectedGenreName.toLowerCase()} movies`;
+        $selectedCategoryTitle.text(`${selectedGenreName} Movies`);
+        $selectedCategorySubtitle.text(`Showing popular ${selectedGenreName.toLowerCase()} movies`);
 
         updateUrlState();
         renderMovies(data.results || []);
         renderPagination();
     } catch (error) {
         console.error(error);
-        selectedCategorySubtitle.textContent = "Could not load movies.";
-        categoryMovies.innerHTML = "";
-        pagination.innerHTML = "";
+        $selectedCategorySubtitle.text("Could not load movies.");
+        $categoryMovies.html("");
+        $pagination.html("");
     }
 }
 
 function renderMovies(movies) {
-    categoryMovies.innerHTML = "";
+    $categoryMovies.html("");
 
     if (!movies.length) {
-        categoryMovies.innerHTML = `
+        $categoryMovies.html(`
             <div class="empty-state">
                 No movies found in this category right now.
             </div>
-        `;
+        `);
         return;
     }
 
     movies.forEach(movie => {
-        categoryMovies.appendChild(createMovieCard(movie));
+        $categoryMovies.append(createMovieCard(movie));
     });
 }
 
 function createMovieCard(movie) {
-    const movieEl = document.createElement("div");
-    movieEl.classList.add("movie-card");
+    const $movieEl = $("<div></div>").addClass("movie-card");
 
-    const image = document.createElement("img");
-    image.src = movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE;
-    image.alt = movie.title || "Movie Poster";
-    image.onerror = () => {
-        image.src = FALLBACK_IMAGE;
-    };
+    const $image = $("<img>");
+    $image.attr("src", movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE);
+    $image.attr("alt", movie.title || "Movie Poster");
+    $image.on("error", function () {
+        $(this).attr("src", FALLBACK_IMAGE);
+    });
 
-    const title = document.createElement("h3");
-    title.textContent = movie.title || "Untitled Movie";
+    const $title = $("<h3></h3>").text(movie.title || "Untitled Movie");
 
-    movieEl.appendChild(image);
-    movieEl.appendChild(title);
+    $movieEl.append($image);
+    $movieEl.append($title);
 
-    movieEl.addEventListener("click", () => {
+    $movieEl.on("click", function () {
         window.location.href = getMovieDetailsUrl(movie.id);
     });
 
-    return movieEl;
+    return $movieEl;
 }
 
 function renderPagination() {
-    pagination.innerHTML = "";
+    $pagination.html("");
 
-    pagination.appendChild(createArrowButton("←", currentPage > 1, () => {
+    $pagination.append(createArrowButton("←", currentPage > 1, function () {
         changePage(currentPage - 1);
     }));
 
@@ -254,34 +246,33 @@ function renderPagination() {
 
     pages.forEach(item => {
         if (item === "...") {
-            const dots = document.createElement("span");
-            dots.className = "dots";
-            dots.textContent = "...";
-            pagination.appendChild(dots);
+            const $dots = $("<span></span>").addClass("dots").text("...");
+            $pagination.append($dots);
         } else {
-            const pageBtn = document.createElement("button");
-            pageBtn.textContent = item;
+            const $pageBtn = $("<button></button>").text(item);
 
             if (item === currentPage) {
-                pageBtn.classList.add("active");
+                $pageBtn.addClass("active");
             }
 
-            pageBtn.addEventListener("click", () => changePage(item));
-            pagination.appendChild(pageBtn);
+            $pageBtn.on("click", function () {
+                changePage(item);
+            });
+
+            $pagination.append($pageBtn);
         }
     });
 
-    pagination.appendChild(createArrowButton("→", currentPage < totalPages, () => {
+    $pagination.append(createArrowButton("→", currentPage < totalPages, function () {
         changePage(currentPage + 1);
     }));
 }
 
 function createArrowButton(label, enabled, onClick) {
-    const button = document.createElement("button");
-    button.textContent = label;
-    button.disabled = !enabled;
-    button.addEventListener("click", onClick);
-    return button;
+    const $button = $("<button></button>").text(label);
+    $button.prop("disabled", !enabled);
+    $button.on("click", onClick);
+    return $button;
 }
 
 function changePage(page) {
@@ -307,7 +298,7 @@ function getPaginationPages(current, total) {
 }
 
 function scrollToMoviesSection() {
-    const section = document.getElementById("category-section");
+    const section = $("#category-section")[0];
 
     if (section) {
         section.scrollIntoView({ behavior: "smooth", block: "start" });

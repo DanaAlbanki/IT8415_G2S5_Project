@@ -4,7 +4,7 @@ const BACKDROP_PATH = "https://image.tmdb.org/t/p/original";
 const PROFILE_PATH = "https://image.tmdb.org/t/p/w300";
 const FALLBACK_IMAGE = "assets/images/notfound.png";
 
-const container = document.getElementById("movie-detail");
+const $container = $("#movie-detail");
 const params = new URLSearchParams(window.location.search);
 const tmdbId = (params.get("id") || "").trim();
 
@@ -52,15 +52,12 @@ function requireLogin() {
 
 async function loadMovie() {
     try {
-        const response = await fetch(
-            `${BASE_URL}/movie/${encodeURIComponent(tmdbId)}?api_key=${API_KEY}&append_to_response=credits,videos,recommendations`
-        );
+        const movie = await $.ajax({
+            url: `${BASE_URL}/movie/${encodeURIComponent(tmdbId)}?api_key=${API_KEY}&append_to_response=credits,videos,recommendations`,
+            method: "GET",
+            dataType: "json"
+        });
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch movie details");
-        }
-
-        const movie = await response.json();
         renderMovie(movie);
     } catch (error) {
         console.error(error);
@@ -69,15 +66,15 @@ async function loadMovie() {
 }
 
 function showMessage(title, text) {
-    if (!container) return;
+    if (!$container.length) return;
 
-    container.innerHTML = `
+    $container.html(`
         <section class="message-block">
             <h1>${escapeHTML(title)}</h1>
             <p>${escapeHTML(text)}</p>
             <a href="index.php" class="action-btn secondary-btn">Back Home</a>
         </section>
-    `;
+    `);
 }
 
 function resolvePoster(movie) {
@@ -147,39 +144,50 @@ function renderInfoRow(label, value, id = "") {
 }
 
 function updateWatchlistButton() {
-    const watchlistBtn = document.getElementById("watchlistBtn");
-    if (!watchlistBtn) return;
+    const $watchlistBtn = $("#watchlistBtn");
+    if (!$watchlistBtn.length) return;
 
     if (!isLoggedIn) {
-        watchlistBtn.textContent = "Login to Add to Watchlist";
-        watchlistBtn.classList.remove("in-watchlist");
+        $watchlistBtn.text("Login to Add to Watchlist");
+        $watchlistBtn.removeClass("in-watchlist");
         return;
     }
 
-    watchlistBtn.textContent = isInUserWatchlist ? "Remove from Watchlist" : "Add to Watchlist";
-    watchlistBtn.classList.toggle("in-watchlist", isInUserWatchlist);
+    $watchlistBtn.text(isInUserWatchlist ? "Remove from Watchlist" : "Add to Watchlist");
+    $watchlistBtn.toggleClass("in-watchlist", isInUserWatchlist);
 }
 
 async function postForm(url, formData, fallbackMessage) {
-    const response = await fetch(url, {
-        method: "POST",
-        body: formData
-    });
-
-    const text = await response.text();
-
-    let data;
     try {
-        data = JSON.parse(text);
-    } catch (e) {
-        throw new Error(text || fallbackMessage);
-    }
+        const data = await $.ajax({
+            url: url,
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "json"
+        });
 
-    if (!response.ok || !data.success) {
-        throw new Error(data.message || fallbackMessage);
-    }
+        if (!data.success) {
+            throw new Error(data.message || fallbackMessage);
+        }
 
-    return data;
+        return data;
+    } catch (xhr) {
+        let data = null;
+
+        if (xhr && xhr.responseJSON) {
+            data = xhr.responseJSON;
+        } else if (xhr && xhr.responseText) {
+            try {
+                data = JSON.parse(xhr.responseText);
+            } catch (e) {
+                throw new Error(xhr.responseText || fallbackMessage);
+            }
+        }
+
+        throw new Error((data && data.message) || fallbackMessage);
+    }
 }
 
 async function addToWatchlist() {
@@ -229,25 +237,23 @@ function formatCommentDate(dateString) {
 }
 
 function escapeHTML(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+    return $("<div>").text(text).html();
 }
 
 function renderCommentsList(comments) {
-    const commentsList = document.getElementById("commentsList");
-    if (!commentsList) return;
+    const $commentsList = $("#commentsList");
+    if (!$commentsList.length) return;
 
     if (!comments.length) {
-        commentsList.innerHTML = `
+        $commentsList.html(`
             <div class="comment-line">
                 <p class="comment-line-text">No comments yet.</p>
             </div>
-        `;
+        `);
         return;
     }
 
-    commentsList.innerHTML = comments.map((comment) => `
+    $commentsList.html(comments.map((comment) => `
         <div class="comment-line">
             <div class="comment-line-head">
                 <strong class="comment-line-user">${escapeHTML(comment.display_name || "User")}</strong>
@@ -255,38 +261,38 @@ function renderCommentsList(comments) {
             </div>
             <p class="comment-line-text">${escapeHTML(comment.comment_text || "")}</p>
         </div>
-    `).join("");
+    `).join(""));
 }
 
 function updateStarSelection(stars, selectedRating) {
-    stars.forEach((star) => {
-        const value = Number(star.dataset.value);
-        star.classList.toggle("active", value <= selectedRating);
+    stars.each(function () {
+        const value = Number($(this).data("value"));
+        $(this).toggleClass("active", value <= selectedRating);
     });
 }
 
 function updateSummaryUI(summary) {
     dbSummary = { ...dbSummary, ...(summary || {}) };
 
-    const averageEl = document.getElementById("detailAverageRating");
-    const ratingCountEl = document.getElementById("detailRatingCount");
-    const commentCountEl = document.getElementById("detailCommentCount");
-    const viewCountEl = document.getElementById("detailViewCount");
+    const $averageEl = $("#detailAverageRating");
+    const $ratingCountEl = $("#detailRatingCount");
+    const $commentCountEl = $("#detailCommentCount");
+    const $viewCountEl = $("#detailViewCount");
 
-    if (averageEl) {
-        averageEl.textContent = Number(dbSummary.average_rating || 0).toFixed(1);
+    if ($averageEl.length) {
+        $averageEl.text(Number(dbSummary.average_rating || 0).toFixed(1));
     }
 
-    if (ratingCountEl) {
-        ratingCountEl.textContent = String(Number(dbSummary.rating_count || 0));
+    if ($ratingCountEl.length) {
+        $ratingCountEl.text(String(Number(dbSummary.rating_count || 0)));
     }
 
-    if (commentCountEl) {
-        commentCountEl.textContent = String(Number(dbSummary.comment_count || 0));
+    if ($commentCountEl.length) {
+        $commentCountEl.text(String(Number(dbSummary.comment_count || 0)));
     }
 
-    if (viewCountEl) {
-        viewCountEl.textContent = String(Number(dbSummary.view_count || 0));
+    if ($viewCountEl.length) {
+        $viewCountEl.text(String(Number(dbSummary.view_count || 0)));
     }
 }
 
@@ -446,22 +452,22 @@ function getGenreNamesFromIds(ids) {
 }
 
 function setupActorsToggle() {
-    const toggle = document.getElementById("actorsToggle");
-    const hiddenItems = document.querySelectorAll("[data-hidden-actor='true']");
+    const $toggle = $("#actorsToggle");
+    const $hiddenItems = $("[data-hidden-actor='true']");
 
-    if (!toggle || !hiddenItems.length) return;
+    if (!$toggle.length || !$hiddenItems.length) return;
 
-    toggle.addEventListener("change", () => {
-        hiddenItems.forEach(item => {
-            item.classList.toggle("show", toggle.checked);
+    $toggle.on("change", function () {
+        $hiddenItems.each(function () {
+            $(this).toggleClass("show", $toggle.prop("checked"));
         });
     });
 }
 
 function setupRecommendationClicks() {
-    document.querySelectorAll("[data-recommendation-id]").forEach(card => {
-        card.addEventListener("click", () => {
-            const movieId = card.getAttribute("data-recommendation-id");
+    $("[data-recommendation-id]").each(function () {
+        $(this).on("click", function () {
+            const movieId = $(this).attr("data-recommendation-id");
             if (!movieId) return;
             window.location.href = getMovieDetailsUrl(movieId);
         });
@@ -469,7 +475,7 @@ function setupRecommendationClicks() {
 }
 
 function renderMovie(movie) {
-    if (!container) return;
+    if (!$container.length) return;
 
     const title = movie.title || "Untitled Movie";
     const year = getYear(movie.release_date);
@@ -500,7 +506,7 @@ function renderMovie(movie) {
         ? ""
         : "Login to post a comment.";
 
-    container.innerHTML = `
+    $container.html(`
         <section class="hero" style="background-image: url('${escapeHTML(backdrop)}')">
             <div class="hero-overlay"></div>
 
@@ -622,135 +628,138 @@ function renderMovie(movie) {
         ${renderActorsSection(movie)}
 
         ${renderRecommendationsSection(movie)}
-    `;
+    `);
 
-    const posterImage = document.querySelector(".poster-image");
-    if (posterImage) {
-        posterImage.addEventListener("error", () => {
-            posterImage.src = FALLBACK_IMAGE;
+    const $posterImage = $(".poster-image");
+    if ($posterImage.length) {
+        $posterImage.on("error", function () {
+            $(this).attr("src", FALLBACK_IMAGE);
         });
     }
 
-    const heroSection = document.querySelector(".hero");
-    if (heroSection && backdrop.includes("image.tmdb.org")) {
+    const $heroSection = $(".hero");
+    if ($heroSection.length && backdrop.includes("image.tmdb.org")) {
         const testImage = new Image();
-        testImage.onerror = () => {
-            heroSection.style.backgroundImage = `url('${FALLBACK_IMAGE}')`;
+        testImage.onerror = function () {
+            $heroSection.css("background-image", `url('${FALLBACK_IMAGE}')`);
         };
         testImage.src = backdrop;
     }
 
-    const watchlistBtn = document.getElementById("watchlistBtn");
-    if (watchlistBtn) {
+    const $watchlistBtn = $("#watchlistBtn");
+    if ($watchlistBtn.length) {
         updateWatchlistButton();
-        watchlistBtn.addEventListener("click", () => {
-            toggleWatchlistOnServer(watchlistBtn);
+        $watchlistBtn.on("click", function () {
+            toggleWatchlistOnServer(this);
         });
     }
 
-    const stars = [...document.querySelectorAll(".star-btn")];
-    const saveRatingBtn = document.getElementById("saveRatingBtn");
-    const ratingMessage = document.getElementById("ratingMessage");
+    const $stars = $(".star-btn");
+    const $saveRatingBtn = $("#saveRatingBtn");
+    const $ratingMessage = $("#ratingMessage");
 
     let selectedRating = dbUserRating;
 
-    updateStarSelection(stars, selectedRating);
+    updateStarSelection($stars, selectedRating);
     renderCommentsList(dbComments);
     setupActorsToggle();
     setupRecommendationClicks();
 
-    stars.forEach((star) => {
-        star.addEventListener("click", () => {
+    $stars.each(function () {
+        $(this).on("click", function () {
             if (!requireLogin()) return;
 
-            selectedRating = Number(star.dataset.value);
-            updateStarSelection(stars, selectedRating);
-            if (ratingMessage) {
-                ratingMessage.textContent = `Selected: ${selectedRating}/5`;
+            selectedRating = Number($(this).data("value"));
+            updateStarSelection($stars, selectedRating);
+
+            if ($ratingMessage.length) {
+                $ratingMessage.text(`Selected: ${selectedRating}/5`);
             }
         });
     });
 
-    if (saveRatingBtn) {
-        saveRatingBtn.addEventListener("click", async () => {
+    if ($saveRatingBtn.length) {
+        $saveRatingBtn.on("click", async function () {
             if (!requireLogin()) return;
 
             if (!selectedRating) {
-                if (ratingMessage) {
-                    ratingMessage.textContent = "Please choose a rating first.";
+                if ($ratingMessage.length) {
+                    $ratingMessage.text("Please choose a rating first.");
                 }
                 return;
             }
 
-            saveRatingBtn.disabled = true;
-            if (ratingMessage) {
-                ratingMessage.textContent = "Submitting rating...";
+            this.disabled = true;
+
+            if ($ratingMessage.length) {
+                $ratingMessage.text("Submitting rating...");
             }
 
             try {
                 const data = await submitRating(selectedRating);
                 dbUserRating = Number(data.user_rating || selectedRating);
 
-                if (ratingMessage) {
-                    ratingMessage.textContent = `Your rating: ${dbUserRating}/5`;
+                if ($ratingMessage.length) {
+                    $ratingMessage.text(`Your rating: ${dbUserRating}/5`);
                 }
 
                 updateSummaryUI(data.summary);
-                updateStarSelection(stars, dbUserRating);
+                updateStarSelection($stars, dbUserRating);
             } catch (error) {
                 console.error(error);
-                if (ratingMessage) {
-                    ratingMessage.textContent = error.message || "Error submitting rating.";
+                if ($ratingMessage.length) {
+                    $ratingMessage.text(error.message || "Error submitting rating.");
                 }
             } finally {
-                saveRatingBtn.disabled = false;
+                this.disabled = false;
             }
         });
     }
 
-    const commentForm = document.getElementById("commentForm");
-    const commentText = document.getElementById("commentText");
-    const commentMessage = document.getElementById("commentMessage");
-    const commentSubmitBtn = commentForm ? commentForm.querySelector("button[type='submit']") : null;
+    const $commentForm = $("#commentForm");
+    const $commentText = $("#commentText");
+    const $commentMessage = $("#commentMessage");
+    const $commentSubmitBtn = $commentForm.length ? $commentForm.find("button[type='submit']") : $();
 
-    if (commentForm && commentText && commentSubmitBtn) {
-        commentForm.addEventListener("submit", async (e) => {
+    if ($commentForm.length && $commentText.length && $commentSubmitBtn.length) {
+        $commentForm.on("submit", async function (e) {
             e.preventDefault();
 
             if (!requireLogin()) return;
 
-            const text = commentText.value.trim();
+            const text = $commentText.val().trim();
 
             if (!text) {
-                if (commentMessage) {
-                    commentMessage.textContent = "Please write a comment first.";
+                if ($commentMessage.length) {
+                    $commentMessage.text("Please write a comment first.");
                 }
                 return;
             }
 
-            commentSubmitBtn.disabled = true;
-            if (commentMessage) {
-                commentMessage.textContent = "Posting comment...";
+            $commentSubmitBtn.prop("disabled", true);
+
+            if ($commentMessage.length) {
+                $commentMessage.text("Posting comment...");
             }
 
             try {
                 const data = await submitComment(text);
                 dbComments = Array.isArray(data.comments) ? data.comments : dbComments;
 
-                if (commentMessage) {
-                    commentMessage.textContent = "Comment posted.";
+                if ($commentMessage.length) {
+                    $commentMessage.text("Comment posted.");
                 }
 
-                commentForm.reset();
+                this.reset();
                 renderCommentsList(dbComments);
                 updateSummaryUI(data.summary);
             } catch (error) {
                 console.error(error);
-                if (commentMessage) {
-                    commentMessage.textContent = error.message || "Error posting comment.";
+                if ($commentMessage.length) {
+                    $commentMessage.text(error.message || "Error posting comment.");
                 }
             } finally {
-                commentSubmitBtn.disabled = false;
+                $commentSubmitBtn.prop("disabled", false);
             }
         });
     }

@@ -5,35 +5,35 @@ const FALLBACK_IMAGE = 'assets/images/notfound.png';
 let currentPage = 1;
 let totalPages = 1;
 
-const container = document.getElementById("movies");
-const pagination = document.getElementById("pagination");
+const $container = $("#movies");
+const $pagination = $("#pagination");
 
-const searchForm = document.getElementById("searchForm");
-const searchTitle = document.getElementById("searchTitle");
-const searchCreator = document.getElementById("searchCreator");
-const fromDate = document.getElementById("fromDate");
-const toDate = document.getElementById("toDate");
-const sortBy = document.getElementById("sortBy");
-const resetFiltersBtn = document.getElementById("resetFilters");
+const $searchForm = $("#searchForm");
+const $searchTitle = $("#searchTitle");
+const $searchCreator = $("#searchCreator");
+const $fromDate = $("#fromDate");
+const $toDate = $("#toDate");
+const $sortBy = $("#sortBy");
+const $resetFiltersBtn = $("#resetFilters");
 
-const allMoviesSection = document.getElementById("all-movies-section");
+const $allMoviesSection = $("#all-movies-section");
 
-const latestTrack = document.getElementById("latestTrack");
-const latestPrev = document.getElementById("latestPrev");
-const latestNext = document.getElementById("latestNext");
+const $latestTrack = $("#latestTrack");
+const $latestPrev = $("#latestPrev");
+const $latestNext = $("#latestNext");
 
-const topRatedTrack = document.getElementById("topRatedTrack");
-const topRatedPrev = document.getElementById("topRatedPrev");
-const topRatedNext = document.getElementById("topRatedNext");
+const $topRatedTrack = $("#topRatedTrack");
+const $topRatedPrev = $("#topRatedPrev");
+const $topRatedNext = $("#topRatedNext");
 
-const resultsCount = document.getElementById("resultsCount");
-const slides = document.querySelectorAll(".slide");
-const dots = document.querySelectorAll(".dot");
-const nextSlideBtn = document.querySelector(".next-slide");
-const prevSlideBtn = document.querySelector(".prev-slide");
-const navbar = document.querySelector(".navbar");
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
+const $resultsCount = $("#resultsCount");
+const $slides = $(".slide");
+const $dots = $(".dot");
+const $nextSlideBtn = $(".next-slide");
+const $prevSlideBtn = $(".prev-slide");
+const $navbar = $(".navbar");
+const $menuToggle = $("#menuToggle");
+const $navLinks = $("#navLinks");
 
 let currentSlide = 0;
 let autoSlide = null;
@@ -48,29 +48,29 @@ function getMovieDetailsUrl(movieId) {
 }
 
 function showSlide(index) {
-    if (!slides.length || !dots.length) return;
+    if (!$slides.length || !$dots.length) return;
 
-    slides.forEach((slide) => slide.classList.remove("active"));
-    dots.forEach((dot) => dot.classList.remove("active"));
+    $slides.removeClass("active");
+    $dots.removeClass("active");
 
-    slides[index].classList.add("active");
-    dots[index].classList.add("active");
+    $slides.eq(index).addClass("active");
+    $dots.eq(index).addClass("active");
 }
 
 function nextSlide() {
-    if (!slides.length) return;
-    currentSlide = (currentSlide + 1) % slides.length;
+    if (!$slides.length) return;
+    currentSlide = (currentSlide + 1) % $slides.length;
     showSlide(currentSlide);
 }
 
 function prevSlide() {
-    if (!slides.length) return;
-    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    if (!$slides.length) return;
+    currentSlide = (currentSlide - 1 + $slides.length) % $slides.length;
     showSlide(currentSlide);
 }
 
 function startAutoSlide() {
-    if (!slides.length) return;
+    if (!$slides.length) return;
     stopAutoSlide();
     autoSlide = setInterval(nextSlide, 5000);
 }
@@ -81,47 +81,47 @@ function stopAutoSlide() {
     }
 }
 
-if (menuToggle && navLinks) {
-    menuToggle.addEventListener("click", () => {
-        navLinks.classList.toggle("open");
+if ($menuToggle.length && $navLinks.length) {
+    $menuToggle.on("click", function () {
+        $navLinks.toggleClass("open");
     });
 
-    document.querySelectorAll(".nav-links a").forEach((link) => {
-        link.addEventListener("click", () => {
-            navLinks.classList.remove("open");
+    $(".nav-links a").each(function () {
+        $(this).on("click", function () {
+            $navLinks.removeClass("open");
         });
     });
 }
 
-if (nextSlideBtn) {
-    nextSlideBtn.addEventListener("click", () => {
+if ($nextSlideBtn.length) {
+    $nextSlideBtn.on("click", function () {
         nextSlide();
         startAutoSlide();
     });
 }
 
-if (prevSlideBtn) {
-    prevSlideBtn.addEventListener("click", () => {
+if ($prevSlideBtn.length) {
+    $prevSlideBtn.on("click", function () {
         prevSlide();
         startAutoSlide();
     });
 }
 
-dots.forEach((dot, index) => {
-    dot.addEventListener("click", () => {
+$dots.each(function (index) {
+    $(this).on("click", function () {
         currentSlide = index;
         showSlide(currentSlide);
         startAutoSlide();
     });
 });
 
-window.addEventListener("scroll", () => {
-    if (!navbar) return;
+$(window).on("scroll", function () {
+    if (!$navbar.length) return;
 
-    if (window.scrollY > 60) {
-        navbar.classList.add("scrolled");
+    if ($(window).scrollTop() > 60) {
+        $navbar.addClass("scrolled");
     } else {
-        navbar.classList.remove("scrolled");
+        $navbar.removeClass("scrolled");
     }
 });
 
@@ -138,16 +138,16 @@ const filters = {
 
 const carousels = {
     latest: {
-        track: latestTrack,
-        prev: latestPrev,
-        next: latestNext,
+        track: $latestTrack,
+        prev: $latestPrev,
+        next: $latestNext,
         index: 0,
         total: 0
     },
     topRated: {
-        track: topRatedTrack,
-        prev: topRatedPrev,
-        next: topRatedNext,
+        track: $topRatedTrack,
+        prev: $topRatedPrev,
+        next: $topRatedNext,
         index: 0,
         total: 0
     }
@@ -162,25 +162,25 @@ async function init() {
 }
 
 function attachEvents() {
-    if (searchForm) {
-        searchForm.addEventListener("submit", async (e) => {
+    if ($searchForm.length) {
+        $searchForm.on("submit", async function (e) {
             e.preventDefault();
 
-            filters.title = searchTitle ? searchTitle.value.trim() : "";
-            filters.creator = searchCreator ? searchCreator.value.trim() : "";
-            filters.fromDate = fromDate ? fromDate.value : "";
-            filters.toDate = toDate ? toDate.value : "";
-            filters.sortBy = sortBy ? sortBy.value : "primary_release_date.desc";
+            filters.title = $searchTitle.length ? $searchTitle.val().trim() : "";
+            filters.creator = $searchCreator.length ? $searchCreator.val().trim() : "";
+            filters.fromDate = $fromDate.length ? $fromDate.val() : "";
+            filters.toDate = $toDate.length ? $toDate.val() : "";
+            filters.sortBy = $sortBy.length ? $sortBy.val() : "primary_release_date.desc";
 
             await getMovies(1);
             scrollToAllMovies();
         });
     }
 
-    if (resetFiltersBtn) {
-        resetFiltersBtn.addEventListener("click", async () => {
-            if (searchForm) {
-                searchForm.reset();
+    if ($resetFiltersBtn.length) {
+        $resetFiltersBtn.on("click", async function () {
+            if ($searchForm.length) {
+                $searchForm[0].reset();
             }
 
             filters.title = "";
@@ -189,8 +189,8 @@ function attachEvents() {
             filters.toDate = "";
             filters.sortBy = "primary_release_date.desc";
 
-            if (sortBy) {
-                sortBy.value = "primary_release_date.desc";
+            if ($sortBy.length) {
+                $sortBy.val("primary_release_date.desc");
             }
 
             await getMovies(1);
@@ -198,21 +198,31 @@ function attachEvents() {
         });
     }
 
-    if (latestPrev && latestNext) {
-        latestPrev.addEventListener("click", () => moveCarousel("latest", -1));
-        latestNext.addEventListener("click", () => moveCarousel("latest", 1));
+    if ($latestPrev.length && $latestNext.length) {
+        $latestPrev.on("click", function () {
+            moveCarousel("latest", -1);
+        });
+
+        $latestNext.on("click", function () {
+            moveCarousel("latest", 1);
+        });
     }
 
-    if (topRatedPrev && topRatedNext) {
-        topRatedPrev.addEventListener("click", () => moveCarousel("topRated", -1));
-        topRatedNext.addEventListener("click", () => moveCarousel("topRated", 1));
+    if ($topRatedPrev.length && $topRatedNext.length) {
+        $topRatedPrev.on("click", function () {
+            moveCarousel("topRated", -1);
+        });
+
+        $topRatedNext.on("click", function () {
+            moveCarousel("topRated", 1);
+        });
     }
 
-    document.querySelectorAll(".hero-detail-btn").forEach(button => {
-        button.addEventListener("click", async (e) => {
+    $(".hero-detail-btn").each(function () {
+        $(this).on("click", async function (e) {
             e.preventDefault();
 
-            const title = button.dataset.title;
+            const title = $(this).data("title");
 
             try {
                 const params = new URLSearchParams({
@@ -223,8 +233,7 @@ function attachEvents() {
                 });
 
                 const url = `${BASE_URL}/search/movie?${params.toString()}`;
-                const response = await fetch(url);
-                const data = await response.json();
+                const data = await fetchJSON(url);
 
                 if (data.results && data.results.length > 0) {
                     const movieId = data.results[0].id;
@@ -241,7 +250,7 @@ function attachEvents() {
 }
 
 async function loadLatestMovies() {
-    if (!latestTrack) return;
+    if (!$latestTrack.length) return;
 
     try {
         const today = new Date().toISOString().split("T")[0];
@@ -254,14 +263,14 @@ async function loadLatestMovies() {
 
         renderCarousel("latest", releasedOnly.slice(0, 10));
     } catch (error) {
-        if (latestTrack) {
-            latestTrack.innerHTML = `<div class="empty-state">Failed to load latest movies.</div>`;
+        if ($latestTrack.length) {
+            $latestTrack.html(`<div class="empty-state">Failed to load latest movies.</div>`);
         }
     }
 }
 
 async function loadTopRatedMovies() {
-    if (!topRatedTrack) return;
+    if (!$topRatedTrack.length) return;
 
     try {
         const today = new Date().toISOString().split("T")[0];
@@ -273,22 +282,22 @@ async function loadTopRatedMovies() {
 
         renderCarousel("topRated", releasedOnly.slice(0, 10));
     } catch (error) {
-        if (topRatedTrack) {
-            topRatedTrack.innerHTML = `<div class="empty-state">Failed to load top rated movies.</div>`;
+        if ($topRatedTrack.length) {
+            $topRatedTrack.html(`<div class="empty-state">Failed to load top rated movies.</div>`);
         }
     }
 }
 
 async function getMovies(page) {
-    if (!container) return;
+    if (!$container.length) return;
 
     try {
         currentPage = page;
 
         const data = await fetchMovies(page);
 
-        if (resultsCount) {
-            resultsCount.innerHTML = `Found <span class="count-number">${(data.total_results || 0).toLocaleString()}</span> results`;
+        if ($resultsCount.length) {
+            $resultsCount.html(`Found <span class="count-number">${(data.total_results || 0).toLocaleString()}</span> results`);
         }
 
         totalPages = Math.min(Math.max(1, data.total_pages || 1), 500);
@@ -298,10 +307,10 @@ async function getMovies(page) {
         renderPagination();
     } catch (error) {
         console.error("Error fetching movies:", error);
-        container.innerHTML = `<div class="empty-state">Failed to load movies.</div>`;
+        $container.html(`<div class="empty-state">Failed to load movies.</div>`);
 
-        if (pagination) {
-            pagination.innerHTML = "";
+        if ($pagination.length) {
+            $pagination.html("");
         }
     }
 }
@@ -429,74 +438,71 @@ function sortMovies(movies) {
 }
 
 function showMovies(movies) {
-    if (!container) return;
+    if (!$container.length) return;
 
-    container.innerHTML = "";
+    $container.html("");
 
     if (!movies.length) {
-        container.innerHTML = `
+        $container.html(`
             <div class="empty-state">
                 No released movies found. Try another title, creator, or date range.
             </div>
-        `;
+        `);
         return;
     }
 
     movies.forEach(movie => {
-        container.appendChild(createMovieCard(movie));
+        $container.append(createMovieCard(movie));
     });
 }
 
 function createMovieCard(movie) {
-    const movieEl = document.createElement("div");
-    movieEl.classList.add("movie-card");
+    const $movieEl = $("<div></div>").addClass("movie-card");
 
-    const image = document.createElement("img");
-    image.src = movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE;
-    image.alt = movie.title || "Movie Poster";
-    image.onerror = () => {
-        image.src = FALLBACK_IMAGE;
-    };
+    const $image = $("<img>");
+    $image.attr("src", movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE);
+    $image.attr("alt", movie.title || "Movie Poster");
+    $image.on("error", function () {
+        $(this).attr("src", FALLBACK_IMAGE);
+    });
 
-    const title = document.createElement("h3");
-    title.textContent = (movie.title || "").trim() ? movie.title : "Untitled Movie";
+    const $title = $("<h3></h3>").text((movie.title || "").trim() ? movie.title : "Untitled Movie");
 
-    movieEl.appendChild(image);
-    movieEl.appendChild(title);
+    $movieEl.append($image);
+    $movieEl.append($title);
 
-    movieEl.addEventListener("click", () => {
+    $movieEl.on("click", function () {
         window.location.href = getMovieDetailsUrl(movie.id);
     });
 
-    return movieEl;
+    return $movieEl;
 }
 
 function renderCarousel(type, movies) {
     const carousel = carousels[type];
 
-    if (!carousel || !carousel.track) return;
+    if (!carousel || !carousel.track.length) return;
 
-    carousel.track.innerHTML = "";
+    carousel.track.html("");
     carousel.index = 0;
 
     const groups = chunkArray(movies, 5);
     carousel.total = groups.length;
 
     if (!groups.length) {
-        carousel.track.innerHTML = `<div class="empty-state">No movies found.</div>`;
+        carousel.track.html(`<div class="empty-state">No movies found.</div>`);
         updateCarousel(type);
         return;
     }
 
     groups.forEach(group => {
-        const page = document.createElement("div");
-        page.classList.add("carousel-page");
+        const $page = $("<div></div>").addClass("carousel-page");
 
         group.forEach(movie => {
-            page.appendChild(createMovieCard(movie));
+            $page.append(createMovieCard(movie));
         });
 
-        carousel.track.appendChild(page);
+        carousel.track.append($page);
     });
 
     updateCarousel(type);
@@ -522,25 +528,25 @@ function moveCarousel(type, direction) {
 function updateCarousel(type) {
     const carousel = carousels[type];
 
-    if (!carousel || !carousel.track) return;
+    if (!carousel || !carousel.track.length) return;
 
-    carousel.track.style.transform = `translateX(-${carousel.index * 100}%)`;
+    carousel.track.css("transform", `translateX(-${carousel.index * 100}%)`);
 
-    if (carousel.prev) {
-        carousel.prev.disabled = carousel.index === 0;
+    if (carousel.prev.length) {
+        carousel.prev.prop("disabled", carousel.index === 0);
     }
 
-    if (carousel.next) {
-        carousel.next.disabled = carousel.index >= carousel.total - 1 || carousel.total <= 1;
+    if (carousel.next.length) {
+        carousel.next.prop("disabled", carousel.index >= carousel.total - 1 || carousel.total <= 1);
     }
 }
 
 function renderPagination() {
-    if (!pagination) return;
+    if (!$pagination.length) return;
 
-    pagination.innerHTML = "";
+    $pagination.html("");
 
-    pagination.appendChild(createArrowButton("←", currentPage > 1, () => {
+    $pagination.append(createArrowButton("←", currentPage > 1, function () {
         changePage(currentPage - 1);
     }));
 
@@ -548,39 +554,37 @@ function renderPagination() {
 
     pages.forEach(item => {
         if (item === "...") {
-            const dotsElement = document.createElement("span");
-            dotsElement.className = "dots";
-            dotsElement.textContent = "...";
-            pagination.appendChild(dotsElement);
+            const $dotsElement = $("<span></span>").addClass("dots").text("...");
+            $pagination.append($dotsElement);
         } else {
-            const pageBtn = document.createElement("button");
-            pageBtn.textContent = item;
+            const $pageBtn = $("<button></button>").text(item);
 
             if (item === currentPage) {
-                pageBtn.classList.add("active");
+                $pageBtn.addClass("active");
             }
 
-            pageBtn.addEventListener("click", () => changePage(item));
-            pagination.appendChild(pageBtn);
+            $pageBtn.on("click", function () {
+                changePage(item);
+            });
+
+            $pagination.append($pageBtn);
         }
     });
 
-    pagination.appendChild(createArrowButton("→", currentPage < totalPages, () => {
+    $pagination.append(createArrowButton("→", currentPage < totalPages, function () {
         changePage(currentPage + 1);
     }));
 }
 
 function createArrowButton(symbol, enabled, onClick) {
-    const btn = document.createElement("button");
-    btn.textContent = symbol;
-    btn.className = "arrow";
-    btn.disabled = !enabled;
+    const $btn = $("<button></button>").text(symbol).addClass("arrow");
+    $btn.prop("disabled", !enabled);
 
     if (enabled) {
-        btn.addEventListener("click", onClick);
+        $btn.on("click", onClick);
     }
 
-    return btn;
+    return $btn;
 }
 
 function getPaginationPages(current, total) {
@@ -621,10 +625,10 @@ function changePage(page) {
 }
 
 function scrollToAllMovies() {
-    if (!allMoviesSection) return;
+    if (!$allMoviesSection.length) return;
 
     window.scrollTo({
-        top: allMoviesSection.offsetTop - 80,
+        top: $allMoviesSection[0].offsetTop - 80,
         behavior: "smooth"
     });
 }
@@ -640,12 +644,16 @@ function chunkArray(array, size) {
 }
 
 async function fetchJSON(url) {
-    const response = await fetch(url);
-    const data = await response.json();
+    try {
+        const data = await $.ajax({
+            url: url,
+            method: "GET",
+            dataType: "json"
+        });
 
-    if (!response.ok) {
+        return data;
+    } catch (xhr) {
+        const data = xhr.responseJSON || {};
         throw new Error(data.status_message || data.message || "Failed to fetch data");
     }
-
-    return data;
 }

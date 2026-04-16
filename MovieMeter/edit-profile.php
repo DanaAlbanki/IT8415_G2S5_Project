@@ -482,7 +482,8 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
             <p>© 2026 MovieMeter. All rights reserved.</p>
         </div>
     </footer>
-
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="assets/js/edit-profile.js"></script>
 
 </body>

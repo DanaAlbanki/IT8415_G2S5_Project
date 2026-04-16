@@ -1,13 +1,13 @@
 function togglePassword(inputId, button) {
-    const input = document.getElementById(inputId);
+    const $input = $("#" + inputId);
 
-    if (!input) return;
+    if (!$input.length) return;
 
-    if (input.type === "password") {
-        input.type = "text";
-        button.textContent = "Hide";
+    if ($input.attr("type") === "password") {
+        $input.attr("type", "text");
+        $(button).text("Hide");
     } else {
-        input.type = "password";
-        button.textContent = "Show";
+        $input.attr("type", "password");
+        $(button).text("Show");
     }
 }

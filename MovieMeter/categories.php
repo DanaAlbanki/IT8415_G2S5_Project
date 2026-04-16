@@ -137,9 +137,9 @@ $isLoggedIn = isset($_SESSION["user_id"]);
     </div>
 </footer>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script type="module" src="assets/js/categories.js"></script>
 
-<!-- ✅ THIS MAKES FOOTER GENRES CLICK WORK -->
 <script>
 document.querySelectorAll("[data-genre-link]").forEach(link => {
     link.addEventListener("click", function(e) {

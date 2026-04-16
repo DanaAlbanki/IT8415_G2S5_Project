@@ -1,66 +1,73 @@
-const navbar = document.querySelector(".navbar");
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
+const $navbar = $(".navbar");
+const $menuToggle = $("#menuToggle");
+const $navLinks = $("#navLinks");
 
-if (menuToggle && navLinks) {
-    menuToggle.addEventListener("click", () => {
-        navLinks.classList.toggle("open");
+if ($menuToggle.length && $navLinks.length) {
+    $menuToggle.on("click", function () {
+        $navLinks.toggleClass("open");
     });
 }
 
-document.querySelectorAll(".nav-links a").forEach((link) => {
-    link.addEventListener("click", () => {
-        if (navLinks) {
-            navLinks.classList.remove("open");
+$(".nav-links a").each(function () {
+    $(this).on("click", function () {
+        if ($navLinks.length) {
+            $navLinks.removeClass("open");
         }
     });
 });
 
-window.addEventListener("scroll", () => {
-    if (!navbar) return;
+$(window).on("scroll", function () {
+    if (!$navbar.length) return;
 
-    if (window.scrollY > 60) {
-        navbar.classList.add("scrolled");
+    if ($(window).scrollTop() > 60) {
+        $navbar.addClass("scrolled");
     } else {
-        navbar.classList.remove("scrolled");
+        $navbar.removeClass("scrolled");
     }
 });
 
-const saveBtn = document.getElementById("saveBtn");
-const fullNameInput = document.getElementById("full_name");
-const usernameInput = document.getElementById("username");
-const emailInput = document.getElementById("email");
-const imageInput = document.getElementById("profile_image");
-const avatarPreviewImage = document.getElementById("avatarPreviewImage");
-const avatarFallback = document.getElementById("avatarFallback");
+const $saveBtn = $("#saveBtn");
+const $fullNameInput = $("#full_name");
+const $usernameInput = $("#username");
+const $emailInput = $("#email");
+const $imageInput = $("#profile_image");
+const $avatarPreviewImage = $("#avatarPreviewImage");
+const $avatarFallback = $("#avatarFallback");
 
 const initialValues = {
-    fullName: fullNameInput ? fullNameInput.value : "",
-    username: usernameInput ? usernameInput.value : "",
-    email: emailInput ? emailInput.value : ""
+    fullName: $fullNameInput.length ? $fullNameInput.val() : "",
+    username: $usernameInput.length ? $usernameInput.val() : "",
+    email: $emailInput.length ? $emailInput.val() : ""
 };
 
 function toggleSaveButton() {
-    if (!saveBtn || !fullNameInput || !usernameInput || !emailInput || !imageInput) return;
+    if (
+        !$saveBtn.length ||
+        !$fullNameInput.length ||
+        !$usernameInput.length ||
+        !$emailInput.length ||
+        !$imageInput.length
+    ) return;
 
     const textChanged =
-        fullNameInput.value !== initialValues.fullName ||
-        usernameInput.value !== initialValues.username ||
-        emailInput.value !== initialValues.email;
+        $fullNameInput.val() !== initialValues.fullName ||
+        $usernameInput.val() !== initialValues.username ||
+        $emailInput.val() !== initialValues.email;
 
-    const imageChanged = imageInput.files && imageInput.files.length > 0;
+    const imageInputEl = $imageInput[0];
+    const imageChanged = imageInputEl.files && imageInputEl.files.length > 0;
 
-    saveBtn.disabled = !(textChanged || imageChanged);
+    $saveBtn.prop("disabled", !(textChanged || imageChanged));
 }
 
-[fullNameInput, usernameInput, emailInput].forEach((input) => {
-    if (input) {
-        input.addEventListener("input", toggleSaveButton);
+[$fullNameInput, $usernameInput, $emailInput].forEach(($input) => {
+    if ($input.length) {
+        $input.on("input", toggleSaveButton);
     }
 });
 
-if (imageInput) {
-    imageInput.addEventListener("change", function () {
+if ($imageInput.length) {
+    $imageInput.on("change", function () {
         const file = this.files && this.files[0];
 
         if (!file) {
@@ -78,12 +85,12 @@ if (imageInput) {
 
         const reader = new FileReader();
         reader.onload = function (e) {
-            if (avatarPreviewImage) {
-                avatarPreviewImage.src = e.target.result;
-                avatarPreviewImage.style.display = "block";
+            if ($avatarPreviewImage.length) {
+                $avatarPreviewImage.attr("src", e.target.result);
+                $avatarPreviewImage.css("display", "block");
             }
-            if (avatarFallback) {
-                avatarFallback.style.display = "none";
+            if ($avatarFallback.length) {
+                $avatarFallback.css("display", "none");
             }
         };
         reader.readAsDataURL(file);
@@ -92,11 +99,11 @@ if (imageInput) {
     });
 }
 
-if (avatarPreviewImage) {
-    avatarPreviewImage.addEventListener("error", function () {
-        this.style.display = "none";
-        if (avatarFallback) {
-            avatarFallback.style.display = "flex";
+if ($avatarPreviewImage.length) {
+    $avatarPreviewImage.on("error", function () {
+        $(this).css("display", "none");
+        if ($avatarFallback.length) {
+            $avatarFallback.css("display", "flex");
         }
     });
 }

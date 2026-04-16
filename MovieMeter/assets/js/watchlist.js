@@ -1,52 +1,50 @@
 const FALLBACK_IMAGE = "assets/images/notfound.png";
 
-const navbar = document.querySelector(".navbar");
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
-const watchlistContainer = document.getElementById("watchlistMovies");
-const watchlistCount = document.getElementById("watchlistCount");
+const $navbar = $(".navbar");
+const $menuToggle = $("#menuToggle");
+const $navLinks = $("#navLinks");
+const $watchlistContainer = $("#watchlistMovies");
+const $watchlistCount = $("#watchlistCount");
 
-if (menuToggle && navLinks) {
-    menuToggle.addEventListener("click", () => {
-        navLinks.classList.toggle("open");
+if ($menuToggle.length && $navLinks.length) {
+    $menuToggle.on("click", function () {
+        $navLinks.toggleClass("open");
     });
 }
 
-document.querySelectorAll(".nav-links a").forEach((link) => {
-    link.addEventListener("click", () => {
-        if (navLinks) {
-            navLinks.classList.remove("open");
+$(".nav-links a").each(function () {
+    $(this).on("click", function () {
+        if ($navLinks.length) {
+            $navLinks.removeClass("open");
         }
     });
 });
 
-window.addEventListener("scroll", () => {
-    if (!navbar) return;
+$(window).on("scroll", function () {
+    if (!$navbar.length) return;
 
-    if (window.scrollY > 60) {
-        navbar.classList.add("scrolled");
+    if ($(window).scrollTop() > 60) {
+        $navbar.addClass("scrolled");
     } else {
-        navbar.classList.remove("scrolled");
+        $navbar.removeClass("scrolled");
     }
 });
 
 function updateWatchlistCount() {
-    if (!watchlistCount || !watchlistContainer) return;
+    if (!$watchlistCount.length || !$watchlistContainer.length) return;
 
-    const cards = watchlistContainer.querySelectorAll(".watchlist-card");
-    const count = cards.length;
-
-    watchlistCount.textContent = `${count} ${count === 1 ? "movie" : "movies"} saved`;
+    const count = $watchlistContainer.find(".watchlist-card").length;
+    $watchlistCount.text(`${count} ${count === 1 ? "movie" : "movies"} saved`);
 }
 
 function showEmptyState() {
-    if (!watchlistContainer) return;
+    if (!$watchlistContainer.length) return;
 
-    watchlistContainer.innerHTML = `
+    $watchlistContainer.html(`
         <div class="empty-state">
             Your watchlist is empty.
         </div>
-    `;
+    `);
 
     updateWatchlistCount();
 }
@@ -55,25 +53,36 @@ async function sendRemoveRequest(movieId) {
     const formData = new FormData();
     formData.append("movie_id", String(movieId));
 
-    const response = await fetch("remove-from-watchlist.php", {
-        method: "POST",
-        body: formData
-    });
-
-    const text = await response.text();
-
-    let data;
     try {
-        data = JSON.parse(text);
-    } catch (error) {
-        throw new Error(text || "Invalid server response.");
-    }
+        const data = await $.ajax({
+            url: "remove-from-watchlist.php",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "json"
+        });
 
-    if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to remove movie.");
-    }
+        if (!data.success) {
+            throw new Error(data.message || "Failed to remove movie.");
+        }
 
-    return data;
+        return data;
+    } catch (xhr) {
+        let data = null;
+
+        if (xhr && xhr.responseJSON) {
+            data = xhr.responseJSON;
+        } else if (xhr && xhr.responseText) {
+            try {
+                data = JSON.parse(xhr.responseText);
+            } catch (error) {
+                throw new Error(xhr.responseText || "Invalid server response.");
+            }
+        }
+
+        throw new Error((data && data.message) || "Failed to remove movie.");
+    }
 }
 
 async function removeFromWatchlist(movieId, button) {
@@ -82,18 +91,18 @@ async function removeFromWatchlist(movieId, button) {
         return;
     }
 
-    const card = button.closest(".watchlist-card");
-    if (!card || !watchlistContainer) {
+    const $card = $(button).closest(".watchlist-card");
+    if (!$card.length || !$watchlistContainer.length) {
         return;
     }
 
     const placeholder = document.createComment("watchlist-card-placeholder");
-    card.parentNode.insertBefore(placeholder, card);
-    card.remove();
+    $card[0].parentNode.insertBefore(placeholder, $card[0]);
+    $card.remove();
 
-    const remainingCards = watchlistContainer.querySelectorAll(".watchlist-card");
+    const remainingCards = $watchlistContainer.find(".watchlist-card");
 
-    if (remainingCards.length === 0) {
+    if (!remainingCards.length) {
         showEmptyState();
     } else {
         updateWatchlistCount();
@@ -102,13 +111,13 @@ async function removeFromWatchlist(movieId, button) {
     try {
         await sendRemoveRequest(movieId);
     } catch (error) {
-        const emptyState = watchlistContainer.querySelector(".empty-state");
-        if (emptyState) {
-            emptyState.remove();
+        const $emptyState = $watchlistContainer.find(".empty-state");
+        if ($emptyState.length) {
+            $emptyState.remove();
         }
 
         if (placeholder.parentNode) {
-            placeholder.parentNode.insertBefore(card, placeholder);
+            placeholder.parentNode.insertBefore($card[0], placeholder);
             placeholder.remove();
         }
 
@@ -119,35 +128,38 @@ async function removeFromWatchlist(movieId, button) {
 }
 
 function setupWatchlistCards() {
-    if (!watchlistContainer) return;
+    if (!$watchlistContainer.length) return;
 
-    const cards = watchlistContainer.querySelectorAll(".watchlist-card");
+    const $cards = $watchlistContainer.find(".watchlist-card");
 
-    if (!cards.length) {
+    if (!$cards.length) {
         showEmptyState();
         return;
     }
 
-    cards.forEach((card) => {
-        const image = card.querySelector(".watchlist-poster, img");
-        if (image) {
-            image.addEventListener("error", () => {
-                image.src = FALLBACK_IMAGE;
+    $cards.each(function () {
+        const $card = $(this);
+        const $image = $card.find(".watchlist-poster, img").first();
+
+        if ($image.length) {
+            $image.on("error", function () {
+                $(this).attr("src", FALLBACK_IMAGE);
             });
         }
 
-        const removeBtn = card.querySelector(".watchlist-remove-btn, .remove-watchlist-btn");
-        if (removeBtn) {
-            removeBtn.addEventListener("click", () => {
+        const $removeBtn = $card.find(".watchlist-remove-btn, .remove-watchlist-btn").first();
+
+        if ($removeBtn.length) {
+            $removeBtn.on("click", function () {
                 const movieId = parseInt(
-                    removeBtn.dataset.movieId ||
-                    removeBtn.dataset.id ||
-                    card.dataset.movieId ||
-                    card.dataset.id,
+                    $removeBtn.data("movieId") ||
+                    $removeBtn.data("id") ||
+                    $card.data("movieId") ||
+                    $card.data("id"),
                     10
                 );
 
-                removeFromWatchlist(movieId, removeBtn);
+                removeFromWatchlist(movieId, this);
             });
         }
     });
@@ -155,6 +167,6 @@ function setupWatchlistCards() {
     updateWatchlistCount();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+$(document).ready(function () {
     setupWatchlistCards();
 });

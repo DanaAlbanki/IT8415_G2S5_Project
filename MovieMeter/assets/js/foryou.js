@@ -2,18 +2,18 @@ import { API_KEY, BASE_URL, IMG_PATH } from "./api.js";
 
 const FALLBACK_IMAGE = "assets/images/no-image.png";
 
-const navbar = document.querySelector(".navbar");
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
+const $navbar = $(".navbar");
+const $menuToggle = $("#menuToggle");
+const $navLinks = $("#navLinks");
 
-const trendingMovies = document.getElementById("trendingMovies");
-const forYouMovies = document.getElementById("forYouMovies");
+const $trendingMovies = $("#trendingMovies");
+const $forYouMovies = $("#forYouMovies");
 
-const trendingStatus = document.getElementById("trendingStatus");
-const forYouStatus = document.getElementById("forYouStatus");
+const $trendingStatus = $("#trendingStatus");
+const $forYouStatus = $("#forYouStatus");
 
-const refreshTrending = document.getElementById("refreshTrending");
-const refreshForYou = document.getElementById("refreshForYou");
+const $refreshTrending = $("#refreshTrending");
+const $refreshForYou = $("#refreshForYou");
 
 const genrePool = [28, 12, 16, 35, 80, 18, 14, 27, 9648, 10749, 878, 53];
 
@@ -37,45 +37,45 @@ async function init() {
 }
 
 function attachEvents() {
-    if (menuToggle && navLinks) {
-        menuToggle.addEventListener("click", () => {
-            navLinks.classList.toggle("open");
+    if ($menuToggle.length && $navLinks.length) {
+        $menuToggle.on("click", function () {
+            $navLinks.toggleClass("open");
         });
     }
 
-    document.querySelectorAll(".nav-links a").forEach((link) => {
-        link.addEventListener("click", () => {
-            if (navLinks) {
-                navLinks.classList.remove("open");
+    $(".nav-links a").each(function () {
+        $(this).on("click", function () {
+            if ($navLinks.length) {
+                $navLinks.removeClass("open");
             }
         });
     });
 
-    window.addEventListener("scroll", () => {
-        if (!navbar) return;
+    $(window).on("scroll", function () {
+        if (!$navbar.length) return;
 
-        if (window.scrollY > 60) {
-            navbar.classList.add("scrolled");
+        if ($(window).scrollTop() > 60) {
+            $navbar.addClass("scrolled");
         } else {
-            navbar.classList.remove("scrolled");
+            $navbar.removeClass("scrolled");
         }
     });
 
-    if (refreshTrending) {
-        refreshTrending.addEventListener("click", loadTrendingMovies);
+    if ($refreshTrending.length) {
+        $refreshTrending.on("click", loadTrendingMovies);
     }
 
-    if (refreshForYou) {
-        refreshForYou.addEventListener("click", loadForYouMovies);
+    if ($refreshForYou.length) {
+        $refreshForYou.on("click", loadForYouMovies);
     }
 }
 
 async function loadTrendingMovies() {
-    if (!trendingMovies) return;
+    if (!$trendingMovies.length) return;
 
     try {
-        if (trendingStatus) trendingStatus.textContent = "Loading movies...";
-        trendingMovies.innerHTML = "";
+        if ($trendingStatus.length) $trendingStatus.text("Loading movies...");
+        $trendingMovies.html("");
 
         const randomPage = getRandomNumber(1, 8);
         const data = await fetchJSON(
@@ -83,22 +83,22 @@ async function loadTrendingMovies() {
         );
 
         const picked = pickFiveUniqueMovies(data.results || []);
-        renderMovieRow(trendingMovies, picked);
+        renderMovieRow($trendingMovies, picked);
 
-        if (trendingStatus) trendingStatus.textContent = "";
+        if ($trendingStatus.length) $trendingStatus.text("");
     } catch (error) {
         console.error(error);
-        if (trendingStatus) trendingStatus.textContent = "";
-        trendingMovies.innerHTML = `<div class="empty-state">Failed to load trending movies.</div>`;
+        if ($trendingStatus.length) $trendingStatus.text("");
+        $trendingMovies.html(`<div class="empty-state">Failed to load trending movies.</div>`);
     }
 }
 
 async function loadForYouMovies() {
-    if (!forYouMovies) return;
+    if (!$forYouMovies.length) return;
 
     try {
-        if (forYouStatus) forYouStatus.textContent = "Loading movies...";
-        forYouMovies.innerHTML = "";
+        if ($forYouStatus.length) $forYouStatus.text("Loading movies...");
+        $forYouMovies.html("");
 
         const randomGenre = genrePool[getRandomNumber(0, genrePool.length - 1)];
         const randomPage = getRandomNumber(1, 12);
@@ -108,51 +108,49 @@ async function loadForYouMovies() {
         );
 
         const picked = pickFiveUniqueMovies(data.results || []);
-        renderMovieRow(forYouMovies, picked);
+        renderMovieRow($forYouMovies, picked);
 
-        if (forYouStatus) forYouStatus.textContent = "";
+        if ($forYouStatus.length) $forYouStatus.text("");
     } catch (error) {
         console.error(error);
-        if (forYouStatus) forYouStatus.textContent = "";
-        forYouMovies.innerHTML = `<div class="empty-state">Failed to load recommendations.</div>`;
+        if ($forYouStatus.length) $forYouStatus.text("");
+        $forYouMovies.html(`<div class="empty-state">Failed to load recommendations.</div>`);
     }
 }
 
-function renderMovieRow(container, movies) {
-    container.innerHTML = "";
+function renderMovieRow($container, movies) {
+    $container.html("");
 
     if (!movies.length) {
-        container.innerHTML = `<div class="empty-state">No movies found right now.</div>`;
+        $container.html(`<div class="empty-state">No movies found right now.</div>`);
         return;
     }
 
     movies.forEach((movie) => {
-        container.appendChild(createMovieCard(movie));
+        $container.append(createMovieCard(movie));
     });
 }
 
 function createMovieCard(movie) {
-    const movieEl = document.createElement("div");
-    movieEl.classList.add("movie-card");
+    const $movieEl = $("<div></div>").addClass("movie-card");
 
-    const image = document.createElement("img");
-    image.src = movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE;
-    image.alt = movie.title || "Movie Poster";
-    image.onerror = () => {
-        image.src = FALLBACK_IMAGE;
-    };
+    const $image = $("<img>");
+    $image.attr("src", movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE);
+    $image.attr("alt", movie.title || "Movie Poster");
+    $image.on("error", function () {
+        $(this).attr("src", FALLBACK_IMAGE);
+    });
 
-    const title = document.createElement("h3");
-    title.textContent = movie.title || "Untitled Movie";
+    const $title = $("<h3></h3>").text(movie.title || "Untitled Movie");
 
-    movieEl.appendChild(image);
-    movieEl.appendChild(title);
+    $movieEl.append($image);
+    $movieEl.append($title);
 
-    movieEl.addEventListener("click", () => {
+    $movieEl.on("click", function () {
         window.location.href = getMovieDetailsUrl(movie.id);
     });
 
-    return movieEl;
+    return $movieEl;
 }
 
 function pickFiveUniqueMovies(movies) {
@@ -169,12 +167,11 @@ function getRandomNumber(min, max) {
 }
 
 async function fetchJSON(url) {
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.status_message || data.message || "Failed to fetch data");
-    }
+    const data = await $.ajax({
+        url: url,
+        method: "GET",
+        dataType: "json"
+    });
 
     return data;
 }

@@ -96,6 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="assets/js/forgot-password.js"></script>
 </body>
 </html>
