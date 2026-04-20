@@ -71,18 +71,25 @@ $media_result = mysqli_query($dbc, $media_sql);
         <img src="../assets/images/logo.png">
     </div>
 
-    <div class="nav-links">
-        <a href="../creator/dashboard.php">Dashboard</a>
+  <div class="nav-links">
+        <a href="../creator/dashboard.php" class="active-link">Dashboard</a>
         <a href="../creator/my-movie.php">My Movies</a>
         <a href="../creator/add-movie.php">Add Movie</a>
         <a href="../creator/import-movies.php">Import Movies</a>
         <a href="../creator/profile.php">Profile</a>
+        <a href="../logout.php">Logout</a>
     </div>
 </div>
-
+    
+<div class="top-back">
+    <a href="movie_details.php?movie_id=<?php echo $movie_id; ?>"
+       class="back-link"
+       onclick="event.preventDefault(); goBackSmart(this.href);">
+        ← Back
+    </a>
+</div>
 <div class="container">
 
-    <!-- LEFT -->
     <div>
 
         <?php
@@ -257,6 +264,21 @@ window.addEventListener("scroll", function () {
         navbar.classList.remove("scrolled");
     }
 });
+
+function goBackSmart(fallbackUrl) {
+    try {
+        if (window.history.length > 1 && document.referrer) {
+            const referrerUrl = new URL(document.referrer, window.location.origin);
+
+            if (referrerUrl.origin === window.location.origin) {
+                window.history.back();
+                return;
+            }
+        }
+    } catch (e) {}
+
+    window.location.href = fallbackUrl;
+}
 </script>
 
 </html>

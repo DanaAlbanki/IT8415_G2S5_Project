@@ -72,12 +72,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <img src="../assets/images/logo.png">
     </div>
 
-    <div class="nav-links">
-        <a href="../creator/dashboard.php">Dashboard</a>
+ <div class="nav-links">
+        <a href="../creator/dashboard.php" class="active-link">Dashboard</a>
         <a href="../creator/my-movie.php">My Movies</a>
-        <a href="../creator/add-movie.php" class="active-link">Add Movie</a>
+        <a href="../creator/add-movie.php">Add Movie</a>
         <a href="../creator/import-movies.php">Import Movies</a>
         <a href="../creator/profile.php">Profile</a>
+        <a href="../logout.php">Logout</a>
     </div>
 </div>
 
@@ -238,6 +239,7 @@ function refreshPreview() {
     mediaInput.dispatchEvent(new Event('change'));
 }
 </script>
+<?php include("../includes/creator_footer.php"); ?>
 
 </body>
 </html>

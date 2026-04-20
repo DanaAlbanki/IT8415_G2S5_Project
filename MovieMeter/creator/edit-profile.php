@@ -332,7 +332,14 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
             <li><a href="../creator/profile.php">Profile</a></li>
         </ul>
     </nav>
-
+    
+<div class="top-back">
+    <a href="../creator/profile.php"
+       class="back-link"
+       onclick="event.preventDefault(); goBackSmart(this.href);">
+        ← Back
+    </a>
+</div>
     <main class="edit-profile-page">
         <section class="edit-profile-card">
             <div class="edit-profile-header">
@@ -438,22 +445,26 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
         </section>
     </main>
 
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-contact">
-                <h4>Contact</h4>
-                <p><a href="mailto:support@moviemeter.com">support@moviemeter.com</a></p>
-                <p><a href="tel:+97317000000">+973 1700 0000</a></p>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>© 2026 MovieMeter. All rights reserved.</p>
-        </div>
-    </footer>
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="../assets/js/edit-profile.js"></script>
+<?php include("../includes/creator_footer.php"); ?>
 
 </body>
+<script>
+    function goBackSmart(fallbackUrl) {
+    try {
+        if (window.history.length > 1 && document.referrer) {
+            const referrerUrl = new URL(document.referrer, window.location.origin);
+
+            if (referrerUrl.origin === window.location.origin) {
+                window.history.back();
+                return;
+            }
+        }
+    } catch (e) {}
+
+    window.location.href = fallbackUrl;
+}
+</script>
 </html>

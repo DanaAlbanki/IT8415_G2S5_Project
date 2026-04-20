@@ -1,14 +1,3 @@
-
-body {
-    margin: 0;
-    font-family: Arial;
-    background: #1f1229;
-    color: #fff;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
 .navbar {
     width: 100%;
     display: flex;
@@ -55,87 +44,123 @@ body {
 .active-link {
     color: #facc15;
 }
-.container {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
-    width: 100%;
-    padding: 100px 40px 40px;
+
+body {
+    font-family: Arial, sans-serif; 
+    background: #1f1229; 
+    color: #fff; 
+    margin: 0; 
+    padding: 40px 0 0 0;
+    padding-top: 70px;
+}
+
+.box {
+    max-width: 1200px;
+    margin: 85px auto 0;
+    padding: 50px 45px 80px;
+    background: #2a1a36;
+    border-radius: 18px;
+    text-align: left;
     box-sizing: border-box;
 }
 
-.poster {
-    width: 100%;
-    max-height: 420px;
-    object-fit: contain;
+h2 {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 6px 0;
+    padding-left: 10px;
+    position: relative;
+    top: 0;
+}
+
+.analytics-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+}
+
+.analytics-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.4);
+    padding: 16px 18px;
+    min-width: 200px;
+    flex: 1;
+    transition: 0.25s ease;
 }
 
-.details-box {
-    margin-top: 10px;
-    background: rgba(255,255,255,0.03);
-    padding: 16px;
-    border-radius: 12px;
+.analytics-card:hover {
+    transform: translateY(-3px);
 }
 
-.right-box {
-    background: rgba(255,255,255,0.03);
-    border-radius: 14px;
-    padding: 16px;
-}
-
-.stat {
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-.label {
-    font-size: 0.8rem;
-    color: #cdb2ea;
+.analytics-card h4 {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
     text-transform: uppercase;
+    color: #cdb2ea;
 }
 
-input, textarea {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-    margin-top: 8px;
-    border-radius: 6px;
+.analytics-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-top: 6px;
+    color: #ffffff;
+}
+
+.section-title {
+    margin: 20px 0 10px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #eadcff;
+}
+
+.movies-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 18px;
+    justify-content: start;
+    align-items: stretch;
+    margin-top: 10px;
+}
+
+
+.btn{
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: #facc15;
+    color: #1a1025;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s ease;
     border: none;
-    background: #3a2550;
+    cursor: pointer;
+}
+
+.btn:hover{
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+.btn-secondary{
+    background: #6a4385;
     color: #fff;
 }
 
-textarea {
-    min-height: 100px;
-    resize: none;
+.form-row{
+    margin: 18px 0;
 }
 
-button {
-    margin-top: 20px;
-    background: #facc15;
-    color: #1f1229;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-}
-
-.media-row {
-    display:flex;
-    gap:10px;
-    overflow-x:auto;
-    margin-top:10px;
-}
-
-.media-item {
-    min-width:140px;
-    height:100px;
-    border-radius:10px;
-    overflow:hidden;
+.actions{
+    margin-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    gap:12px;
 }
 
 .footer {
@@ -209,36 +234,4 @@ button {
     margin: 0;
     color: #eadcff;
     font-size: 14px;
-}
-.top-back {
-    position: fixed;
-    top: 18px;
-    left: 20px;   
-    z-index: 1000;
-}
-
-.back-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    height: 40px;
-    padding: 0 16px;
-
-    background: #6a4385; /* matches your edit/movie purple */
-    color: #ffffff;
-
-    font-size: 13px;
-    font-weight: 700;
-
-    border-radius: 12px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.25);
-
-    text-decoration: none;
-    transition: 0.25s ease;
-}
-
-.back-link:hover {
-    background: #744b92;
-    transform: translateY(-2px);
 }

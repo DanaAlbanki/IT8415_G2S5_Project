@@ -292,3 +292,35 @@ div#avatarFallback {
         font-size: 2.15rem;
     }
 }
+.top-back {
+    position: fixed;
+    top: 110px; 
+    left: 20px;
+    z-index: 1000;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 38px;
+    padding: 0 14px;
+
+    background: #8b2d7a; 
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+
+    text-decoration: none;
+    transition: 0.25s ease;
+}
+
+.back-link:hover {
+    background: #a43b91;
+    transform: translateY(-2px);
+}

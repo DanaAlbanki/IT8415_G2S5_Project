@@ -12,7 +12,6 @@ if ($_SESSION["role_name"] !== "creator") {
 $dbc = getConnection();
 $creator_id = $_SESSION['user_id'];
 
-
 $query = "
     SELECT AVG(r.rating_value) AS avg_rating
     FROM mm_ratings r, mm_movies m
@@ -28,7 +27,7 @@ $sql = "
         m.movie_id,
         m.title,
         m.poster_image,
-        AVG(r.rating_value) AS avg_rating
+            AVG(r.rating_value) AS avg_rating
     FROM mm_movies m
     LEFT JOIN mm_ratings r ON m.movie_id = r.movie_id
     WHERE m.status = 'published'
@@ -46,6 +45,8 @@ $movies_result = mysqli_query($dbc, $sql);
 <head>
 <title>Creator Dashboard</title>
 <link rel="stylesheet" href="../assets/css/creator-dashboard.css">
+<link rel="stylesheet" href="../assets/css/my-movie.css">
+
 </head>
 
 <body>
@@ -56,17 +57,18 @@ $movies_result = mysqli_query($dbc, $sql);
     </div>
 
     <div class="nav-links">
-        <a href="../creator/dashboard.php">Dashboard</a>
+        <a href="../creator/dashboard.php" class="active-link">Dashboard</a>
         <a href="../creator/my-movie.php">My Movies</a>
         <a href="../creator/add-movie.php">Add Movie</a>
         <a href="../creator/import-movies.php">Import Movies</a>
         <a href="../creator/profile.php">Profile</a>
+        <a href="../logout.php">Logout</a>
     </div>
 </div>
 
 <div class="box">
-
 <h2>Welcome Creator, <?php echo htmlspecialchars($_SESSION["full_name"]); ?></h2>
+
 <hr>
 
 <div class="analytics-row">
@@ -109,9 +111,11 @@ $movies_result = mysqli_query($dbc, $sql);
     </div>
 
 </div>
+
 <h2 class="section-title">Top Rated Movies</h2>
 
-<div class="movies-wrapper">
+<div class="movies">
+
 <?php if (mysqli_num_rows($movies_result) > 0) { ?>
     <?php while ($movie = mysqli_fetch_assoc($movies_result)) { ?>
 
@@ -127,27 +131,30 @@ $movies_result = mysqli_query($dbc, $sql);
         }
         ?>
 
-        <div class="movie-card">
+        <article class="movie-card">
             <a href="movie_details.php?movie_id=<?php echo (int)$movie["movie_id"]; ?>">
+
                 <img src="<?php echo htmlspecialchars($poster_path); ?>">
-                <h3><?php echo htmlspecialchars($movie["title"]); ?></h3>
+
+                <div class="movie-info">
+
+                    <h3><?php echo htmlspecialchars($movie["title"]); ?></h3>
+
+                </div>
+
             </a>
-        </div>
+        </article>
 
     <?php } ?>
 <?php } else { ?>
     <p>No movies found.</p>
 <?php } ?>
+
 </div>
+
 <br>
-<a href="../creator/my-movie.php" class="btn">View All</a>
-<hr>
 
-
-<div class="actions">
-    <a href="../logout.php" class="btn btn-secondary">Logout</a>
-</div>
-
+<a href="../creator/my-movie.php" class="view-all-btn">View All</a>
 </div>
 
 <script>
@@ -161,6 +168,7 @@ window.addEventListener("scroll", function () {
     }
 });
 </script>
+<?php include("../includes/creator_footer.php"); ?>
 
 </body>
 </html>

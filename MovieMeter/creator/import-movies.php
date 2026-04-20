@@ -100,7 +100,7 @@ $overview = mysqli_real_escape_string($dbc, $overview);
 <html>
 <head>
     <title>Import Movies</title>
-<link rel="stylesheet" href="../assets/css/creator-dashboard.css">
+<link rel="stylesheet" href="../assets/css/import.css">
 
 </head>
 <body>
@@ -109,12 +109,13 @@ $overview = mysqli_real_escape_string($dbc, $overview);
         <img src="../assets/images/logo.png">
     </div>
 
-    <div class="nav-links">
-        <a href="../creator/dashboard.php">Dashboard</a>
+ <div class="nav-links">
+        <a href="../creator/dashboard.php" class="active-link">Dashboard</a>
         <a href="../creator/my-movie.php">My Movies</a>
         <a href="../creator/add-movie.php">Add Movie</a>
-        <a href="../creator/import-movies.php" class="active-link">Import Movies</a>
+        <a href="../creator/import-movies.php">Import Movies</a>
         <a href="../creator/profile.php">Profile</a>
+        <a href="../logout.php">Logout</a>
     </div>
 </div>
 <div class="box">
@@ -154,6 +155,7 @@ $overview = mysqli_real_escape_string($dbc, $overview);
     <a href="../creator/my-movie.php" class="btn btn-secondary">My Movies</a>
 </div>
 </div>
+<?php include("../includes/creator_footer.php"); ?>
 
 </body>
 

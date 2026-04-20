@@ -100,6 +100,8 @@ if ($profileImage !== "") {
             <li><a href="../creator/add-movie.php">Add Movie</a></li>
             <li><a href="../creator/import-movies.php">Import Movies</a></li>
             <li><a href="../creator/profile.php">Profile</a></li>
+            <li><a href="../logout.php">Logout</a></li> 
+
         </ul>
     </nav>
 
@@ -194,6 +196,7 @@ if ($profileImage !== "") {
             }
         });
     </script>
+<?php include("../includes/creator_footer.php"); ?>
 
 </body>
 </html>
