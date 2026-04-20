@@ -6,6 +6,12 @@ if (session_status() === PHP_SESSION_NONE) {
 $current = basename($_SERVER['PHP_SELF']);
 ?>
 
+<?php if ($current != 'dashboard.php') { ?>
+<div class="admin-back">
+    <a href="javascript:history.back()">← Back</a>
+</div>
+<?php } ?>
+
 <nav class="admin-navbar">
 
     <div class="admin-logo">

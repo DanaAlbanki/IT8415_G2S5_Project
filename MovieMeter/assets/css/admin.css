@@ -286,3 +286,18 @@ body {
     object-fit: cover;
     border-radius: 10px;
 }
+
+.admin-back {
+    margin: 20px 60px 0;
+}
+
+.admin-back a {
+    text-decoration: none;
+    color: #facc15;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.admin-back a:hover {
+    opacity: 0.8;
+}
