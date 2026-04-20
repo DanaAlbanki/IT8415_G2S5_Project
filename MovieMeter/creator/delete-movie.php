@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <br>
 
     <button type="submit">Confirm Delete</button>
-
+<a href="my-movie.php" class="cancel-btn">Cancel</a>
 </form>
 
 </div>
