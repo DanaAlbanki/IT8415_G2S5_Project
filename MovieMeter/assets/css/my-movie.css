@@ -5,7 +5,7 @@ body {
     background: #1f1229;
     color: #fff;
     margin: 0;
-    padding: 70px 0 0 0; /* only top padding */
+    padding: 70px 0 0 0; 
 }
 
 .navbar {
@@ -54,18 +54,20 @@ body {
 
 .box {
     max-width: 1400px;
-    margin: 120px auto 0;
-    padding: 0 20px;
+ margin: 30px auto 0;
+ padding: 0 20px;
 }
 
 .search-section {
-    padding: 55px 20px;
-    margin-bottom: 40px;
+    width: 100%;
+    margin: 0;
+    padding: 55px 0; 
+    background: #3a234d;
 }
-
 .search-section-inner {
     max-width: 1300px;
     margin: 0 auto;
+    padding: 0 30px; 
 }
 
 .search-heading {

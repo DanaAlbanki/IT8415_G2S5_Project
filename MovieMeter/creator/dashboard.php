@@ -67,10 +67,6 @@ $movies_result = mysqli_query($dbc, $sql);
 </div>
 
 <div class="box">
-<h2>Welcome Creator, <?php echo htmlspecialchars($_SESSION["full_name"]); ?></h2>
-
-<hr>
-
 <div class="analytics-row">
 
     <div class="analytics-card">

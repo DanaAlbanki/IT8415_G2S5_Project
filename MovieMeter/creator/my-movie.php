@@ -19,7 +19,6 @@ $status     = $_GET['status'] ?? '';
 $date_from  = $_GET['date_from'] ?? '';
 $date_to    = $_GET['date_to'] ?? '';
 
-/* ================= BASE QUERY ================= */
 $sql = "
     SELECT movie_id, title, poster_image, release_date, short_description, status
     FROM mm_movies
@@ -27,7 +26,6 @@ $sql = "
     AND status != 'deleted'
 ";
 
-/* ================= APPLY FILTERS ================= */
 if (!empty($title)) {
     $safe_title = mysqli_real_escape_string($dbc, $title);
     $sql .= " AND title LIKE '%$safe_title%'";
@@ -48,10 +46,8 @@ if (!empty($date_to)) {
     $sql .= " AND DATE(release_date) <= '$safe_to'";
 }
 
-/* ================= ORDER ================= */
 $sql .= " ORDER BY release_date DESC";
 
-/* ================= EXECUTE ================= */
 $result = mysqli_query($dbc, $sql);
 
 if (!$result) {
@@ -83,6 +79,7 @@ if (!$result) {
     </div>
 </div>
 
+<!-- TOP CONTENT -->
 <div class="box">
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -96,49 +93,48 @@ if (!$result) {
         </a>
     </div>
 
-    <hr>
+</div>
 
-    <!-- SEARCH SECTION -->
-    <div class="search-section">
-        <div class="search-section-inner">
+<!-- FULL WIDTH SEARCH -->
+<div class="search-section">
+    <div class="search-section-inner">
 
-            <div class="search-heading">
-                <h2>Search Movies</h2>
-                <p>Search by title, status, and date range.</p>
+        <div class="search-heading">
+            <h2>Search Movies</h2>
+            <p>Search by title, status, and date range.</p>
+        </div>
+
+        <form id="searchForm" class="search-form-grid" method="GET">
+
+            <input type="text" name="title" placeholder="Search by title"
+                   value="<?php echo htmlspecialchars($title); ?>">
+
+            <select name="status">
+                <option value="">All Status</option>
+                <option value="published" <?php if ($status == 'published') echo 'selected'; ?>>Published</option>
+                <option value="draft" <?php if ($status == 'draft') echo 'selected'; ?>>Draft</option>
+            </select>
+
+            <input type="date" name="date_from" value="<?php echo htmlspecialchars($date_from); ?>">
+            <input type="date" name="date_to" value="<?php echo htmlspecialchars($date_to); ?>">
+
+            <div class="search-form-buttons">
+                <button type="submit" class="search-btn-main">Search</button>
+
+                <button type="button" class="reset-btn-main"
+                        onclick="window.location.href='my-movie.php'">
+                    Reset
+                </button>
             </div>
 
-            <form id="searchForm" class="search-form-grid" method="GET">
+        </form>
 
-                <input type="text" name="title" placeholder="Search by title"
-                       value="<?php echo htmlspecialchars($title); ?>">
-
-                <select name="status">
-                    <option value="">All Status</option>
-                    <option value="published" <?php if ($status == 'published') echo 'selected'; ?>>Published</option>
-                    <option value="draft" <?php if ($status == 'draft') echo 'selected'; ?>>Draft</option>
-                </select>
-
-                <input type="date" name="date_from" value="<?php echo htmlspecialchars($date_from); ?>">
-                <input type="date" name="date_to" value="<?php echo htmlspecialchars($date_to); ?>">
-
-                <div class="search-form-buttons">
-                    <button type="submit" class="search-btn-main">Search</button>
-
-                    <!-- ✅ FIXED RESET BUTTON -->
-                    <button type="button" class="reset-btn-main"
-                        onclick="window.location.href='my-movie.php'">
-                        Reset
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
     </div>
+</div>
 
-    <hr>
+<!-- MOVIES SECTION -->
+<div class="box">
 
-    <!-- MOVIES -->
     <div class="movies">
 
         <?php if (mysqli_num_rows($result) > 0) { ?>
@@ -203,6 +199,7 @@ window.addEventListener("scroll", function () {
     }
 });
 </script>
+
 <?php include("../includes/creator_footer.php"); ?>
 
 </body>
