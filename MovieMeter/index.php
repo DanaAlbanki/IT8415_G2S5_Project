@@ -12,6 +12,17 @@ $isLoggedIn = isset($_SESSION['user_id']);
 
 $conn = getConnection();
 
+$creatorQuery = "
+    SELECT u.user_id, u.full_name
+    FROM mm_users u
+    JOIN mm_roles r ON u.role_id = r.role_id
+    WHERE r.role_name = 'creator'
+      AND u.account_status = 'active'
+    ORDER BY u.full_name ASC
+";
+
+$creatorsResult = mysqli_query($conn, $creatorQuery);
+
 $query = "
     SELECT 
         m.movie_id,
@@ -150,7 +161,15 @@ function e($value)
 
             <form id="searchForm" class="search-form-grid" method="GET" action="search.php">
                 <input type="text" id="searchTitle" name="title" placeholder="Search by movie title">
-                <input type="text" id="searchCreator" name="creator" placeholder="Search by creator">
+                <select id="searchCreator" name="creator">
+                    <option value="">All Creators</option>
+
+                    <?php while ($creator = mysqli_fetch_assoc($creatorsResult)) { ?>
+                        <option value="<?php echo htmlspecialchars($creator['full_name']); ?>">
+                            <?php echo htmlspecialchars($creator['full_name']); ?>
+                        </option>
+                    <?php } ?>
+                </select>
                 <input type="date" id="fromDate" name="date_from">
                 <input type="date" id="toDate" name="date_to">
 
