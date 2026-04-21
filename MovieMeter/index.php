@@ -174,7 +174,7 @@ function e($value)
 
     <section class="movies-section" id="all-movies-section">
         <div class="section-header">
-            <h2>Latest Movies</h2>
+            <h2>Browse Movies</h2>
             <p id="resultsCount">Found <?php echo $totalMovies; ?> results</p>
         </div>
 
