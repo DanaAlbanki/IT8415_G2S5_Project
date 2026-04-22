@@ -324,7 +324,7 @@ MovieMeter/
 │
 ├── .htaccess                 # Routing & security rules
 ├── .gitignore                # Ignored files
-
+```
 ---
 
 ## 🧪 Testing
