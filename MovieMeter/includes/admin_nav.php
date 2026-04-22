@@ -6,7 +6,18 @@ if (session_status() === PHP_SESSION_NONE) {
 $current = basename($_SERVER['PHP_SELF']);
 ?>
 
-<?php if ($current != 'dashboard.php') { ?>
+<?php
+$noBackPages = [
+    'dashboard.php',
+    'manage-users.php',
+    'manage-movies.php',
+    'manage-comments.php',
+    'reports.php',
+    'admin-profile.php'
+];
+
+if (!in_array($current, $noBackPages)) {
+?>
 <div class="admin-back">
     <a href="javascript:history.back()">← Back</a>
 </div>
