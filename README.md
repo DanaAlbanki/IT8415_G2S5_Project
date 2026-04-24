@@ -328,6 +328,89 @@ MovieMeter/
 ```
 ---
 
+## ⚙️ Setup Instructions
+
+Follow these steps to run the project locally:
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/DanaAlbanki/IT8415_G2S5_Project.git
+```
+
+### 2. Move Project to Server
+
+* Place the project folder inside:
+
+  * `htdocs` (XAMPP) OR
+  * `Applications/MAMP/htdocs` (MAMP)
+
+---
+
+### 3. Setup Database
+
+1. Open **phpMyAdmin**
+2. Create a new database
+3. Import the SQL files in order:
+
+   ```
+   /sql/db.sql
+   /sql/indexes.sql
+   /sql/procedures.sql
+   /sql/triggers.sql
+   /sql/sample-data.sql
+   ```
+
+---
+
+### 4. Configure Database Connection
+
+Open:
+
+```
+config/config.php
+```
+
+Update with your local credentials:
+
+```php
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db   = "your_database_name";
+```
+
+---
+
+### 5. Setup TMDB API Key
+
+1. Go to: https://www.themoviedb.org/
+2. Create an account and generate an API key
+3. Open:
+
+```
+assets/js/api.js
+```
+
+Replace this line:
+
+```js
+export const API_KEY = "YOUR_TMDB_API_KEY";
+```
+
+---
+
+### 6. Run the Project
+
+Open your browser and go to:
+
+```
+http://localhost/MovieMeter/
+```
+
+---
+
+
 ## 🧪 Testing
 
 The system is tested to ensure:
@@ -337,6 +420,14 @@ The system is tested to ensure:
 - Role permissions are enforced
 - Reports generate correct results
 - Advanced features function as expected
+
+---
+
+## 🔐 Notes
+
+* API keys are not included in this repository for security reasons.
+* Make sure to add your own TMDB API key before running the project.
+* Database credentials must match your local setup.
 
 ---
 
