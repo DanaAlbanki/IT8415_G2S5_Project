@@ -67,24 +67,24 @@ MovieMeter is a movie review and rating platform where users can:
 - Most popular movies within a date range
 - Movies created by specific users
 
+---
+## 🚀 Advanced Features
 
-# 🚀 Advanced Features
-
-## 1. Recommendation Movies ⭐
+### 1. Recommendation Movies ⭐
 Used to suggest movies based on user preferences.
 
 **Assigned To:** Fatema
 
 ---
 
-## 2. Actors in Each Movie ⭐
+### 2. Actors in Each Movie ⭐
 Display actor information for each movie.
 
 **Assigned To:** Fatema
 
 ---
 
-## 3. Advanced UI Responsive ⭐
+### 3. Advanced UI Responsive ⭐
 - Responsive design
 - Clean and modern layout
 
@@ -92,7 +92,7 @@ Display actor information for each movie.
 
 ---
 
-## 4. Pagination ⭐
+### 4. Pagination ⭐
 - Display movies in pages
 - Improve performance
 - Better user experience
@@ -101,7 +101,7 @@ Display actor information for each movie.
 
 ---
 
-## 5. Watchlist ⭐
+### 5. Watchlist ⭐
 - Add/remove movies
 - Personal movie list
 
@@ -109,7 +109,7 @@ Display actor information for each movie.
 
 ---
 
-## 6. Triggers (Database) ⭐
+### 6. Triggers (Database) ⭐
 Used to automate database operations.
 - Automatically update average rating
 - Maintain comment count
@@ -120,14 +120,14 @@ Used to automate database operations.
 
 ---
 
-## 7. External API Integration ⭐
+### 7. External API Integration ⭐
 - Fetch movies from external API
 
 **Assigned To:** Maram, Fatema
 
 ---
 
-## 8. Trailer ⭐
+### 8. Trailer ⭐
 - Display movie trailers
 - Play trailers directly on the movie page
 - Handle video loading errors
@@ -136,7 +136,7 @@ Used to automate database operations.
 
 ---
 
-## 9. Handle Missing Images ⭐
+### 9. Handle Missing Images ⭐
 - Show fallback image when movie poster is missing
 - Prevent broken image links in UI
 - Maintain consistent layout
@@ -145,7 +145,7 @@ Used to automate database operations.
 
 ---
 
-## 10. "For You" Section ⭐
+### 10. "For You" Section ⭐
 - Recommend movies based on user activity
 - Display personalized movie suggestions
 - Update dynamically as user interacts with the site
@@ -154,42 +154,42 @@ Used to automate database operations.
 
 ---
 
-## 11. Profiles & Edit Profile ⭐
+### 11. Profiles & Edit Profile ⭐
 User profile management and editing functionality.
 
 **Assigned To:** Fatema
 
 ---
 
-## 12. Image Upload (Profile Pic) ⭐
+### 12. Image Upload (Profile Pic) ⭐
 Upload and manage user profile pictures.
 
 **Assigned To:** Fatema
 
 ---
 
-## 13. View Count Changes ⭐
+### 13. View Count Changes ⭐
 Track and update movie view counts.
 
 **Assigned To:** Fatema
 
 ---
 
-## 14. AJAX ⭐
+### 14. AJAX ⭐
 Dynamic content loading and updates without page refresh.
 
 **Assigned To:** Maram
 
 ---
 
-## 15. jQuery ⭐
+### 15. jQuery ⭐
 DOM manipulation and event handling.
 
 **Assigned To:** Fatema
 
 ---
 
-## 16. Database Procedures ⭐
+### 16. Database Procedures ⭐
 Create and manage stored procedures for database operations.
 
 **Assigned To:** Maram
