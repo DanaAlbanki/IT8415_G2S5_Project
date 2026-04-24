@@ -236,9 +236,9 @@ Create and manage stored procedures for database operations.
 MovieMeter/
 │
 ├── index.php                  # Home page: latest movies + search
-├── login.php                  # User login page
+├── login.php                  # User login & creates session after authentication
 ├── register.php               # User signup page
-├── logout.php                 # Logout and destroy session
+├── logout.php                 # Destroy session and log user out
 ├── discover.php               # Discover movies page
 ├── categories.php             # Movies by category
 ├── search.php                 # Search results page
@@ -250,13 +250,13 @@ MovieMeter/
 │
 ├── config/
 │   ├── DBConn.php             # Database connection
-│   ├── config.php             # App configuration (API keys, constants)
+│   ├── config.php             # Application configuration (database credentials, constants)
 │
 ├── includes/
 │   ├── admin_nav.php          # Admin navigation bar
 │   ├── admin_footer.php       # Admin footer
 │   ├── creator_footer.php     # Creator footer
-│   ├── auth_check.php         # Role/session protection
+│   ├── auth_check.php         # Session check & restrict access to logged-in users
 │   ├── config_setup.php       # Initial config setup
 │
 ├── admin/
@@ -302,7 +302,8 @@ MovieMeter/
 │   │   ├── foryou.css         # For You styles
 │   │
 │   ├── js/
-│   │   ├── main.js            # Main logic (API + navigation)
+│   │   ├── api.js            # TMDB API configuration: base URL and image path
+│   │   ├── main.js            # Main logic (navigation)
 │   │   ├── home.js            # Home interactions (slider)
 │   │   ├── movie.js           # Movie page logic (rating/comments)
 │   │   ├── watchlist.js       # Watchlist logic
