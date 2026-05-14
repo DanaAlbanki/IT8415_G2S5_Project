@@ -13,7 +13,7 @@ $creator_id = $_SESSION['user_id'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $reason = $_POST['reason'] ?? 'No reason provided';
+$reason = mysqli_real_escape_string($dbc, $_POST['reason']);
 
     $sql = "
     UPDATE mm_movies

@@ -28,10 +28,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $poster = "";
     if (!empty($_FILES['poster']['name'])) {
-        $uploadDir = __DIR__ . "/../assets/uploads/";
+        $uploadDir = __DIR__ . "/../assets/uploads/media/";
         $fileName = time() . "_" . basename($_FILES['poster']['name']);
         if (move_uploaded_file($_FILES['poster']['tmp_name'], $uploadDir . $fileName)) {
-            $poster = "assets/uploads/" . $fileName;
+            $poster = "assets/uploads/media/" . $fileName;
         }
     }
     

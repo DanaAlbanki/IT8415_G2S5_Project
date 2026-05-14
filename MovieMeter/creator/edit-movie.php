@@ -39,14 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $poster_image = $movie['poster_image'];
     if (!empty($_FILES['poster_file']['name'])) {
 
-        $uploadDir = __DIR__ . "/../assets/uploads/";
+        $uploadDir = __DIR__ . "/../assets/uploads/media/";
         $fileName = time() . "_" . basename($_FILES['poster_file']['name']);
         $targetFile = $uploadDir . $fileName;
         $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         $allowed = ['jpg','jpeg','png','webp'];
         if (in_array($ext, $allowed)) {
             if (move_uploaded_file($_FILES['poster_file']['tmp_name'], $targetFile)) {
-                $poster_image = "assets/uploads/" . $fileName;
+                $poster_image = "assets/uploads/media/" . $fileName;
             }
         }
     }
