@@ -230,6 +230,16 @@ Create and manage stored procedures for database operations.
 
 ---
 
+## 🗂️ Database ERD
+
+The Entity Relationship Diagram (ERD) shows the database structure of the MovieMeter system, including the main tables, relationships, primary keys, and foreign keys used in the project.
+
+The ERD file is included in the main project folder as:
+
+![MovieMeter ERD](moviemeter-erd.png)
+
+---
+
 ## 📁 Project Structure
 
 ```
