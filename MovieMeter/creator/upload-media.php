@@ -50,7 +50,7 @@ if (!empty($_FILES['media_file']['name'][0])) {
         $name = basename($files['name'][$i]);
         if (!$tmp) continue;
         $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        $allowed = ['jpg','jpeg','png','webp','mp4','mov','webm'];
+        $allowed = ['jpg','jpeg','png','webp','mp4','mov','webm', 'jfif'];
 
         if (!in_array($ext, $allowed)) {
             continue;
