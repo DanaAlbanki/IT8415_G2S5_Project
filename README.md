@@ -194,6 +194,24 @@ Create and manage stored procedures for database operations.
 **Assigned To:** Maram
 
 ---
+
+### 17. Discover Movies ⭐
+- Displays trending/popular movies from the TMDB API.
+- Allows users to browse external movie content.
+- Improves the browsing experience.
+
+**Assigned To:** Fatema, Maram
+
+---
+
+### 18. Categories Movies ⭐
+- Displays movies grouped by genre/category.
+- Uses TMDB API to fetch category-based movie results.
+- Helps users find movies based on their interests.
+
+**Assigned To:** Fatema, Maram
+
+---
 ## 👥 Final Task Distribution
 
 ### Team Members
