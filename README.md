@@ -18,10 +18,9 @@ MovieMeter is a movie review and rating platform where users can:
 
 ## 👥 Roles
 
-- **Viewer (Visitor)** — Browse and search movies, view details, read reviews and ratings
-- **Content Creator** — Add and manage movies, write reviews, upload media
-- **Administrator** — Full system control: manage users, approve/delete content, generate reports
-
+- **Viewer** — Browse/search movies, view details, add ratings, add comments, and manage a personal watchlist.
+- **Creator** — Add, edit, upload media for, publish, and manage their own movies.
+- **Admin** — Manage users, manage all movies, manage/delete comments, delete content, and generate reports.
 ---
 
 ## ✨ Required Features
