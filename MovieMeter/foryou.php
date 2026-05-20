@@ -86,7 +86,7 @@ require_once(__DIR__ . "/includes/auth_check.php");
 
 </main>
 
-<!-- ✅ FIXED FOOTER -->
+<!-- Footer -->
 <footer class="footer">
     <div class="footer-container">
 
@@ -98,7 +98,7 @@ require_once(__DIR__ . "/includes/auth_check.php");
             </p>
         </div>
 
-        <!-- ✅ Quick Links (clean + consistent) -->
+        <!-- Quick Links -->
         <div class="footer-links">
             <h4>Quick Links</h4>
             <ul>
@@ -109,7 +109,7 @@ require_once(__DIR__ . "/includes/auth_check.php");
             </ul>
         </div>
 
-        <!-- ✅ Categories (WORKING FILTER LINKS) -->
+        <!-- Categories -->
         <div class="footer-links">
             <h4>Categories</h4>
             <ul>
