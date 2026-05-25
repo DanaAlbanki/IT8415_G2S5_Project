@@ -12,7 +12,7 @@ Thumbs.db
 
 # Logs
 *.log
-
+mdb_config
 # Temporary files
 *.tmp
 
