@@ -1,19 +1,25 @@
 <?php
+// Show PHP errors for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Load authentication and database connection
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once("../config/DBConn.php");
 
+// Allow creators only
 if ($_SESSION["role_name"] !== "creator") {
     die("Access denied.");
 }
 
+// Connect to database
 $dbc = getConnection();
 
+// Get movie ID and creator ID
 $movie_id = isset($_GET['movie_id']) ? (int)$_GET['movie_id'] : 0;
 $creator_id = $_SESSION['user_id'];
 
+// SQL query to get movie details
 $sql = "
     SELECT *
     FROM mm_movies
@@ -21,14 +27,19 @@ $sql = "
     AND creator_id = $creator_id
 ";
 
+// Execute movie query
 $result = mysqli_query($dbc, $sql);
 $movie = mysqli_fetch_assoc($result);
 
+// Check if movie exists
 if (!$movie) {
     die("Movie not found.");
 }
 
+// Run when form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Escape form inputs
     $title = mysqli_real_escape_string($dbc, $_POST['title']);
     $short_description = mysqli_real_escape_string($dbc, $_POST['short_description']);
     $full_description = mysqli_real_escape_string($dbc, $_POST['full_description']);
@@ -36,21 +47,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ? "'" . mysqli_real_escape_string($dbc, $_POST['release_date']) . "'"
         : "NULL";
 
+    // Keep current poster image
     $poster_image = $movie['poster_image'];
+
+    // Check if new poster is uploaded
     if (!empty($_FILES['poster_file']['name'])) {
 
-        $uploadDir = __DIR__ . "/../assets/uploads/";
+        $uploadDir = __DIR__ . "/../assets/uploads/media/";
         $fileName = time() . "_" . basename($_FILES['poster_file']['name']);
         $targetFile = $uploadDir . $fileName;
+
+        // Get file extension
         $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        // Allowed image types
         $allowed = ['jpg','jpeg','png','webp'];
+
+        // Validate image type
         if (in_array($ext, $allowed)) {
+
+            // Upload new poster image
             if (move_uploaded_file($_FILES['poster_file']['tmp_name'], $targetFile)) {
-                $poster_image = "assets/uploads/" . $fileName;
+                $poster_image = "assets/uploads/media/" . $fileName;
             }
         }
     }
 
+    // SQL query to update movie details
     $update_sql = "
         UPDATE mm_movies
         SET title = '$title',
@@ -61,29 +84,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         WHERE movie_id = $movie_id AND creator_id = $creator_id
     ";
 
+    // Execute update query
     mysqli_query($dbc, $update_sql);
 
+    // Check if media files were uploaded
     if (!empty($_FILES['media_file']['name'][0])) {
         $_POST['action'] = 'upload';
         $_POST['movie_id'] = $movie_id;
+
         include(__DIR__ . "/upload-media.php");
     }
 
+    // Show success message and redirect
     echo "<script>alert('Movie updated successfully!'); window.location='movie_details.php?movie_id=$movie_id';</script>";
     exit;
 }
 
+// Get poster image path
 $poster = $movie['poster_image'] ?? '';
 $poster_path = (!empty($poster))
     ? ((strpos($poster, 'http') === 0) ? $poster : '../' . $poster)
     : '../assets/images/placeholder.png';
 
+// SQL query to get movie media files
 $media_sql = "
     SELECT *
     FROM mm_movie_media
     WHERE movie_id = $movie_id
     ORDER BY is_primary DESC, uploaded_at DESC
 ";
+
+// Execute media query
 $media_result = mysqli_query($dbc, $media_sql);
 ?>
 
@@ -202,6 +233,7 @@ $media_result = mysqli_query($dbc, $media_sql);
     <div style="margin-top:10px;">
 
         <?php
+        // Set publish button text and color
         $current_status = $movie['status'] ?? 'draft';
         $btn_text = ($current_status === 'published') ? 'Unpublish Movie' : 'Publish Movie';
         $btn_color = ($current_status === 'published') ? '#ef4444' : '#22c55e';

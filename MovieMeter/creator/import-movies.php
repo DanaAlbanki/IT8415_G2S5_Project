@@ -1,48 +1,66 @@
 <?php
+// Show PHP errors for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Load authentication and database connection
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once("../config/DBConn.php");
 
+// Allow creators only
 if ($_SESSION["role_name"] !== "creator") {
     die("Access denied.");
 }
 
+// Connect to database
 $dbc = getConnection();
 
 $message = "";
 $errors = 0;
 $inserted = 0;
 
+// Run when form is submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
+    // Get number of pages from form
     $pages = isset($_POST["pages"]) ? (int)$_POST["pages"] : 1;
+
+    // Limit pages between 1 and 20
     $pages = max(1, min(20, $pages));
 
+    // TMDB API key
     $apiKey = "d29868793eba2f4ccb7cb36fa101c2a8";
 
+    // Loop through API pages
     for ($page = 1; $page <= $pages; $page++) {
 
+        // TMDB API request URL
         $url = "https://api.themoviedb.org/3/movie/popular?api_key=$apiKey&page=$page";
 
+        // Fetch API response
         $response = file_get_contents($url);
         $data = json_decode($response, true);
 
+        // Skip if no movie results
         if (empty($data["results"])) continue;
 
+        // Loop through movies
         foreach ($data["results"] as $movie) {
 
+            // Get movie data
             $tmdb_id = (int)$movie["id"];
             $title = mysqli_real_escape_string($dbc, $movie["title"] ?? "Untitled");
 
+            // Generate poster URL
             $poster = !empty($movie["poster_path"])
                 ? "https://image.tmdb.org/t/p/w500" . $movie["poster_path"]
                 : "assets/images/placeholder.png";
 
-$overview = substr($movie["overview"] ?? "", 0, 255);
-$overview = mysqli_real_escape_string($dbc, $overview);
+            // Get and sanitize overview text
+            $overview = substr($movie["overview"] ?? "", 0, 255);
+            $overview = mysqli_real_escape_string($dbc, $overview);
 
+            // SQL query to check if movie already exists
             $check = mysqli_query($dbc, "
                 SELECT movie_id 
                 FROM mm_movies 
@@ -50,10 +68,12 @@ $overview = mysqli_real_escape_string($dbc, $overview);
                 LIMIT 1
             ");
 
+            // Skip duplicate movies
             if (mysqli_num_rows($check) > 0) {
                 continue; 
             }
 
+            // SQL query to insert imported movie
             $sql = "
                 INSERT INTO mm_movies (
                     title,
@@ -84,6 +104,7 @@ $overview = mysqli_real_escape_string($dbc, $overview);
                 )
             ";
 
+            // Execute insert query
             if (mysqli_query($dbc, $sql)) {
                 $inserted++;
             } else {
@@ -92,6 +113,7 @@ $overview = mysqli_real_escape_string($dbc, $overview);
         }
     }
 
+    // Import summary message
     $message = "Import completed. Inserted: $inserted | Errors: $errors";
 }
 ?>
@@ -171,4 +193,3 @@ window.addEventListener("scroll", function () {
 });
 </script>
 </html>
-

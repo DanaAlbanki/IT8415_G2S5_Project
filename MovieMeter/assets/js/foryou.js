@@ -1,34 +1,44 @@
 import { API_KEY, BASE_URL, IMG_PATH } from "./api.js";
 
+// Default image used when a movie poster is missing
 const FALLBACK_IMAGE = "assets/images/no-image.png";
 
+// Navbar elements
 const $navbar = $(".navbar");
 const $menuToggle = $("#menuToggle");
 const $navLinks = $("#navLinks");
 
+// Movie section elements
 const $trendingMovies = $("#trendingMovies");
 const $forYouMovies = $("#forYouMovies");
 
+// Status text elements
 const $trendingStatus = $("#trendingStatus");
 const $forYouStatus = $("#forYouStatus");
 
+// Refresh buttons
 const $refreshTrending = $("#refreshTrending");
 const $refreshForYou = $("#refreshForYou");
 
+// Genre ids used for random recommendations
 const genrePool = [28, 12, 16, 35, 80, 18, 14, 27, 9648, 10749, 878, 53];
 
+// Start the page
 init();
 
 function getReturnTo() {
+    // Save the current page URL so the user can return back later
     const fileName = window.location.pathname.split("/").pop() || "foryou.php";
     return `${fileName}${window.location.search}${window.location.hash}`;
 }
 
 function getMovieDetailsUrl(movieId) {
+    // Build the movie details URL with the selected movie id
     return `movie.php?id=${encodeURIComponent(movieId)}&return_to=${encodeURIComponent(getReturnTo())}`;
 }
 
 async function init() {
+    // Attach events and load both movie sections
     attachEvents();
     await Promise.all([
         loadTrendingMovies(),
@@ -37,12 +47,14 @@ async function init() {
 }
 
 function attachEvents() {
+    // Toggle mobile navigation menu
     if ($menuToggle.length && $navLinks.length) {
         $menuToggle.on("click", function () {
             $navLinks.toggleClass("open");
         });
     }
 
+    // Close mobile menu when a nav link is clicked
     $(".nav-links a").each(function () {
         $(this).on("click", function () {
             if ($navLinks.length) {
@@ -51,6 +63,7 @@ function attachEvents() {
         });
     });
 
+    // Add navbar style when scrolling
     $(window).on("scroll", function () {
         if (!$navbar.length) return;
 
@@ -61,16 +74,19 @@ function attachEvents() {
         }
     });
 
+    // Reload trending movies when refresh is clicked
     if ($refreshTrending.length) {
         $refreshTrending.on("click", loadTrendingMovies);
     }
 
+    // Reload recommendations when refresh is clicked
     if ($refreshForYou.length) {
         $refreshForYou.on("click", loadForYouMovies);
     }
 }
 
 async function loadTrendingMovies() {
+    // Load random weekly trending movies
     if (!$trendingMovies.length) return;
 
     try {
@@ -87,6 +103,7 @@ async function loadTrendingMovies() {
 
         if ($trendingStatus.length) $trendingStatus.text("");
     } catch (error) {
+        // Show error message if trending movies fail to load
         console.error(error);
         if ($trendingStatus.length) $trendingStatus.text("");
         $trendingMovies.html(`<div class="empty-state">Failed to load trending movies.</div>`);
@@ -94,6 +111,7 @@ async function loadTrendingMovies() {
 }
 
 async function loadForYouMovies() {
+    // Load random recommended movies by genre
     if (!$forYouMovies.length) return;
 
     try {
@@ -112,6 +130,7 @@ async function loadForYouMovies() {
 
         if ($forYouStatus.length) $forYouStatus.text("");
     } catch (error) {
+        // Show error message if recommendations fail to load
         console.error(error);
         if ($forYouStatus.length) $forYouStatus.text("");
         $forYouMovies.html(`<div class="empty-state">Failed to load recommendations.</div>`);
@@ -119,6 +138,7 @@ async function loadForYouMovies() {
 }
 
 function renderMovieRow($container, movies) {
+    // Display movies inside the selected container
     $container.html("");
 
     if (!movies.length) {
@@ -132,6 +152,7 @@ function renderMovieRow($container, movies) {
 }
 
 function createMovieCard(movie) {
+    // Create one movie card element
     const $movieEl = $("<div></div>").addClass("movie-card");
 
     const $image = $("<img>");
@@ -154,6 +175,7 @@ function createMovieCard(movie) {
 }
 
 function pickFiveUniqueMovies(movies) {
+    // Pick up to five usable movies with images
     const usable = movies.filter(
         (movie) => movie && movie.id && (movie.poster_path || movie.backdrop_path)
     );
@@ -163,10 +185,12 @@ function pickFiveUniqueMovies(movies) {
 }
 
 function getRandomNumber(min, max) {
+    // Return a random number between min and max
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 async function fetchJSON(url) {
+    // Request JSON data from the API
     const data = await $.ajax({
         url: url,
         method: "GET",

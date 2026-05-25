@@ -164,7 +164,7 @@ require_once(__DIR__ . "/includes/auth_check.php");
         <p>© 2026 MovieMeter. All rights reserved.</p>
     </div>
 </footer>
- 
+
 <!-- jQuery library -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 

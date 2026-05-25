@@ -1,22 +1,28 @@
+// Import API settings
 import { API_KEY, BASE_URL, IMG_PATH } from "./api.js";
 
+// Image base paths
 const BACKDROP_PATH = "https://image.tmdb.org/t/p/original";
 const PROFILE_PATH = "https://image.tmdb.org/t/p/w300";
 const FALLBACK_IMAGE = "assets/images/notfound.png";
 
+// Main container and movie id from URL
 const $container = $("#movie-detail");
 const params = new URLSearchParams(window.location.search);
 const tmdbId = (params.get("id") || "").trim();
 
+// Backend endpoint URLs
 const basePath = window.location.pathname.replace(/\/[^/]*$/, "/");
 const ADD_TO_WATCHLIST_URL = `${window.location.origin}${basePath}add-to-watchlist.php`;
 const REMOVE_FROM_WATCHLIST_URL = `${window.location.origin}${basePath}remove-from-watchlist.php`;
 const ADD_RATING_URL = `${window.location.origin}${basePath}add-rating.php`;
 const ADD_COMMENT_URL = `${window.location.origin}${basePath}add-comment.php`;
 
+// Data passed from PHP
 const pageData = window.moviePageData || {};
 const isLoggedIn = Boolean(pageData.isLoggedIn || false);
 
+// Stored comments, rating, and summary data
 let dbComments = Array.isArray(pageData.comments) ? pageData.comments : [];
 let dbUserRating = Number(pageData.userRating || 0);
 let dbSummary = pageData.summary || {
@@ -26,8 +32,10 @@ let dbSummary = pageData.summary || {
     view_count: 0
 };
 
+// Watchlist state
 let isInUserWatchlist = Boolean(pageData.isInWatchlist || false);
 
+// Load movie if id exists
 if (!tmdbId) {
     showMessage("Movie not found", "No movie ID was provided.");
 } else {
@@ -35,14 +43,17 @@ if (!tmdbId) {
 }
 
 function getReturnTo() {
+    // Return current movie page
     return `movie.php?id=${encodeURIComponent(tmdbId)}`;
 }
 
 function getMovieDetailsUrl(movieId) {
+    // Build movie details URL
     return `movie.php?id=${encodeURIComponent(movieId)}&return_to=${encodeURIComponent(getReturnTo())}`;
 }
 
 function requireLogin() {
+    // Redirect guest users to login
     if (!isLoggedIn) {
         window.location.href = "login.php";
         return false;
@@ -51,6 +62,7 @@ function requireLogin() {
 }
 
 async function loadMovie() {
+    // Load movie details from API
     try {
         const movie = await $.ajax({
             url: `${BASE_URL}/movie/${encodeURIComponent(tmdbId)}?api_key=${API_KEY}&append_to_response=credits,videos,recommendations`,
@@ -60,12 +72,14 @@ async function loadMovie() {
 
         renderMovie(movie);
     } catch (error) {
+        // Show error message if loading fails
         console.error(error);
         showMessage("Something went wrong", "We could not load this movie right now.");
     }
 }
 
 function showMessage(title, text) {
+    // Show message block on page
     if (!$container.length) return;
 
     $container.html(`
@@ -78,39 +92,47 @@ function showMessage(title, text) {
 }
 
 function resolvePoster(movie) {
+    // Return poster image or fallback
     return movie.poster_path ? IMG_PATH + movie.poster_path : FALLBACK_IMAGE;
 }
 
 function resolveBackdrop(movie, poster) {
+    // Return backdrop image or fallback
     return movie.backdrop_path ? BACKDROP_PATH + movie.backdrop_path : (poster || FALLBACK_IMAGE);
 }
 
 function resolveActorImage(actor) {
+    // Return actor image or fallback
     return actor.profile_path ? PROFILE_PATH + actor.profile_path : FALLBACK_IMAGE;
 }
 
 function getYear(releaseDate) {
+    // Get year from release date
     return releaseDate ? releaseDate.split("-")[0] : "";
 }
 
 function getGenres(movie) {
+    // Get movie genre names
     if (!movie.genres || !movie.genres.length) return "N/A";
     return movie.genres.map((genre) => genre.name).join(", ");
 }
 
 function getActors(movie) {
+    // Get first three actors
     if (!movie.credits || !movie.credits.cast) return "N/A";
     const cast = movie.credits.cast.slice(0, 3).map((actor) => actor.name);
     return cast.length ? cast.join(", ") : "N/A";
 }
 
 function getDirector(movie) {
+    // Get movie director
     if (!movie.credits || !movie.credits.crew) return "N/A";
     const director = movie.credits.crew.find((person) => person.job === "Director");
     return director ? director.name : "N/A";
 }
 
 function formatRuntime(minutes) {
+    // Format runtime text
     if (!minutes || Number.isNaN(minutes)) return "N/A";
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -121,6 +143,7 @@ function formatRuntime(minutes) {
 }
 
 function getTrailer(movie) {
+    // Find best YouTube trailer
     const videos = movie.videos?.results || [];
 
     const trailer =
@@ -132,6 +155,7 @@ function getTrailer(movie) {
 }
 
 function renderInfoRow(label, value, id = "") {
+    // Create detail info row
     if (value === undefined || value === null || value === "") return "";
     const idAttr = id ? ` id="${id}"` : "";
 
@@ -144,6 +168,7 @@ function renderInfoRow(label, value, id = "") {
 }
 
 function updateWatchlistButton() {
+    // Update watchlist button status
     const $watchlistBtn = $("#watchlistBtn");
     if (!$watchlistBtn.length) return;
 
@@ -158,6 +183,7 @@ function updateWatchlistButton() {
 }
 
 async function postForm(url, formData, fallbackMessage) {
+    // Send POST request to backend
     try {
         const data = await $.ajax({
             url: url,
@@ -191,18 +217,21 @@ async function postForm(url, formData, fallbackMessage) {
 }
 
 async function addToWatchlist() {
+    // Add current movie to watchlist
     const formData = new FormData();
     formData.append("tmdb_id", tmdbId);
     return await postForm(ADD_TO_WATCHLIST_URL, formData, "Failed to add to watchlist.");
 }
 
 async function removeFromWatchlist() {
+    // Remove current movie from watchlist
     const formData = new FormData();
     formData.append("tmdb_id", tmdbId);
     return await postForm(REMOVE_FROM_WATCHLIST_URL, formData, "Failed to remove from watchlist.");
 }
 
 async function toggleWatchlistOnServer(button) {
+    // Toggle watchlist on server
     if (!button || button.disabled) return;
 
     if (!requireLogin()) return;
@@ -231,16 +260,19 @@ async function toggleWatchlistOnServer(button) {
 }
 
 function formatCommentDate(dateString) {
+    // Format comment date
     const date = new Date(dateString);
     if (Number.isNaN(date.getTime())) return "";
     return date.toLocaleString();
 }
 
 function escapeHTML(text) {
+    // Escape text before adding it to HTML
     return $("<div>").text(text).html();
 }
 
 function renderCommentsList(comments) {
+    // Render comments list
     const $commentsList = $("#commentsList");
     if (!$commentsList.length) return;
 
@@ -265,6 +297,7 @@ function renderCommentsList(comments) {
 }
 
 function updateStarSelection(stars, selectedRating) {
+    // Highlight selected rating stars
     stars.each(function () {
         const value = Number($(this).data("value"));
         $(this).toggleClass("active", value <= selectedRating);
@@ -272,6 +305,7 @@ function updateStarSelection(stars, selectedRating) {
 }
 
 function updateSummaryUI(summary) {
+    // Update rating, comment, and view summary
     dbSummary = { ...dbSummary, ...(summary || {}) };
 
     const $averageEl = $("#detailAverageRating");
@@ -297,6 +331,7 @@ function updateSummaryUI(summary) {
 }
 
 async function submitRating(ratingValue) {
+    // Submit user rating
     const formData = new FormData();
     formData.append("tmdb_id", tmdbId);
     formData.append("rating_value", String(ratingValue));
@@ -304,6 +339,7 @@ async function submitRating(ratingValue) {
 }
 
 async function submitComment(commentTextValue) {
+    // Submit user comment
     const formData = new FormData();
     formData.append("tmdb_id", tmdbId);
     formData.append("comment_text", commentTextValue);
@@ -311,6 +347,7 @@ async function submitComment(commentTextValue) {
 }
 
 function createActorCard(actor) {
+    // Create actor card HTML
     const actorName = actor?.name || "Unknown Actor";
     const characterName = actor?.character || "Cast";
     const actorImage = resolveActorImage(actor);
@@ -334,6 +371,7 @@ function createActorCard(actor) {
 }
 
 function renderActorsSection(movie) {
+    // Render actors section
     const cast = movie?.credits?.cast || [];
 
     if (!cast.length) {
@@ -377,6 +415,7 @@ function renderActorsSection(movie) {
 }
 
 function createRecommendationCard(movie) {
+    // Create recommendation card HTML
     const poster = resolvePoster(movie);
     const title = movie?.title || "Untitled Movie";
 
@@ -397,6 +436,7 @@ function createRecommendationCard(movie) {
 }
 
 function renderRecommendationsSection(movie) {
+    // Render recommendations section
     const recommendations = movie?.recommendations?.results || [];
 
     if (!recommendations.length) {
@@ -426,6 +466,7 @@ function renderRecommendationsSection(movie) {
 }
 
 function getGenreNamesFromIds(ids) {
+    // Convert genre ids to names
     const genreMap = {
         28: "Action",
         12: "Adventure",
@@ -452,6 +493,7 @@ function getGenreNamesFromIds(ids) {
 }
 
 function setupActorsToggle() {
+    // Set up show all actors toggle
     const $toggle = $("#actorsToggle");
     const $hiddenItems = $("[data-hidden-actor='true']");
 
@@ -465,6 +507,7 @@ function setupActorsToggle() {
 }
 
 function setupRecommendationClicks() {
+    // Open recommendation movie page on click
     $("[data-recommendation-id]").each(function () {
         $(this).on("click", function () {
             const movieId = $(this).attr("data-recommendation-id");
@@ -475,6 +518,7 @@ function setupRecommendationClicks() {
 }
 
 function renderMovie(movie) {
+    // Render full movie details page
     if (!$container.length) return;
 
     const title = movie.title || "Untitled Movie";
@@ -630,6 +674,7 @@ function renderMovie(movie) {
         ${renderRecommendationsSection(movie)}
     `);
 
+    // Handle broken poster image
     const $posterImage = $(".poster-image");
     if ($posterImage.length) {
         $posterImage.on("error", function () {
@@ -637,6 +682,7 @@ function renderMovie(movie) {
         });
     }
 
+    // Handle broken backdrop image
     const $heroSection = $(".hero");
     if ($heroSection.length && backdrop.includes("image.tmdb.org")) {
         const testImage = new Image();
@@ -646,6 +692,7 @@ function renderMovie(movie) {
         testImage.src = backdrop;
     }
 
+    // Set up watchlist button
     const $watchlistBtn = $("#watchlistBtn");
     if ($watchlistBtn.length) {
         updateWatchlistButton();
@@ -654,17 +701,21 @@ function renderMovie(movie) {
         });
     }
 
+    // Rating elements
     const $stars = $(".star-btn");
     const $saveRatingBtn = $("#saveRatingBtn");
     const $ratingMessage = $("#ratingMessage");
 
+    // Current selected rating
     let selectedRating = dbUserRating;
 
+    // Initialize rating, comments, actors, and recommendations
     updateStarSelection($stars, selectedRating);
     renderCommentsList(dbComments);
     setupActorsToggle();
     setupRecommendationClicks();
 
+    // Handle star rating click
     $stars.each(function () {
         $(this).on("click", function () {
             if (!requireLogin()) return;
@@ -678,6 +729,7 @@ function renderMovie(movie) {
         });
     });
 
+    // Handle rating submit
     if ($saveRatingBtn.length) {
         $saveRatingBtn.on("click", async function () {
             if (!requireLogin()) return;
@@ -716,11 +768,13 @@ function renderMovie(movie) {
         });
     }
 
+    // Comment form elements
     const $commentForm = $("#commentForm");
     const $commentText = $("#commentText");
     const $commentMessage = $("#commentMessage");
     const $commentSubmitBtn = $commentForm.length ? $commentForm.find("button[type='submit']") : $();
 
+    // Handle comment submit
     if ($commentForm.length && $commentText.length && $commentSubmitBtn.length) {
         $commentForm.on("submit", async function (e) {
             e.preventDefault();

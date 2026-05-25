@@ -18,10 +18,9 @@ MovieMeter is a movie review and rating platform where users can:
 
 ## 👥 Roles
 
-- **Viewer (Visitor)** — Browse and search movies, view details, read reviews and ratings
-- **Content Creator** — Add and manage movies, write reviews, upload media
-- **Administrator** — Full system control: manage users, approve/delete content, generate reports
-
+- **Viewer** — Browse/search movies, view details, add ratings, add comments, and manage a personal watchlist.
+- **Creator** — Add, edit, upload media for, publish, and manage their own movies.
+- **Admin** — Manage users, manage all movies, manage/delete comments, delete content, and generate reports.
 ---
 
 ## ✨ Required Features
@@ -68,60 +67,151 @@ MovieMeter is a movie review and rating platform where users can:
 - Movies created by specific users
 
 ---
-
 ## 🚀 Advanced Features
 
-### 1. AJAX ⭐
-Used to update parts of the page dynamically without reloading.
-- Add comments without page reload
-- Update ratings instantly
-- Live search results
+### 1. Recommendation Movies ⭐
+Used to suggest movies based on user preferences.
 
-### 2. Prepared Statements ⭐
-Used to secure database operations and prevent SQL injection.
-- Secure login queries
-- Secure insert/update/delete operations
+**Assigned To:** Fatema
 
-### 3. jQuery ⭐
-Used to simplify JavaScript operations.
-- Event handling
-- Form validation
-- AJAX requests
+---
 
-### 4. Advanced UI (Bootstrap) ⭐
+### 2. Actors in Each Movie ⭐
+Display actor information for each movie.
+
+**Assigned To:** Fatema
+
+---
+
+### 3. Advanced UI Responsive ⭐
 - Responsive design
 - Clean and modern layout
-- UI components (cards, navbar, modals)
 
-### 5. Pagination ⭐
+**Assigned To:** All (Maram, Zainab, Fatema, Dana)
+
+---
+
+### 4. Pagination ⭐
 - Display movies in pages
 - Improve performance
 - Better user experience
 
-### 6. Watchlist ⭐
+**Assigned To:** Fatema, Maram
+
+---
+
+### 5. Watchlist ⭐
 - Add/remove movies
 - Personal movie list
 
-### 7. Database Triggers ⭐
+**Assigned To:** Fatema, Maram
+
+---
+
+### 6. Triggers (Database) ⭐
 Used to automate database operations.
 - Automatically update average rating
 - Maintain comment count
 - Prevent duplicate ratings
 - Log deleted data
 
-### 8. External API Integration ⭐
-- Fetch movies from external API
-- Save selected movies into database
-
-### 9. Dark Theme UI ⭐
-- Consistent dark interface design
-
-### 10. API Testing (Postman)
-- Test API endpoints
-- Verify requests and responses
+**Assigned To:** Fatema, Maram
 
 ---
 
+### 7. External API Integration ⭐
+- Fetch movies from external API
+
+**Assigned To:** Maram, Fatema
+
+---
+
+### 8. Trailer ⭐
+- Display movie trailers
+- Play trailers directly on the movie page
+- Handle video loading errors
+
+**Assigned To:** Fatema, Maram
+
+---
+
+### 9. Handle Missing Images ⭐
+- Show fallback image when movie poster is missing
+- Prevent broken image links in UI
+- Maintain consistent layout
+
+**Assigned To:** Fatema, Maram
+
+---
+
+### 10. "For You" Section ⭐
+- Recommend movies based on user activity
+- Display personalized movie suggestions
+- Update dynamically as user interacts with the site
+
+**Assigned To:** Maram
+
+---
+
+### 11. Profiles & Edit Profile ⭐
+User profile management and editing functionality.
+
+**Assigned To:** Fatema
+
+---
+
+### 12. Image Upload (Profile Pic) ⭐
+Upload and manage user profile pictures.
+
+**Assigned To:** Fatema
+
+---
+
+### 13. View Count Changes ⭐
+Track and update movie view counts.
+
+**Assigned To:** Fatema
+
+---
+
+### 14. AJAX ⭐
+Dynamic content loading and updates without page refresh.
+
+**Assigned To:** Maram
+
+---
+
+### 15. jQuery ⭐
+DOM manipulation and event handling.
+
+**Assigned To:** Fatema
+
+---
+
+### 16. Database Procedures ⭐
+Create and manage stored procedures for database operations.
+
+**Assigned To:** Maram
+
+---
+
+### 17. Discover Movies ⭐
+- Displays trending/popular movies from the TMDB API.
+- Allows users to browse external movie content.
+- Improves the browsing experience.
+
+**Assigned To:** Fatema, Maram
+
+---
+
+### 18. Categories Movies ⭐
+- Displays movies grouped by genre/category.
+- Uses TMDB API to fetch category-based movie results.
+- Helps users find movies based on their interests.
+
+**Assigned To:** Fatema, Maram
+
+---
 ## 👥 Final Task Distribution
 
 ### Team Members
@@ -137,12 +227,12 @@ Used to automate database operations.
 
 ## Roles & Tasks
 
-| Name | Role | Dev Type | Tasks |
+| Developer | Role | Dev Type | Primary Responsibilities |
 |---|---|---|---|
-| **Maram Shubbar** | Frontend & UI/UX Developer | Frontend | ERD, Home Page (UI + layout), Search System (AJAX + filters), Rating & Comments (AJAX frontend), jQuery integration (events + AJAX handling), API consumption (connect frontend to backend endpoints), Watchlist (UI + AJAX add/remove), Dark/light theme toggle |
-| **Zainab Mahdi** | Content & Creator Panel Developer | Full-stack | ERD, Creator Panel (add/edit/publish movies), Media Upload (images/videos), Movie Validation (forms + logic), Image Preview Before Upload (JavaScript), Connect creator panel with database, Edit/Delete logic with permissions |
-| **Fatema Maitham** | Backend & API Developer | Backend | Database Table Creation, Authentication (login/register), Session Management, Roles & Permissions, External API Integration (fetch & save movies), API endpoints (for AJAX requests), Watchlist API (add/remove backend logic), Pagination, Database Triggers |
-| **Dana Albanki** | Admin & Reports Developer | Backend | Database Table Creation, Admin Panel (manage users & movies), Manage Comments (admin control), Reporting System, Prepared Statements (secure queries) |
+| **Maram Shubbar** | Frontend & UI/UX | Frontend | ERD Design, Home Page, Search System, Rating/Comments (Frontend), Watchlist (UI), "For You" Section, Pagination (Frontend), Triggers (Frontend), External API (Frontend), Trailer (Frontend), Missing Images, AJAX, jQuery, Database Procedures |
+| **Zainab Mahdi** | Content & Creator Panel | Full-stack | Database Tables Creation, Creator Panel (Add/Edit/Publish), Media Upload (Images/Videos), Movie Validation, Image Preview Before Upload, Connect to Database, Edit/Delete Logic with Permissions |
+| **Fatema Maitham** | Backend & API | Backend | Database Tables Creation, Authentication & Roles, Recommendation System, Actors, Pagination (Backend), Watchlist (Backend), Database Triggers (Backend), Trailer (Backend), Handle Missing Images (Backend), User Profiles, Profile Picture Upload, View Count Changes |
+| **Dana Albanki** | Admin & Reports | Backend | ERD Design, Admin Panel, Reporting System (Most Popular, By Creator), Comment Management, Prepared Statements (Secure Queries) |
 
 ---
 
@@ -150,10 +240,20 @@ Used to automate database operations.
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | HTML, CSS, JavaScript, Bootstrap, jQuery |
+| Frontend | HTML, CSS, JavaScript, jQuery |
 | Backend | PHP |
 | Database | MySQL |
-| Tools | XAMPP, MAMP/ phpMyAdmin / NetBeans / Postman |
+| Tools | XAMPP, MAMP/ phpMyAdmin / NetBeans  |
+
+---
+
+## 📊 Database ERD
+
+The Entity Relationship Diagram (ERD) shows the database structure of the MovieMeter system, including the main tables, relationships, primary keys, and foreign keys used in the project.
+
+The ERD file is included in the main project folder as:
+
+![MovieMeter ERD](moviemeter-erd.png)
 
 ---
 
@@ -162,127 +262,181 @@ Used to automate database operations.
 ```
 MovieMeter/
 │
-├── index.php                     # Home page: latest movies, search bar
-├── login.php                     # User login page
-├── register.php                  # User signup page
-├── logout.php                    # Logout and destroy session
-├── search.php                    # Search results page
-├── movie-details.php             # Movie page: details, rating, comments, trailer
-├── profile.php                   # Logged-in user profile
-├── not-found.php                 # 404 page
+├── index.php                  # Home page: latest movies + search
+├── login.php                  # User login & creates session after authentication
+├── register.php               # User signup page
+├── logout.php                 # Destroy session and log user out
+├── discover.php               # Discover movies page
+├── categories.php             # Movies by category
+├── search.php                 # Search results page
+├── movie.php                  # Movie details page (rating, comments, trailer)
+├── profile.php                # User profile page
+├── watchlist.php              # User watchlist page
+├── foryou.php                 # Personalized recommendations
+├── 404.php                    # Not found page
 │
 ├── config/
-│   ├── config.php                # App settings, constants, API key, base URL
-│   ├── database.php              # Database connection
-│   └── app.php                   # Global app configuration
+│   ├── DBConn.php             # Database connection
+│   ├── config.php             # Application configuration (database credentials, constants)
 │
 ├── includes/
-│   ├── header.php                # Common header + Bootstrap CSS
-│   ├── footer.php                # Common footer + JS files
-│   ├── navbar.php                # Navigation bar
-│   ├── session.php               # Session helpers
-│   ├── auth.php                  # Login/role protection helpers
-│   ├── functions.php             # General helper functions
-│   ├── flash.php                 # Success/error messages
-│   └── pagination.php            # Pagination UI/helper
-│
-├── classes/
-│   ├── User.php                  # User operations: register, login, update, delete
-│   ├── Movie.php                 # Movie operations: add, edit, delete, fetch, search
-│   ├── Rating.php                # Rating operations: add/update/get average
-│   ├── Comment.php               # Comment operations: add/get/delete/approve
-│   ├── Category.php              # Category operations
-│   ├── Report.php                # Reports for admin
-│   └── Auth.php                  # Authentication logic
+│   ├── admin_nav.php          # Admin navigation bar
+│   ├── admin_footer.php       # Admin footer
+│   ├── creator_footer.php     # Creator footer
+│   ├── auth_check.php         # Session check & restrict access to logged-in users
+│   ├── config_setup.php       # Initial config setup
 │
 ├── admin/
-│   ├── dashboard.php             # Admin dashboard
-│   ├── manage-users.php          # View/edit/delete users
-│   ├── add-user.php              # Add new user manually
-│   ├── edit-user.php             # Edit user data
-│   ├── delete-user.php           # Delete user
-│   ├── manage-movies.php         # View/edit/delete all movies
-│   ├── add-movie.php             # Add movie as admin
-│   ├── edit-movie.php            # Edit any movie
-│   ├── delete-movie.php          # Delete any movie
-│   ├── manage-comments.php       # View/delete inappropriate comments
-│   ├── reports.php               # Reports page
-│   ├── popular-report.php        # Most popular movies by date range
-│   ├── creator-report.php        # Movies by specific creator
-│   └── settings.php              # Admin settings
+│   ├── dashboard.php          # Admin dashboard
+│   ├── manage-users.php       # Manage users
+│   ├── add-user.php           # Add user
+│   ├── edit-user.php          # Edit user
+│   ├── delete-user.php        # Delete user
+│   ├── manage-movies.php      # Manage all movies
+│   ├── add-movie.php          # Add movie
+│   ├── edit-movie.php         # Edit movie
+│   ├── delete-movie.php       # Delete movie
+│   ├── manage-comments.php    # Manage comments
+│   ├── delete-comment.php     # Delete comment
+│   ├── reports.php            # Reports main page
+│   ├── popular-report.php     # Most popular movies
+│   ├── creator-report.php     # Movies by creator
 │
 ├── creator/
-│   ├── dashboard.php             # Creator dashboard
-│   ├── add-movie.php             # Add new movie
-│   ├── edit-movie.php            # Edit own movie
-│   ├── delete-movie.php          # Delete own movie if allowed
-│   ├── my-movies.php             # List creator's own movies
-│   ├── upload-media.php          # Upload poster/trailer/media
-│   └── publish-movie.php         # Publish movie
-│
-├── viewer/
-│   ├── dashboard.php             # Viewer dashboard
-│   ├── favorites.php             # Watchlist movies
-│   ├── ratings.php               # Movies rated by viewer
-│   └── comments.php              # Comments written by viewer
-│
-├── api/
-│   ├── fetch-movies.php          # Fetch movies from external API
-│   ├── import-movies.php         # Save selected API movies into DB
-│   ├── save-movie.php            # Save single API movie into DB
-│   ├── rate.php                  # AJAX rating endpoint
-│   ├── comment.php               # AJAX comment insert endpoint
-│   ├── delete-comment.php        # AJAX comment delete endpoint
-│   ├── search-movies.php         # AJAX live search endpoint
-│   └── fetch-reports.php         # AJAX report data endpoint
+│   ├── dashboard.php          # Creator dashboard
+│   ├── add-movie.php          # Add new movie
+│   ├── edit-movie.php         # Edit movie
+│   ├── delete-movie.php       # Delete movie
+│   ├── my-movie.php           # Creator movies list
+│   ├── movie_details.php      # Movie details (creator view)
+│   ├── import-movies.php      # Import from API
+│   ├── publish.php            # Publish movie
+│   ├── upload-media.php       # Upload images/videos
+│   ├── profile.php            # Creator profile
 │
 ├── assets/
 │   ├── css/
-│   │   ├── style.css             # Main custom styles
-│   │   ├── admin.css             # Admin page styles
-│   │   ├── forms.css             # Form styles
-│   │   └── movie.css             # Movie cards/details styles
+│   │   ├── style.css          # Main styles
+│   │   ├── admin.css          # Admin styles
+│   │   ├── discover.css       # Discover page styles
+│   │   ├── categories.css     # Categories styles
+│   │   ├── movie.css          # Movie card styles
+│   │   ├── movie-details.css  # Movie details page
+│   │   ├── profile.css        # Profile styles
+│   │   ├── login.css          # Login page styles
+│   │   ├── register.css       # Register page styles
+│   │   ├── watchlist.css      # Watchlist styles
+│   │   ├── foryou.css         # For You styles
+│   │
 │   ├── js/
-│   │   ├── validation.js         # Client-side form validation
-│   │   ├── rating.js             # Star rating logic
-│   │   ├── comments.js           # Comment submit/load/delete
-│   │   ├── search.js             # Search and filter logic
-│   │   ├── ajax.js               # Shared AJAX helpers
-│   │   └── app.js                # Global JS
-│   └── images/
-│       ├── logo.png
-│       ├── default-movie.jpg
-│       └── uploads/
-│
-├── uploads/
-│   ├── posters/
-│   ├── trailers/
-│   ├── thumbnails/
-│   └── temp/
+│   │   ├── api.js            # TMDB API configuration: base URL and image path
+│   │   ├── main.js            # Main logic (navigation)
+│   │   ├── home.js            # Home interactions (slider)
+│   │   ├── movie.js           # Movie page logic (rating/comments)
+│   │   ├── watchlist.js       # Watchlist logic
+│   │   ├── foryou.js          # Recommendation logic
+│   │   ├── categories.js      # Category filtering
+│   │   ├── auth.js            # Auth handling
+│   │   ├── edit-profile.js    # Profile update logic
+│   │
+│   ├── images/               # Images & assets
 │
 ├── sql/
-│   ├── db.sql                    # CREATE TABLE statements
-│   ├── sample-data.sql           # Sample data
-│   ├── procedures.sql            # Stored procedures
-│   ├── triggers.sql              # Database triggers
-│   └── indexes.sql               # Full-text/index definitions
+│   ├── db.sql                # Tables structure
+│   ├── sample-data.sql       # Sample data
+│   ├── procedures.sql        # Stored procedures
+│   ├── triggers.sql          # Database triggers
+│   ├── indexes.sql           # Indexes
 │
-├── tests/
-│   ├── screenshots/
-│   ├── functional-tests.txt
-│   └── advanced-features.txt
+├── uploads/                  # Uploaded files (images/videos)
 │
-├── docs/
-│   ├── erd.png
-│   ├── report.pdf
-│   ├── test-plan.pdf
-│   └── github-link.txt
-│
-├── .htaccess                     # URL/security rules (Apache)
-└── README.md                     # Project overview and setup
+├── .htaccess                 # Routing & security rules
+├── .gitignore                # Ignored files
+```
+---
+
+## ⚙️ Setup Instructions
+
+Follow these steps to run the project locally:
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/DanaAlbanki/IT8415_G2S5_Project.git
+```
+
+### 2. Move Project to Server
+
+* Place the project folder inside:
+
+  * `htdocs` (XAMPP) OR
+  * `Applications/MAMP/htdocs` (MAMP)
+
+---
+
+### 3. Setup Database
+
+1. Open **phpMyAdmin**
+2. Create a new database
+3. Import the SQL files in order:
+
+   ```
+   /sql/db.sql
+   /sql/indexes.sql
+   /sql/procedures.sql
+   /sql/triggers.sql
+   /sql/sample-data.sql
+   ```
+
+---
+
+### 4. Configure Database Connection
+
+Open:
+
+```
+config/config.php
+```
+
+Update with your local credentials:
+
+```php
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db   = "your_database_name";
 ```
 
 ---
+
+### 5. Setup TMDB API Key
+
+1. Go to: https://www.themoviedb.org/
+2. Create an account and generate an API key
+3. Open:
+
+```
+assets/js/api.js
+```
+
+Replace this line:
+
+```js
+export const API_KEY = "YOUR_TMDB_API_KEY";
+```
+
+---
+
+### 6. Run the Project
+
+Open your browser and go to:
+
+```
+http://localhost/MovieMeter/
+```
+
+---
+
 
 ## 🧪 Testing
 
@@ -293,7 +447,14 @@ The system is tested to ensure:
 - Role permissions are enforced
 - Reports generate correct results
 - Advanced features function as expected
-- API endpoints verified via Postman
+
+---
+
+## 🔐 Notes
+
+* API keys are not included in this repository for security reasons.
+* Make sure to add your own TMDB API key before running the project.
+* Database credentials must match your local setup.
 
 ---
 

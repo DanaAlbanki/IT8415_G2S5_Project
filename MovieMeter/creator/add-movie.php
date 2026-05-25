@@ -6,9 +6,11 @@ if ($_SESSION["role_name"] !== "creator") {
     die("Access denied.");
 }
 
+// Connect to database and get creator ID
 $dbc = getConnection();
 $creator_id = $_SESSION['user_id'];
 
+// if form is submitted GET form data
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $title = $_POST['title'];
@@ -17,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full  = $_POST['full_description'];
     $trailer = $_POST['trailer_url'];
 
-    
+    // Check if release date is empty
     if (empty($release_date)) {
         echo "<script>
             alert('Release date is required!');
@@ -26,15 +28,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
     
+    // Upload poster image
     $poster = "";
     if (!empty($_FILES['poster']['name'])) {
-        $uploadDir = __DIR__ . "/../assets/uploads/";
+        $uploadDir = __DIR__ . "/../assets/uploads/media/";
         $fileName = time() . "_" . basename($_FILES['poster']['name']);
         if (move_uploaded_file($_FILES['poster']['tmp_name'], $uploadDir . $fileName)) {
-            $poster = "assets/uploads/" . $fileName;
+            $poster = "assets/uploads/media/" . $fileName;
         }
     }
     
+    // Insert movie details into database
     $sql = "
         INSERT INTO mm_movies
         (creator_id, title, short_description, full_description, trailer_url, poster_image, release_date, created_at, updated_at)
@@ -43,14 +47,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ";
 
     mysqli_query($dbc, $sql);
-    $movie_id = mysqli_insert_id($dbc);
     
+    // Get inserted movie ID
+    $movie_id = mysqli_insert_id($dbc);
+   
+    // Upload media files if available  
     if (!empty($_FILES['media_file']['name'][0])) {
         $_POST['action'] = 'upload';
         $_POST['movie_id'] = $movie_id;
         include(__DIR__ . "/upload-media.php");
     }
 
+    // Redirect to movie list page
     header("Location: my-movie.php");
     exit;
 }

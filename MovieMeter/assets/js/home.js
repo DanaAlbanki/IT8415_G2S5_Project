@@ -1,15 +1,20 @@
+// Slider elements
 const $slides = $(".slide");
 const $dots = $(".dot");
 const $nextSlideBtn = $(".next-slide");
 const $prevSlideBtn = $(".prev-slide");
+
+// Navbar elements
 const $navbar = $(".navbar");
 const $menuToggle = $("#menuToggle");
 const $navLinks = $("#navLinks");
 
+// Slider state
 let currentSlide = 0;
 let autoSlide = null;
 
 function showSlide(index) {
+    // Show the selected slide and dot
     if (!$slides.length || !$dots.length) return;
 
     $slides.removeClass("active");
@@ -20,34 +25,40 @@ function showSlide(index) {
 }
 
 function nextSlide() {
+    // Move to the next slide
     if (!$slides.length) return;
     currentSlide = (currentSlide + 1) % $slides.length;
     showSlide(currentSlide);
 }
 
 function prevSlide() {
+    // Move to the previous slide
     if (!$slides.length) return;
     currentSlide = (currentSlide - 1 + $slides.length) % $slides.length;
     showSlide(currentSlide);
 }
 
 function startAutoSlide() {
+    // Start automatic slide changing
     if (!$slides.length) return;
     stopAutoSlide();
     autoSlide = setInterval(nextSlide, 5000);
 }
 
 function stopAutoSlide() {
+    // Stop automatic slide changing
     if (autoSlide) {
         clearInterval(autoSlide);
     }
 }
 
+// Toggle mobile navigation menu
 if ($menuToggle.length && $navLinks.length) {
     $menuToggle.on("click", function () {
         $navLinks.toggleClass("open");
     });
 
+    // Close mobile menu when a nav link is clicked
     $(".nav-links a").each(function () {
         $(this).on("click", function () {
             $navLinks.removeClass("open");
@@ -55,6 +66,7 @@ if ($menuToggle.length && $navLinks.length) {
     });
 }
 
+// Next slide button
 if ($nextSlideBtn.length) {
     $nextSlideBtn.on("click", function () {
         nextSlide();
@@ -62,6 +74,7 @@ if ($nextSlideBtn.length) {
     });
 }
 
+// Previous slide button
 if ($prevSlideBtn.length) {
     $prevSlideBtn.on("click", function () {
         prevSlide();
@@ -69,6 +82,7 @@ if ($prevSlideBtn.length) {
     });
 }
 
+// Dot navigation buttons
 $dots.each(function (index) {
     $(this).on("click", function () {
         currentSlide = index;
@@ -77,6 +91,7 @@ $dots.each(function (index) {
     });
 });
 
+// Add navbar style when scrolling
 $(window).on("scroll", function () {
     if (!$navbar.length) return;
 
@@ -87,5 +102,6 @@ $(window).on("scroll", function () {
     }
 });
 
+// Initialize slider
 showSlide(currentSlide);
 startAutoSlide();

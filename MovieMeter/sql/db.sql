@@ -137,3 +137,16 @@ CREATE TABLE mm_deleted_movies_log (
     movie_title VARCHAR(200) NOT NULL,
     deleted_reason VARCHAR(255) NULL
 ) ENGINE=MyISAM;
+
+
+-- movie media table
+CREATE TABLE `mm_movie_media` (
+  `media_id` int NOT NULL,
+  `movie_id` int NOT NULL,
+  `media_type` enum('image','video','audio') NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `is_primary` tinyint(1) DEFAULT '0',
+  `uploaded_at` datetime DEFAULT CURRENT_TIMESTAMP
+) ENGINE=MyISAM;
+

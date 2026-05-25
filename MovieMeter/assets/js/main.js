@@ -1,13 +1,18 @@
+// Import API settings
 import { API_KEY, BASE_URL, IMG_PATH } from './api.js';
 
+// Default image if movie poster is missing
 const FALLBACK_IMAGE = 'assets/images/notfound.png';
 
+// Pagination state
 let currentPage = 1;
 let totalPages = 1;
 
+// Main movie and pagination containers
 const $container = $("#movies");
 const $pagination = $("#pagination");
 
+// Search form elements
 const $searchForm = $("#searchForm");
 const $searchTitle = $("#searchTitle");
 const $searchCreator = $("#searchCreator");
@@ -16,16 +21,20 @@ const $toDate = $("#toDate");
 const $sortBy = $("#sortBy");
 const $resetFiltersBtn = $("#resetFilters");
 
+// All movies section
 const $allMoviesSection = $("#all-movies-section");
 
+// Latest movies carousel elements
 const $latestTrack = $("#latestTrack");
 const $latestPrev = $("#latestPrev");
 const $latestNext = $("#latestNext");
 
+// Top rated movies carousel elements
 const $topRatedTrack = $("#topRatedTrack");
 const $topRatedPrev = $("#topRatedPrev");
 const $topRatedNext = $("#topRatedNext");
 
+// Page UI elements
 const $resultsCount = $("#resultsCount");
 const $slides = $(".slide");
 const $dots = $(".dot");
@@ -35,19 +44,23 @@ const $navbar = $(".navbar");
 const $menuToggle = $("#menuToggle");
 const $navLinks = $("#navLinks");
 
+// Hero slider state
 let currentSlide = 0;
 let autoSlide = null;
 
 function getReturnTo() {
+    // Save current page URL for returning back later
     const fileName = window.location.pathname.split("/").pop() || "index.php";
     return `${fileName}${window.location.search}${window.location.hash}`;
 }
 
 function getMovieDetailsUrl(movieId) {
+    // Build movie details URL
     return `movie.php?id=${encodeURIComponent(movieId)}&return_to=${encodeURIComponent(getReturnTo())}`;
 }
 
 function showSlide(index) {
+    // Show selected hero slide
     if (!$slides.length || !$dots.length) return;
 
     $slides.removeClass("active");
@@ -58,34 +71,40 @@ function showSlide(index) {
 }
 
 function nextSlide() {
+    // Move to next hero slide
     if (!$slides.length) return;
     currentSlide = (currentSlide + 1) % $slides.length;
     showSlide(currentSlide);
 }
 
 function prevSlide() {
+    // Move to previous hero slide
     if (!$slides.length) return;
     currentSlide = (currentSlide - 1 + $slides.length) % $slides.length;
     showSlide(currentSlide);
 }
 
 function startAutoSlide() {
+    // Start automatic hero slider
     if (!$slides.length) return;
     stopAutoSlide();
     autoSlide = setInterval(nextSlide, 5000);
 }
 
 function stopAutoSlide() {
+    // Stop automatic hero slider
     if (autoSlide) {
         clearInterval(autoSlide);
     }
 }
 
+// Toggle mobile navigation menu
 if ($menuToggle.length && $navLinks.length) {
     $menuToggle.on("click", function () {
         $navLinks.toggleClass("open");
     });
 
+    // Close menu when a nav link is clicked
     $(".nav-links a").each(function () {
         $(this).on("click", function () {
             $navLinks.removeClass("open");
@@ -93,6 +112,7 @@ if ($menuToggle.length && $navLinks.length) {
     });
 }
 
+// Next hero slide button
 if ($nextSlideBtn.length) {
     $nextSlideBtn.on("click", function () {
         nextSlide();
@@ -100,6 +120,7 @@ if ($nextSlideBtn.length) {
     });
 }
 
+// Previous hero slide button
 if ($prevSlideBtn.length) {
     $prevSlideBtn.on("click", function () {
         prevSlide();
@@ -107,6 +128,7 @@ if ($prevSlideBtn.length) {
     });
 }
 
+// Hero slide dot buttons
 $dots.each(function (index) {
     $(this).on("click", function () {
         currentSlide = index;
@@ -115,6 +137,7 @@ $dots.each(function (index) {
     });
 });
 
+// Add navbar style on scroll
 $(window).on("scroll", function () {
     if (!$navbar.length) return;
 
@@ -125,9 +148,11 @@ $(window).on("scroll", function () {
     }
 });
 
+// Initialize hero slider
 showSlide(currentSlide);
 startAutoSlide();
 
+// Search filter values
 const filters = {
     title: "",
     creator: "",
@@ -136,6 +161,7 @@ const filters = {
     sortBy: "primary_release_date.desc"
 };
 
+// Carousel state
 const carousels = {
     latest: {
         track: $latestTrack,
@@ -153,15 +179,18 @@ const carousels = {
     }
 };
 
+// Start page
 init();
 
 async function init() {
+    // Attach events and load movie sections
     attachEvents();
     await Promise.all([loadLatestMovies(), loadTopRatedMovies()]);
     await getMovies(1);
 }
 
 function attachEvents() {
+    // Handle search form submit
     if ($searchForm.length) {
         $searchForm.on("submit", async function (e) {
             e.preventDefault();
@@ -177,6 +206,7 @@ function attachEvents() {
         });
     }
 
+    // Handle reset filters button
     if ($resetFiltersBtn.length) {
         $resetFiltersBtn.on("click", async function () {
             if ($searchForm.length) {
@@ -198,6 +228,7 @@ function attachEvents() {
         });
     }
 
+    // Latest carousel buttons
     if ($latestPrev.length && $latestNext.length) {
         $latestPrev.on("click", function () {
             moveCarousel("latest", -1);
@@ -208,6 +239,7 @@ function attachEvents() {
         });
     }
 
+    // Top rated carousel buttons
     if ($topRatedPrev.length && $topRatedNext.length) {
         $topRatedPrev.on("click", function () {
             moveCarousel("topRated", -1);
@@ -218,6 +250,7 @@ function attachEvents() {
         });
     }
 
+    // Hero detail buttons
     $(".hero-detail-btn").each(function () {
         $(this).on("click", async function (e) {
             e.preventDefault();
@@ -250,6 +283,7 @@ function attachEvents() {
 }
 
 async function loadLatestMovies() {
+    // Load latest released movies
     if (!$latestTrack.length) return;
 
     try {
@@ -270,6 +304,7 @@ async function loadLatestMovies() {
 }
 
 async function loadTopRatedMovies() {
+    // Load top rated released movies
     if (!$topRatedTrack.length) return;
 
     try {
@@ -289,6 +324,7 @@ async function loadTopRatedMovies() {
 }
 
 async function getMovies(page) {
+    // Load movies for main results section
     if (!$container.length) return;
 
     try {
@@ -316,6 +352,7 @@ async function getMovies(page) {
 }
 
 async function fetchMovies(apiPage) {
+    // Fetch movies based on current filters
     if (filters.creator) {
         const personId = await getPersonId(filters.creator);
 
@@ -348,6 +385,7 @@ async function fetchMovies(apiPage) {
 }
 
 function buildDiscoverUrl(apiPage, extraParams = {}) {
+    // Build discover API URL
     const today = new Date().toISOString().split("T")[0];
 
     const params = new URLSearchParams({
@@ -371,6 +409,7 @@ function buildDiscoverUrl(apiPage, extraParams = {}) {
 }
 
 async function getPersonId(name) {
+    // Get person id by creator name
     const params = new URLSearchParams({
         api_key: API_KEY,
         query: name,
@@ -385,6 +424,7 @@ async function getPersonId(name) {
 }
 
 function applyClientFilters(movies) {
+    // Apply local filters after API response
     let filtered = [...movies];
     const today = new Date().toISOString().split("T")[0];
 
@@ -414,6 +454,7 @@ function applyClientFilters(movies) {
 }
 
 function sortMovies(movies) {
+    // Sort movies based on selected option
     const sorted = [...movies];
 
     switch (filters.sortBy) {
@@ -438,6 +479,7 @@ function sortMovies(movies) {
 }
 
 function showMovies(movies) {
+    // Display movie cards in main section
     if (!$container.length) return;
 
     $container.html("");
@@ -457,6 +499,7 @@ function showMovies(movies) {
 }
 
 function createMovieCard(movie) {
+    // Create one movie card
     const $movieEl = $("<div></div>").addClass("movie-card");
 
     const $image = $("<img>");
@@ -479,6 +522,7 @@ function createMovieCard(movie) {
 }
 
 function renderCarousel(type, movies) {
+    // Render movie carousel pages
     const carousel = carousels[type];
 
     if (!carousel || !carousel.track.length) return;
@@ -509,6 +553,7 @@ function renderCarousel(type, movies) {
 }
 
 function moveCarousel(type, direction) {
+    // Move carousel left or right
     const carousel = carousels[type];
     if (!carousel) return;
 
@@ -526,6 +571,7 @@ function moveCarousel(type, direction) {
 }
 
 function updateCarousel(type) {
+    // Update carousel position and buttons
     const carousel = carousels[type];
 
     if (!carousel || !carousel.track.length) return;
@@ -542,6 +588,7 @@ function updateCarousel(type) {
 }
 
 function renderPagination() {
+    // Render pagination buttons
     if (!$pagination.length) return;
 
     $pagination.html("");
@@ -577,6 +624,7 @@ function renderPagination() {
 }
 
 function createArrowButton(symbol, enabled, onClick) {
+    // Create pagination arrow button
     const $btn = $("<button></button>").text(symbol).addClass("arrow");
     $btn.prop("disabled", !enabled);
 
@@ -588,6 +636,7 @@ function createArrowButton(symbol, enabled, onClick) {
 }
 
 function getPaginationPages(current, total) {
+    // Decide which pagination numbers to show
     const pages = [];
 
     if (total <= 3) {
@@ -620,11 +669,13 @@ function getPaginationPages(current, total) {
 }
 
 function changePage(page) {
+    // Change movie results page
     getMovies(page);
     scrollToAllMovies();
 }
 
 function scrollToAllMovies() {
+    // Scroll to all movies section
     if (!$allMoviesSection.length) return;
 
     window.scrollTo({
@@ -634,6 +685,7 @@ function scrollToAllMovies() {
 }
 
 function chunkArray(array, size) {
+    // Split array into groups
     const result = [];
 
     for (let i = 0; i < array.length; i += size) {
@@ -644,6 +696,7 @@ function chunkArray(array, size) {
 }
 
 async function fetchJSON(url) {
+    // Fetch JSON data from API
     try {
         const data = await $.ajax({
             url: url,

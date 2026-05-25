@@ -1,35 +1,43 @@
 import { API_KEY, BASE_URL, IMG_PATH } from "./api.js";
 
+// Default image used when a movie poster is missing
 const FALLBACK_IMAGE = "images/no-image.png";
 
+// Page elements
 const $genresList = $("#genresList");
 const $categoryMovies = $("#categoryMovies");
 const $selectedCategoryTitle = $("#selectedCategoryTitle");
 const $selectedCategorySubtitle = $("#selectedCategorySubtitle");
 const $pagination = $("#pagination");
 
+// Navbar elements
 const $menuToggle = $("#menuToggle");
 const $navLinks = $("#navLinks");
 const $navbar = $(".navbar");
 
+// Page state
 let genres = [];
 let selectedGenreId = null;
 let selectedGenreName = "";
 let currentPage = 1;
 let totalPages = 1;
 
+// Start the page
 init();
 
 function getReturnTo() {
+    // Save the current page URL so the user can return back later
     const fileName = window.location.pathname.split("/").pop() || "categories.php";
     return `${fileName}${window.location.search}${window.location.hash}`;
 }
 
 function getMovieDetailsUrl(movieId) {
+    // Build the movie details URL with the selected movie id
     return `movie.php?id=${encodeURIComponent(movieId)}&return_to=${encodeURIComponent(getReturnTo())}`;
 }
 
 function readStateFromUrl() {
+    // Read selected genre and page number from the URL
     const params = new URLSearchParams(window.location.search);
     const genre = Number(params.get("genre"));
     const page = Number(params.get("page"));
@@ -41,6 +49,7 @@ function readStateFromUrl() {
 }
 
 function updateUrlState() {
+    // Update the URL without refreshing the page
     const fileName = window.location.pathname.split("/").pop() || "categories.php";
     const params = new URLSearchParams(window.location.search);
 
@@ -55,21 +64,25 @@ function updateUrlState() {
 }
 
 async function init() {
+    // Attach events and load categories
     attachEvents();
     await loadGenres();
 }
 
 function attachEvents() {
+    // Toggle mobile menu
     if ($menuToggle.length) {
         $menuToggle.on("click", function () {
             $navLinks.toggleClass("open");
         });
     }
 
+    // Close mobile menu after clicking a nav link
     $(".nav-links a").on("click", function () {
         $navLinks.removeClass("open");
     });
 
+    // Add navbar style when scrolling
     $(window).on("scroll", function () {
         if ($(window).scrollTop() > 60) {
             $navbar.addClass("scrolled");
@@ -78,6 +91,7 @@ function attachEvents() {
         }
     });
 
+    // Handle genre links from navigation or other page sections
     $("[data-genre-link]").on("click", async function (e) {
         e.preventDefault();
 
@@ -96,6 +110,7 @@ function attachEvents() {
 }
 
 async function loadGenres() {
+    // Load movie genres from the API
     try {
         const data = await $.ajax({
             url: `${BASE_URL}/genre/movie/list?api_key=${API_KEY}`,
@@ -126,6 +141,7 @@ async function loadGenres() {
         updateActiveGenreButton();
         await loadMoviesByGenre(state.page || 1);
     } catch (error) {
+        // Show error messages if categories fail to load
         console.error(error);
         $genresList.html(`<div class="empty-state">Failed to load categories.</div>`);
         $categoryMovies.html(`<div class="empty-state">Failed to load category movies.</div>`);
@@ -133,6 +149,7 @@ async function loadGenres() {
 }
 
 function renderGenres() {
+    // Display genre buttons on the page
     $genresList.html("");
 
     genres.forEach(genre => {
@@ -155,6 +172,7 @@ function renderGenres() {
 }
 
 function updateActiveGenreButton() {
+    // Highlight the currently selected genre button
     $(".genre-chip").each(function () {
         const genreId = Number($(this).attr("data-genre-id"));
         $(this).toggleClass("active", genreId === selectedGenreId);
@@ -162,6 +180,7 @@ function updateActiveGenreButton() {
 }
 
 async function loadMoviesByGenre(page = 1) {
+    // Load movies for the selected genre
     if (!selectedGenreId) return;
 
     try {
@@ -189,6 +208,7 @@ async function loadMoviesByGenre(page = 1) {
         renderMovies(data.results || []);
         renderPagination();
     } catch (error) {
+        // Clear movie area if movies fail to load
         console.error(error);
         $selectedCategorySubtitle.text("Could not load movies.");
         $categoryMovies.html("");
@@ -197,6 +217,7 @@ async function loadMoviesByGenre(page = 1) {
 }
 
 function renderMovies(movies) {
+    // Display movie cards
     $categoryMovies.html("");
 
     if (!movies.length) {
@@ -214,6 +235,7 @@ function renderMovies(movies) {
 }
 
 function createMovieCard(movie) {
+    // Create one movie card element
     const $movieEl = $("<div></div>").addClass("movie-card");
 
     const $image = $("<img>");
@@ -236,6 +258,7 @@ function createMovieCard(movie) {
 }
 
 function renderPagination() {
+    // Display pagination buttons
     $pagination.html("");
 
     $pagination.append(createArrowButton("←", currentPage > 1, function () {
@@ -269,6 +292,7 @@ function renderPagination() {
 }
 
 function createArrowButton(label, enabled, onClick) {
+    // Create previous or next button
     const $button = $("<button></button>").text(label);
     $button.prop("disabled", !enabled);
     $button.on("click", onClick);
@@ -276,12 +300,14 @@ function createArrowButton(label, enabled, onClick) {
 }
 
 function changePage(page) {
+    // Change the current page if it is valid
     if (page < 1 || page > totalPages) return;
     loadMoviesByGenre(page);
     scrollToMoviesSection();
 }
 
 function getPaginationPages(current, total) {
+    // Decide which page numbers should appear
     if (total <= 5) {
         return Array.from({ length: total }, (_, i) => i + 1);
     }
@@ -298,6 +324,7 @@ function getPaginationPages(current, total) {
 }
 
 function scrollToMoviesSection() {
+    // Scroll to the movies section
     const section = $("#category-section")[0];
 
     if (section) {
