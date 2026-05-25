@@ -1,5 +1,4 @@
 # Ignore config with sensitive data
-config/mdb_config.php
 assets/js/api.js
 
 # IDE files (NetBeans / VS Code)
