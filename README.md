@@ -436,7 +436,36 @@ http://localhost/MovieMeter/
 ```
 
 ---
+## Test Credentials
 
+### Admin
+
+| Full Name | Username | Email | Password |
+|---|---|---|---|
+| Dana | dana | dana@moviemeter.com | 1234 |
+
+### Creators
+
+| Full Name | Username | Email | Password |
+|---|---|---|---|
+| Zainab | zainab | zainab@moviemeter.com | 1234 |
+| Zahraa | zahraa | zahraa@moviemeter.com | 1234 |
+| Nawraa | nawraa | nawraa@moviemeter.com | 1234 |
+
+### Users
+
+| Full Name | Username | Email | Password |
+|---|---|---|---|
+| Fatema | fatema | fatema@gmail.com | 1234 |
+| Maram | maram | maram@gmail.com | 1234 |
+| Ali | ali | ali@gmail.com | 1234 |
+| Hasan | hasan | hasan@gmail.com | 1234 |
+| Maria | Maria | Maria@gmail.com | 1234 |
+| Mohamed | mohamed22 | mohamed@gmail.com | 1234 |
+| Hussain Ali | hussain | hussain@gmail.com | 1234 |
+| Noor | noor | noor@gmail.com | 1234 |
+
+---
 
 ## 🧪 Testing
 
