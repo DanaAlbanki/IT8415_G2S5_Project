@@ -1,4 +1,6 @@
 <?php
+// Fetches the current admin user's details from the database and renders them in a profile view with secure output encoding.
+
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 

@@ -4,10 +4,20 @@ require_once(__DIR__ . "/../config/DBConn.php");
 
 if ($_SESSION["role_name"] !== "admin") die("Access denied.");
 
-$conn=getConnection();
-$id=$_GET["id"];
+$conn = getConnection();
+$id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 
-mysqli_query($conn,"DELETE FROM mm_comments WHERE comment_id=$id");
+if ($id > 0) {
+    // 1. Prepare and execute the delete
+    $stmt = $conn->prepare("DELETE FROM mm_comments WHERE comment_id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    
+    // 2. CRITICAL: Close the statement before moving on
+    $stmt->close();
+}
 
+// 3. Now perform the redirect
 header("Location: manage-comments.php");
-exit;
+exit; // Always use exit after header()
+?>

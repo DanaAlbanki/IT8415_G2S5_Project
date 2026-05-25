@@ -2,10 +2,12 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Start the session only if it is not already active
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Check if the user is logged in
 $isLoggedIn = isset($_SESSION["user_id"]);
 ?>
 <!DOCTYPE html>
@@ -20,6 +22,8 @@ $isLoggedIn = isset($_SESSION["user_id"]);
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Page fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -42,6 +46,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
         <li><a href="discover.php">Discover</a></li>
         <li><a href="categories.php" class="active-link">Categories</a></li>
 
+        <!-- Show different navigation links based on login status -->
         <?php if ($isLoggedIn): ?>
             <li><a href="foryou.php">For You</a></li>
             <li><a href="watchlist.php">Watchlist</a></li>
@@ -68,6 +73,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
         <p>Select a category to load movies.</p>
     </div>
 
+    <!-- Genres are loaded here using JavaScript -->
     <div id="genresList" class="genres-list"></div>
 </section>
 
@@ -77,18 +83,18 @@ $isLoggedIn = isset($_SESSION["user_id"]);
         <p id="selectedCategorySubtitle">Choose a category to explore movies.</p>
     </div>
 
+    <!-- Movies for the selected category are displayed here -->
     <div id="categoryMovies" class="movies"></div>
 </section>
 
 <div class="pagination-wrapper">
+    <!-- Pagination buttons are generated here -->
     <div id="pagination" class="pagination"></div>
 </div>
 
-<!-- FOOTER FIXED -->
 <footer class="footer">
     <div class="footer-container">
 
-        <!-- Brand -->
         <div class="footer-brand">
             <h3>MovieMeter</h3>
             <p>
@@ -97,12 +103,13 @@ $isLoggedIn = isset($_SESSION["user_id"]);
             </p>
         </div>
 
-        <!-- Quick Links -->
         <div class="footer-links">
             <h4>Quick Links</h4>
             <ul>
                 <li><a href="index.php">Home</a></li>
                 <li><a href="discover.php">Discover</a></li>
+
+                <!-- Footer links also change depending on login status -->
                 <?php if ($isLoggedIn): ?>
                     <li><a href="foryou.php">For You</a></li>
                     <li><a href="watchlist.php">Watchlist</a></li>
@@ -112,7 +119,6 @@ $isLoggedIn = isset($_SESSION["user_id"]);
             </ul>
         </div>
 
-        <!-- Categories -->
         <div class="footer-links">
             <h4>Categories</h4>
             <ul>
@@ -123,7 +129,6 @@ $isLoggedIn = isset($_SESSION["user_id"]);
             </ul>
         </div>
 
-        <!-- Contact -->
         <div class="footer-contact">
             <h4>Contact</h4>
             <p><a href="mailto:support@moviemeter.com">support@moviemeter.com</a></p>
@@ -141,18 +146,19 @@ $isLoggedIn = isset($_SESSION["user_id"]);
 <script type="module" src="assets/js/categories.js"></script>
 
 <script>
+// Make footer category links load movies like the main genre buttons
 document.querySelectorAll("[data-genre-link]").forEach(link => {
     link.addEventListener("click", function(e) {
         e.preventDefault();
 
         const genreId = this.getAttribute("data-genre-link");
 
-        // scroll to movies section
+        // Move the user to the movies section
         document.getElementById("category-section").scrollIntoView({
             behavior: "smooth"
         });
 
-        // trigger same function as main genres
+        // Load movies for the selected footer category
         if (window.loadMoviesByGenre) {
             window.loadMoviesByGenre(genreId);
         }

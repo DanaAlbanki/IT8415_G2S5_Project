@@ -1,4 +1,5 @@
 <?php
+// Displays a summary report dashboard with total counts for system entities (movies, users, comments) and links to detailed performance reports.
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 

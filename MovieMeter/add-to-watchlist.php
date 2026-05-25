@@ -7,6 +7,7 @@ require_once(__DIR__ . "/config/DBConn.php");
 
 header("Content-Type: application/json; charset=UTF-8");
 
+// Sends a JSON response and stops the script
 function respondJson($success, $message, $extra = [], $statusCode = 200)
 {
     http_response_code($statusCode);
@@ -22,6 +23,7 @@ function respondJson($success, $message, $extra = [], $statusCode = 200)
     exit();
 }
 
+// Gets the local movie ID using the TMDB external ID
 function getMovieIdFromTmdb($conn, $tmdbId)
 {
     $sql = "SELECT movie_id FROM mm_movies WHERE external_api_id = ? LIMIT 1";
@@ -33,6 +35,7 @@ function getMovieIdFromTmdb($conn, $tmdbId)
 
     mysqli_stmt_bind_param($stmt, "s", $tmdbId);
     mysqli_stmt_execute($stmt);
+
     $result = mysqli_stmt_get_result($stmt);
     $row = mysqli_fetch_assoc($result);
 
@@ -44,6 +47,7 @@ function getMovieIdFromTmdb($conn, $tmdbId)
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
+// Only allow POST requests
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     respondJson(false, "Invalid request method.", [], 405);
 }
@@ -51,10 +55,12 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 $userId = (int)($_SESSION["user_id"] ?? 0);
 $tmdbId = trim($_POST["tmdb_id"] ?? "");
 
+// Make sure the user is logged in
 if ($userId <= 0) {
     respondJson(false, "You must be logged in.", [], 401);
 }
 
+// Validate the selected movie
 if ($tmdbId === "") {
     respondJson(false, "Invalid movie.", [], 422);
 }
@@ -67,6 +73,7 @@ if ($movieId <= 0) {
 
 $watchlistId = 0;
 
+// Look for the user's existing watchlist
 $watchlistSql = "
     SELECT watchlist_id
     FROM mm_watchlists
@@ -82,14 +89,17 @@ if (!$watchlistStmt) {
 
 mysqli_stmt_bind_param($watchlistStmt, "i", $userId);
 mysqli_stmt_execute($watchlistStmt);
+
 $watchlistResult = mysqli_stmt_get_result($watchlistStmt);
 $watchlistRow = mysqli_fetch_assoc($watchlistResult);
+
 mysqli_stmt_close($watchlistStmt);
 
 if ($watchlistRow) {
     $watchlistId = (int)$watchlistRow["watchlist_id"];
 }
 
+// Create a watchlist if the user does not have one yet
 if ($watchlistId <= 0) {
     $createSql = "INSERT INTO mm_watchlists (user_id) VALUES (?)";
     $createStmt = mysqli_prepare($conn, $createSql);
@@ -110,6 +120,7 @@ if ($watchlistId <= 0) {
     mysqli_stmt_close($createStmt);
 }
 
+// Check if the movie already exists in the watchlist
 $checkSql = "
     SELECT 1
     FROM mm_watchlist_items
@@ -126,6 +137,7 @@ if (!$checkStmt) {
 
 mysqli_stmt_bind_param($checkStmt, "ii", $watchlistId, $movieId);
 mysqli_stmt_execute($checkStmt);
+
 $checkResult = mysqli_stmt_get_result($checkStmt);
 
 if ($checkResult && mysqli_num_rows($checkResult) > 0) {
@@ -139,6 +151,7 @@ if ($checkResult && mysqli_num_rows($checkResult) > 0) {
 
 mysqli_stmt_close($checkStmt);
 
+// Add the movie to the user's watchlist
 $insertSql = "
     INSERT INTO mm_watchlist_items (watchlist_id, movie_id)
     VALUES (?, ?)
@@ -162,6 +175,7 @@ if (!mysqli_stmt_execute($insertStmt)) {
 mysqli_stmt_close($insertStmt);
 mysqli_close($conn);
 
+// Return success after adding the movie
 respondJson(true, "Movie added to watchlist.", [
     "movie_id" => $movieId
 ]);

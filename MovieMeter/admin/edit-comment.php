@@ -1,4 +1,5 @@
 <?php
+// Handles the retrieval and updating of a specific user comment in the database using an admin-accessible form.
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 

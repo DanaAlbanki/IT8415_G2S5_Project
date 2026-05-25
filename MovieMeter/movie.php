@@ -1,20 +1,26 @@
 <?php
+// Enable PHP error reporting for development
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Start the session only if it has not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Include database connection file
 require_once(__DIR__ . "/config/DBConn.php");
 
+// Check if the user is logged in
 $isLoggedIn = isset($_SESSION["user_id"]);
 
+// Fetch movie details from TMDB API
 function fetchTmdbMovie($tmdbId)
 {
     $apiKey = "d29868793eba2f4ccb7cb36fa101c2a8";
     $url = "https://api.themoviedb.org/3/movie/" . urlencode($tmdbId) . "?api_key=" . $apiKey . "&language=en-US&append_to_response=videos";
 
+    // Create and configure the API request
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -22,6 +28,7 @@ function fetchTmdbMovie($tmdbId)
         CURLOPT_SSL_VERIFYPEER => true
     ]);
 
+    // Run the request
     $response = curl_exec($ch);
 
     if ($response === false) {
@@ -29,6 +36,7 @@ function fetchTmdbMovie($tmdbId)
         return null;
     }
 
+    // Check response status
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
@@ -36,10 +44,12 @@ function fetchTmdbMovie($tmdbId)
         return null;
     }
 
+    // Decode API response
     $data = json_decode($response, true);
     return is_array($data) ? $data : null;
 }
 
+// Get local movie ID using TMDB ID
 function getMovieIdFromTmdb($conn, $tmdbId)
 {
     $sql = "
@@ -65,6 +75,7 @@ function getMovieIdFromTmdb($conn, $tmdbId)
     return $row ? (int) $row["movie_id"] : 0;
 }
 
+// Get the best available trailer URL from TMDB video results
 function getTrailerUrlFromMovie($movie)
 {
     if (empty($movie["videos"]["results"]) || !is_array($movie["videos"]["results"])) {
@@ -74,6 +85,7 @@ function getTrailerUrlFromMovie($movie)
     $videos = $movie["videos"]["results"];
     $selectedVideo = null;
 
+    // Prefer official YouTube trailers
     foreach ($videos as $video) {
         if (
             ($video["site"] ?? "") === "YouTube" &&
@@ -86,6 +98,7 @@ function getTrailerUrlFromMovie($movie)
         }
     }
 
+    // If no official trailer exists, use any YouTube trailer
     if (!$selectedVideo) {
         foreach ($videos as $video) {
             if (
@@ -99,6 +112,7 @@ function getTrailerUrlFromMovie($movie)
         }
     }
 
+    // If no trailer exists, use any YouTube video
     if (!$selectedVideo) {
         foreach ($videos as $video) {
             if (
@@ -118,6 +132,7 @@ function getTrailerUrlFromMovie($movie)
     return "https://www.youtube.com/embed/" . trim((string) $selectedVideo["key"]);
 }
 
+// Sync TMDB genres into local categories and link them to the movie
 function syncMovieGenresToCategories($conn, $movieId, $movie)
 {
     if (!$movieId || empty($movie["genres"]) || !is_array($movie["genres"])) {
@@ -133,6 +148,7 @@ function syncMovieGenresToCategories($conn, $movieId, $movie)
 
         $categoryId = 0;
 
+        // Check if category already exists
         $findCategorySql = "
             SELECT category_id
             FROM mm_categories
@@ -155,6 +171,7 @@ function syncMovieGenresToCategories($conn, $movieId, $movie)
             mysqli_stmt_close($findCategoryStmt);
         }
 
+        // Create category if it does not exist
         if ($categoryId <= 0) {
             $description = $categoryName . " movies";
 
@@ -178,6 +195,7 @@ function syncMovieGenresToCategories($conn, $movieId, $movie)
                 mysqli_stmt_close($insertCategoryStmt);
             }
 
+            // Try finding category again if insert did not return an ID
             if ($categoryId <= 0) {
                 $findAgainStmt = mysqli_prepare($conn, $findCategorySql);
 
@@ -200,6 +218,7 @@ function syncMovieGenresToCategories($conn, $movieId, $movie)
             continue;
         }
 
+        // Check if movie is already linked to this category
         $checkLinkSql = "
             SELECT 1
             FROM mm_movie_categories
@@ -219,6 +238,7 @@ function syncMovieGenresToCategories($conn, $movieId, $movie)
             mysqli_stmt_close($checkLinkStmt);
         }
 
+        // Link movie to category if it is not already linked
         if (!$alreadyLinked) {
             $insertLinkSql = "
                 INSERT INTO mm_movie_categories (movie_id, category_id)
@@ -236,6 +256,7 @@ function syncMovieGenresToCategories($conn, $movieId, $movie)
     }
 }
 
+// Update local movie information from TMDB
 function updateExistingMovieFromTmdb($conn, $movieId, $movie)
 {
     $releaseDate = !empty($movie["release_date"]) ? $movie["release_date"] : null;
@@ -271,6 +292,7 @@ function updateExistingMovieFromTmdb($conn, $movieId, $movie)
     }
 }
 
+// Get existing movie or create it from TMDB data
 function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
 {
     $existingMovieId = getMovieIdFromTmdb($conn, $tmdbId);
@@ -286,6 +308,7 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
         return $existingMovieId;
     }
 
+    // Prepare movie data from TMDB
     $title = trim($movie["title"] ?? $movie["name"] ?? "Untitled");
     $overview = trim($movie["overview"] ?? "");
     $releaseDate = !empty($movie["release_date"]) ? $movie["release_date"] : null;
@@ -301,6 +324,7 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
     $externalApiId = (string) $movie["id"];
     $now = date("Y-m-d H:i:s");
 
+    // Insert imported movie into local database
     $insertSql = "
         INSERT INTO mm_movies (
             title,
@@ -358,15 +382,19 @@ function getOrCreateMovieIdFromTmdb($conn, $tmdbId)
     return $newMovieId;
 }
 
+// Open database connection
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
+// Read page values
 $tmdbId = isset($_GET["id"]) ? trim($_GET["id"]) : "";
 $userId = isset($_SESSION["user_id"]) ? (int) $_SESSION["user_id"] : 0;
 $movieId = 0;
 $isInWatchlist = false;
 
 $returnTo = "index.php";
+
+// Validate return URL to avoid unsafe redirects
 if (isset($_GET["return_to"]) && $_GET["return_to"] !== "") {
     $candidate = trim($_GET["return_to"]);
 
@@ -380,6 +408,7 @@ if (isset($_GET["return_to"]) && $_GET["return_to"] !== "") {
     }
 }
 
+// Default movie interaction values
 $userRating = 0;
 $comments = [];
 $summary = [
@@ -397,6 +426,7 @@ if ($tmdbId !== "") {
             $_SESSION["viewed_movies"] = [];
         }
 
+        // Count a view once per session for this movie
         if (!in_array($movieId, $_SESSION["viewed_movies"], true)) {
             $viewStmt = mysqli_prepare(
                 $conn,
@@ -412,6 +442,7 @@ if ($tmdbId !== "") {
             $_SESSION["viewed_movies"][] = $movieId;
         }
 
+        // Get movie rating, comment, and view summary
         $summarySql = "
             SELECT
                 m.view_count,
@@ -457,6 +488,7 @@ if ($tmdbId !== "") {
         }
 
         if ($userId > 0) {
+            // Get current user's rating for this movie
             $ratingSql = "
                 SELECT rating_value
                 FROM mm_ratings
@@ -479,6 +511,7 @@ if ($tmdbId !== "") {
                 mysqli_stmt_close($ratingStmt);
             }
 
+            // Check whether movie is already in user's watchlist
             $watchlistSql = "
                 SELECT 1
                 FROM mm_watchlist_items wi
@@ -498,6 +531,7 @@ if ($tmdbId !== "") {
             }
         }
 
+        // Get visible comments for this movie
         $commentsSql = "
             SELECT
                 c.comment_id,
@@ -527,6 +561,7 @@ if ($tmdbId !== "") {
     }
 }
 
+// Prepare data for JavaScript movie page
 $pageData = [
     "tmdbId" => $tmdbId,
     "movieId" => $movieId,
@@ -537,21 +572,28 @@ $pageData = [
     "isInWatchlist" => $isInWatchlist
 ];
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Character encoding and responsive page settings -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Details</title>
 
+    <!-- Movie details page stylesheet -->
     <link rel="stylesheet" href="assets/css/movie.css">
 
+    <!-- Google font connection optimization -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Website fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="movie-page">
 
+    <!-- Top bar with back button -->
     <header class="movie-topbar">
         <a
             href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>"
@@ -560,8 +602,10 @@ $pageData = [
         >← Back</a>
     </header>
 
+    <!-- Movie details content will be filled by JavaScript -->
     <main id="movie-detail">
         <?php if ($tmdbId === "") { ?>
+            <!-- Message shown when no movie ID is provided -->
             <section class="message-block">
                 <h1>Movie not found</h1>
                 <p>No movie ID was provided.</p>
@@ -572,6 +616,7 @@ $pageData = [
                 >Go Back</a>
             </section>
         <?php } elseif ($movieId <= 0) { ?>
+            <!-- Message shown when movie cannot be loaded -->
             <section class="message-block">
                 <h1>Movie not found</h1>
                 <p>We could not load this movie.</p>
@@ -585,13 +630,19 @@ $pageData = [
     </main>
 
     <?php if ($tmdbId !== "" && $movieId > 0) { ?>
+        <!-- Pass PHP movie data to JavaScript -->
         <script>
             window.moviePageData = <?php echo json_encode($pageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
         </script>
+
+        <!-- jQuery library -->
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+        <!-- Movie details page JavaScript -->
         <script type="module" src="assets/js/movie.js"></script>
     <?php } ?>
 
+    <!-- Smart back button behavior -->
     <script>
         function goBackSmart(fallbackUrl) {
             try {

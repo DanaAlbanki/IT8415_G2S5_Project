@@ -1,4 +1,5 @@
 <?php
+// Handles the retrieval and updating of user account details (name and email) from the database via an admin-facing form.
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 

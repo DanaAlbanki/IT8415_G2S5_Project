@@ -1,4 +1,5 @@
 <?php
+// Fetches and displays a leaderboard of the top 10 most-viewed movies from the database.
 require_once("../includes/auth_check.php");
 require_once("../config/DBConn.php");
 

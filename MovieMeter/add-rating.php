@@ -22,6 +22,7 @@ function respondJson($success, $message, $extra = [], $statusCode = 200)
     exit();
 }
 
+// Gets the local movie ID using the TMDB external ID
 function getMovieIdFromTmdb($conn, $tmdbId)
 {
     $sql = "SELECT movie_id FROM mm_movies WHERE external_api_id = ? LIMIT 1";
@@ -31,6 +32,7 @@ function getMovieIdFromTmdb($conn, $tmdbId)
 
     mysqli_stmt_bind_param($stmt, "s", $tmdbId);
     mysqli_stmt_execute($stmt);
+
     $result = mysqli_stmt_get_result($stmt);
     $row = mysqli_fetch_assoc($result);
 
@@ -42,6 +44,7 @@ function getMovieIdFromTmdb($conn, $tmdbId)
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
+// Only allow rating requests through POST
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     respondJson(false, "Invalid request method.", [], 405);
 }
@@ -50,6 +53,7 @@ $userId = (int) $_SESSION["user_id"];
 $tmdbId = trim($_POST["tmdb_id"] ?? "");
 $ratingValue = (int) ($_POST["rating_value"] ?? 0);
 
+// Validate submitted movie and rating values
 if ($tmdbId === "") {
     respondJson(false, "Invalid movie.", [], 422);
 }
@@ -64,10 +68,7 @@ if ($movieId <= 0) {
     respondJson(false, "Movie not found.", [], 404);
 }
 
-/* =========================
-   INSERT OR UPDATE RATING
-========================= */
-
+// Check whether the user already rated this movie
 $checkSql = "
     SELECT movie_id
     FROM mm_ratings
@@ -78,10 +79,11 @@ $checkSql = "
 $checkStmt = mysqli_prepare($conn, $checkSql);
 mysqli_stmt_bind_param($checkStmt, "ii", $movieId, $userId);
 mysqli_stmt_execute($checkStmt);
+
 $result = mysqli_stmt_get_result($checkStmt);
 
 if (mysqli_num_rows($result) > 0) {
-
+    // Update the existing rating
     $updateSql = "
         UPDATE mm_ratings
         SET rating_value = ?, rated_at = CURRENT_TIMESTAMP
@@ -96,9 +98,8 @@ if (mysqli_num_rows($result) > 0) {
     }
 
     mysqli_stmt_close($updateStmt);
-
 } else {
-
+    // Add a new rating
     $insertSql = "
         INSERT INTO mm_ratings (movie_id, user_id, rating_value)
         VALUES (?, ?, ?)
@@ -116,10 +117,7 @@ if (mysqli_num_rows($result) > 0) {
 
 mysqli_stmt_close($checkStmt);
 
-/* =========================
-   SUMMARY
-========================= */
-
+// Get updated rating summary
 $summarySql = "
     SELECT
         COALESCE(AVG(r.rating_value), 0) AS average_rating,
@@ -131,10 +129,13 @@ $summarySql = "
 $summaryStmt = mysqli_prepare($conn, $summarySql);
 mysqli_stmt_bind_param($summaryStmt, "i", $movieId);
 mysqli_stmt_execute($summaryStmt);
+
 $summaryResult = mysqli_stmt_get_result($summaryStmt);
 $summaryRow = mysqli_fetch_assoc($summaryResult);
+
 mysqli_stmt_close($summaryStmt);
 
+// Get updated visible comment count
 $commentSql = "
     SELECT COUNT(*) AS comment_count
     FROM mm_comments
@@ -145,8 +146,10 @@ $commentSql = "
 $commentStmt = mysqli_prepare($conn, $commentSql);
 mysqli_stmt_bind_param($commentStmt, "i", $movieId);
 mysqli_stmt_execute($commentStmt);
+
 $commentResult = mysqli_stmt_get_result($commentStmt);
 $commentRow = mysqli_fetch_assoc($commentResult);
+
 mysqli_stmt_close($commentStmt);
 
 $summary = [
@@ -157,10 +160,7 @@ $summary = [
 
 mysqli_close($conn);
 
-/* =========================
-   RESPONSE
-========================= */
-
+// Return the updated rating and summary data
 respondJson(true, "Rating submitted successfully.", [
     "user_rating" => $ratingValue,
     "summary" => $summary

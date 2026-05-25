@@ -1,4 +1,6 @@
 <?php
+// Displays a dashboard summary of platform statistics (users, movies, comments) and a preview gallery of the most recently added movies.
+
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 
