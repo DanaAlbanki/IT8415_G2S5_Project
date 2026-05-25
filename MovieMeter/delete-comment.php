@@ -8,11 +8,13 @@ require_once(__DIR__ . "/config/DBConn.php");
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
+// Only allow comment deletion through POST
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: index.php");
     exit();
 }
 
+// Make sure only admins can delete comments
 if (!isset($_SESSION["role_name"]) || $_SESSION["role_name"] !== "admin") {
     die("Only admin can delete comments.");
 }
@@ -21,10 +23,12 @@ $adminId = (int) $_SESSION["user_id"];
 $commentId = (int) ($_POST["comment_id"] ?? 0);
 $movieId = (int) ($_POST["movie_id"] ?? 0);
 
+// Validate the submitted comment and movie IDs
 if ($commentId <= 0 || $movieId <= 0) {
     die("Invalid request.");
 }
 
+// Get the movie external ID to redirect back to the movie page
 $getMovieSql = "
     SELECT external_api_id
     FROM mm_movies
@@ -40,8 +44,10 @@ if (!$getMovieStmt) {
 
 mysqli_stmt_bind_param($getMovieStmt, "i", $movieId);
 mysqli_stmt_execute($getMovieStmt);
+
 $getMovieResult = mysqli_stmt_get_result($getMovieStmt);
 $movieRow = mysqli_fetch_assoc($getMovieResult);
+
 mysqli_stmt_close($getMovieStmt);
 
 if (!$movieRow) {
@@ -50,6 +56,7 @@ if (!$movieRow) {
 
 $tmdbId = trim($movieRow["external_api_id"] ?? "");
 
+// Soft delete the comment instead of removing it permanently
 $deleteSql = "
     UPDATE mm_comments
     SET 
@@ -74,6 +81,7 @@ if (!mysqli_stmt_execute($deleteStmt)) {
 
 mysqli_stmt_close($deleteStmt);
 
+// Update the stored visible comment count for the movie
 $updateMovieSql = "
     UPDATE mm_movies
     SET comment_count = (
@@ -94,6 +102,7 @@ if ($updateMovieStmt) {
 
 mysqli_close($conn);
 
+// Redirect back to the movie page when possible
 if ($tmdbId !== "") {
     header("Location: movie.php?id=" . urlencode($tmdbId));
     exit();

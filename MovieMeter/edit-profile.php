@@ -1,22 +1,28 @@
 <?php
+// Show all PHP errors during development
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Include login protection and database connection
 require_once(__DIR__ . "/includes/auth_check.php");
 require_once(__DIR__ . "/config/DBConn.php");
 
+// Open database connection
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
+// Get logged-in user ID
 $userId = (int) $_SESSION["user_id"];
 $message = "";
 $messageType = "";
 
+// Escape text before displaying it in HTML
 function h($value)
 {
     return htmlspecialchars((string)$value, ENT_QUOTES, "UTF-8");
 }
 
+// Fetch user profile data from the database
 function fetchUser($conn, $userId)
 {
     $sql = "
@@ -73,6 +79,7 @@ function fetchUser($conn, $userId)
     return $user;
 }
 
+// Make sure the upload folder exists and can be written to
 function ensureWritableDirectory($dirPath)
 {
     if (!is_dir($dirPath)) {
@@ -97,6 +104,7 @@ function ensureWritableDirectory($dirPath)
         return false;
     }
 
+    // Test file writing permission
     $testFile = rtrim($dirPath, "/") . "/write_test_" . uniqid("", true) . ".tmp";
     $written = @file_put_contents($testFile, "ok");
 
@@ -108,6 +116,7 @@ function ensureWritableDirectory($dirPath)
     return true;
 }
 
+// Load current user data
 $user = fetchUser($conn, $userId);
 
 if (!$user) {
@@ -115,11 +124,13 @@ if (!$user) {
     die("User not found.");
 }
 
+// Store original values to compare changes later
 $originalFullName = trim(isset($user["full_name"]) ? $user["full_name"] : "");
 $originalUsername = trim(isset($user["username"]) ? $user["username"] : "");
 $originalEmail = trim(isset($user["email"]) ? $user["email"] : "");
 $originalProfileImage = trim(isset($user["profile_image"]) ? $user["profile_image"] : "");
 
+// Handle profile update form submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fullName = trim(isset($_POST["full_name"]) ? $_POST["full_name"] : "");
     $username = trim(isset($_POST["username"]) ? $_POST["username"] : "");
@@ -129,6 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $imageChanged = false;
     $uploadError = false;
 
+    // Validate required fields
     if ($fullName === "" || $username === "" || $email === "") {
         $message = "Please fill in all fields.";
         $messageType = "error";
@@ -136,6 +148,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $message = "Please enter a valid email address.";
         $messageType = "error";
     } else {
+        // Check if the user uploaded a profile image
         if (
             isset($_FILES["profile_image"]) &&
             isset($_FILES["profile_image"]["error"]) &&
@@ -154,6 +167,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $extension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
                 $allowedExtensions = array("jpg", "jpeg", "png", "webp");
 
+                // Validate image size
                 if ($fileSize > 5 * 1024 * 1024) {
                     $message = "Image size must be 5MB or less.";
                     $messageType = "error";
@@ -178,10 +192,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         $messageType = "error";
                         $uploadError = true;
                     } else {
+                        // Create a unique file name for the uploaded profile image
                         $newFileName = "user_" . $userId . "_" . time() . "_" . uniqid() . "." . $extension;
                         $destination = $profileUploadDir . "/" . $newFileName;
                         $relativeImagePath = "profile/" . $newFileName;
 
+                        // Save the uploaded image
                         if (move_uploaded_file($tmpPath, $destination)) {
                             $newProfileImage = $relativeImagePath;
                             $imageChanged = true;
@@ -196,6 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         if (!$uploadError) {
+            // Check if the user changed any text fields
             $textChanged =
                 $fullName !== $originalFullName ||
                 $username !== $originalUsername ||
@@ -205,6 +222,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $message = "No changes were made.";
                 $messageType = "error";
             } else {
+                // Check if the new username is already used by another user
                 $checkUsernameSql = "SELECT user_id FROM mm_users WHERE username = ? AND user_id != ? LIMIT 1";
                 $checkUsernameStmt = mysqli_prepare($conn, $checkUsernameSql);
                 $usernameExists = false;
@@ -217,6 +235,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     mysqli_stmt_close($checkUsernameStmt);
                 }
 
+                // Check if the new email is already used by another user
                 $checkEmailSql = "SELECT user_id FROM mm_users WHERE email = ? AND user_id != ? LIMIT 1";
                 $checkEmailStmt = mysqli_prepare($conn, $checkEmailSql);
                 $emailExists = false;
@@ -236,6 +255,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $message = "This email is already in use.";
                     $messageType = "error";
                 } else {
+                    // Update the user's profile information
                     $updateSql = "UPDATE mm_users SET full_name = ?, username = ?, email = ?, profile_image = ? WHERE user_id = ?";
                     $updateStmt = mysqli_prepare($conn, $updateSql);
 
@@ -246,6 +266,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         mysqli_stmt_bind_param($updateStmt, "ssssi", $fullName, $username, $email, $newProfileImage, $userId);
 
                         if (mysqli_stmt_execute($updateStmt)) {
+                            // Delete the old profile image after replacing it
                             if (
                                 $imageChanged &&
                                 $originalProfileImage !== "" &&
@@ -258,6 +279,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 }
                             }
 
+                            // Update session data after successful profile update
                             $_SESSION["full_name"] = $fullName;
                             $_SESSION["username"] = $username;
                             $_SESSION["email"] = $email;
@@ -266,6 +288,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $message = "Profile updated successfully.";
                             $messageType = "success";
 
+                            // Reload updated user data
                             $user = fetchUser($conn, $userId);
                             $originalFullName = trim(isset($user["full_name"]) ? $user["full_name"] : "");
                             $originalUsername = trim(isset($user["username"]) ? $user["username"] : "");
@@ -284,47 +307,64 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
+// Close database connection after processing
 mysqli_close($conn);
 
+// Prepare safe values for the edit form
 $fullNameValue = h(isset($user["full_name"]) ? $user["full_name"] : "");
 $usernameValue = h(isset($user["username"]) ? $user["username"] : "");
 $emailValue = h(isset($user["email"]) ? $user["email"] : "");
+
+// Prepare profile image path
 $profileImage = trim(isset($user["profile_image"]) ? $user["profile_image"] : "");
 $profileImagePath = $profileImage !== "" ? "uploads/" . $profileImage : "";
+
+// Choose a fallback letter if the user has no profile image
 $avatarLetterSource = trim(
     (isset($user["full_name"]) && $user["full_name"] !== "") ? $user["full_name"] :
     ((isset($user["username"]) && $user["username"] !== "") ? $user["username"] : "U")
 );
 $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <!-- Page character encoding and responsive layout settings -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
 
+    <!-- Main website styles and edit profile page styles -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/edit-profile.css">
 
+    <!-- Google font connection setup -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Website fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
+    <!-- Main navigation bar -->
     <nav class="navbar">
         <div class="logo">
             <img src="assets/images/logo.png" alt="MovieMeter Logo">
         </div>
 
+        <!-- Mobile menu button -->
         <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
             <span></span>
             <span></span>
             <span></span>
         </button>
 
+        <!-- Navigation links -->
         <ul class="nav-links" id="navLinks">
             <li><a href="index.php">Home</a></li>
             <li><a href="discover.php">Discover</a></li>
@@ -336,23 +376,32 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
         </ul>
     </nav>
 
+    <!-- Edit profile page content -->
     <main class="edit-profile-page">
         <section class="edit-profile-card">
+
+            <!-- Page title -->
             <div class="edit-profile-header">
                 <h1>Edit Profile</h1>
                 <p>Update your details</p>
             </div>
 
+            <!-- Success or error message -->
             <?php if (!empty($message)): ?>
                 <div class="edit-message <?php echo h($messageType); ?>">
                     <?php echo h($message); ?>
                 </div>
             <?php endif; ?>
 
+            <!-- Profile edit form -->
             <form class="edit-profile-form" method="POST" enctype="multipart/form-data" id="editProfileForm">
+
+                <!-- Profile image upload area -->
                 <div class="avatar-area">
                     <div class="avatar-upload-wrap">
                         <div class="avatar-shell">
+
+                            <!-- Show profile image if the user already has one -->
                             <?php if ($profileImagePath !== ""): ?>
                                 <img
                                     src="<?php echo h($profileImagePath); ?>"
@@ -368,6 +417,8 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                                     <?php echo h($avatarLetter); ?>
                                 </div>
                             <?php else: ?>
+
+                                <!-- Show fallback avatar letter if there is no image -->
                                 <img
                                     src=""
                                     alt="Profile Avatar"
@@ -381,12 +432,14 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                             <?php endif; ?>
                         </div>
 
+                        <!-- Camera icon button for selecting a profile image -->
                         <label for="profile_image" class="camera-upload-btn" aria-label="Choose profile image" title="Choose profile image">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M9 4.5 10.5 3h3L15 4.5h2.7c1 0 1.9.4 2.5 1 .6.6 1 1.5 1 2.5v8c0 1-.4 1.9-1 2.5-.6.6-1.5 1-2.5 1H6.3c-1 0-1.9-.4-2.5-1-.6-.6-1-1.5-1-2.5V8c0-1 .4-1.9 1-2.5.6-.6 1.5-1 2.5-1H9Zm3 11.8a4.3 4.3 0 1 0 0-8.6 4.3 4.3 0 0 0 0 8.6Zm0-1.8a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z"/>
                             </svg>
                         </label>
 
+                        <!-- Hidden file input for profile image upload -->
                         <input
                             type="file"
                             name="profile_image"
@@ -397,6 +450,7 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                     </div>
                 </div>
 
+                <!-- Full name input -->
                 <div class="field-group">
                     <label for="full_name">Full Name</label>
                     <input
@@ -409,6 +463,7 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                     >
                 </div>
 
+                <!-- Username input -->
                 <div class="field-group">
                     <label for="username">Username</label>
                     <input
@@ -421,6 +476,7 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                     >
                 </div>
 
+                <!-- Email input -->
                 <div class="field-group">
                     <label for="email">Email</label>
                     <input
@@ -433,6 +489,7 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                     >
                 </div>
 
+                <!-- Form action buttons -->
                 <div class="edit-actions">
                     <button type="submit" class="edit-btn edit-btn-primary" id="saveBtn" disabled>Save Changes</button>
                     <a href="profile.php" class="edit-btn edit-btn-secondary">Cancel</a>
@@ -441,8 +498,11 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
         </section>
     </main>
 
+    <!-- Website footer -->
     <footer class="footer">
         <div class="footer-container">
+
+            <!-- Footer brand description -->
             <div class="footer-brand">
                 <h3>MovieMeter</h3>
                 <p>
@@ -451,6 +511,7 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                 </p>
             </div>
 
+            <!-- Footer quick links -->
             <div class="footer-links">
                 <h4>Quick Links</h4>
                 <ul>
@@ -461,6 +522,7 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                 </ul>
             </div>
 
+            <!-- Footer category links -->
             <div class="footer-links">
                 <h4>Categories</h4>
                 <ul>
@@ -471,6 +533,7 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
                 </ul>
             </div>
 
+            <!-- Footer contact information -->
             <div class="footer-contact">
                 <h4>Contact</h4>
                 <p><a href="mailto:support@moviemeter.com">support@moviemeter.com</a></p>
@@ -478,12 +541,16 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
             </div>
         </div>
 
+        <!-- Footer copyright -->
         <div class="footer-bottom">
             <p>© 2026 MovieMeter. All rights reserved.</p>
         </div>
     </footer>
     
+    <!-- jQuery library -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Edit profile page JavaScript -->
     <script src="assets/js/edit-profile.js"></script>
 
 </body>
