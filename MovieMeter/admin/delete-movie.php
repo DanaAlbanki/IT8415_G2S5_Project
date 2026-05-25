@@ -11,24 +11,18 @@ if ($_SESSION["role_name"] !== "admin") {
 
 $conn = getConnection();
 
-// 1. Sanitize the ID: Ensure it is treated strictly as an integer
 $id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 
 if ($id > 0) {
-    // 2. Use a prepared statement to prevent SQL Injection
-    // This separates the SQL command from the data being deleted
     $stmt = $conn->prepare("DELETE FROM mm_movies WHERE movie_id = ?");
     $stmt->bind_param("i", $id);
     
     if ($stmt->execute()) {
-        // Successfully deleted
     } else {
-        // Handle potential errors here (e.g., logging)
     }
     $stmt->close();
 }
 
-// 3. Always redirect after a destructive operation
 header("Location: manage-movies.php");
 exit;
 ?>
