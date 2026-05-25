@@ -1,4 +1,5 @@
 <?php
+// Fetches and displays a list of all system users, including their roles, and provides an interface to edit or delete user records.
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 

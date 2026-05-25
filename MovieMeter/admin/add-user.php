@@ -1,4 +1,6 @@
 <?php
+// Handles user creation by securely hashing passwords and inserting new user details into the database.
+
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 
@@ -7,10 +9,21 @@ if ($_SESSION["role_name"] !== "admin") die("Access denied.");
 $conn = getConnection();
 
 if($_SERVER["REQUEST_METHOD"]=="POST"){
-$name=$_POST["name"];
-$email=$_POST["email"];
-$username=$_POST["username"];
-$password=password_hash($_POST["password"],PASSWORD_DEFAULT);
+    $name = $_POST["name"];
+    $email = $_POST["email"];
+    $username = $_POST["username"];
+    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+
+    // Use prepared statements to prevent SQL Injection
+    $stmt = $conn->prepare("INSERT INTO mm_users (full_name, email, username, password_hash, role_id, account_status) VALUES (?, ?, ?, ?, 3, 'active')");
+    $stmt->bind_param("ssss", $name, $email, $username, $password);
+    
+    if ($stmt->execute()) {
+        header("Location: manage-users.php");
+        exit;
+    } else {
+        echo "Error: " . $stmt->error;
+    }
 
 mysqli_query($conn,"
 INSERT INTO mm_users(full_name,email,username,password_hash,role_id,account_status)

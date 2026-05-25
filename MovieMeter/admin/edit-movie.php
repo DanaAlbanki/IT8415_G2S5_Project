@@ -1,4 +1,5 @@
 <?php
+// Handles the retrieval and updating of movie details, including support for uploading a new poster image.
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 
