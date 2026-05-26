@@ -7,6 +7,17 @@ if ($_SESSION["role_name"] !== "admin") die("Access denied.");
 
 $conn = getConnection();
 
+if (isset($_GET['delete'])) {
+
+    $id = (int)$_GET['delete'];
+
+    mysqli_query($conn,
+    "DELETE FROM mm_comments WHERE comment_id = $id");
+
+    header("Location: manage-comments.php");
+    exit();
+}
+
 $result = mysqli_query($conn,"
 SELECT c.comment_id, c.comment_text, u.full_name, m.title
 FROM mm_comments c
@@ -45,7 +56,7 @@ ORDER BY c.comment_id DESC
 <td><?php echo $row["comment_text"]; ?></td>
 <td>
 <a href="edit-comment.php?id=<?php echo $row["comment_id"]; ?>" class="btn btn-edit">Edit</a>
-<a href="delete-comment.php?id=<?php echo $row["comment_id"]; ?>" class="btn btn-delete" onclick="return confirm('Delete comment?')">Delete</a>
+<a href="manage-comments.php?delete=<?php echo $row["comment_id"]; ?>" class="btn btn-delete" onclick="return confirm('Delete comment?')">Delete</a>
 </td>
 </tr>
 <?php } ?>
