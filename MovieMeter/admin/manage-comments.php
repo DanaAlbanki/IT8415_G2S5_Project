@@ -1,22 +1,12 @@
 <?php
 // Fetches and displays a list of all user comments, including the associated user and movie, with options to edit or delete each record.
+
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 
 if ($_SESSION["role_name"] !== "admin") die("Access denied.");
 
 $conn = getConnection();
-
-if (isset($_GET['delete'])) {
-
-    $id = (int)$_GET['delete'];
-
-    mysqli_query($conn,
-    "DELETE FROM mm_comments WHERE comment_id = $id");
-
-    header("Location: manage-comments.php");
-    exit();
-}
 
 $result = mysqli_query($conn,"
 SELECT c.comment_id, c.comment_text, u.full_name, m.title
@@ -56,7 +46,13 @@ ORDER BY c.comment_id DESC
 <td><?php echo $row["comment_text"]; ?></td>
 <td>
 <a href="edit-comment.php?id=<?php echo $row["comment_id"]; ?>" class="btn btn-edit">Edit</a>
-<a href="manage-comments.php?delete=<?php echo $row["comment_id"]; ?>" class="btn btn-delete" onclick="return confirm('Delete comment?')">Delete</a>
+
+<a href="delete-comment.php?id=<?php echo $row["comment_id"]; ?>" 
+class="btn btn-delete"
+onclick="return confirm('Delete comment?')">
+Delete
+</a>
+
 </td>
 </tr>
 <?php } ?>
@@ -64,6 +60,8 @@ ORDER BY c.comment_id DESC
 </table>
 
 </div>
+
 <?php include("../includes/admin_footer.php"); ?>
+
 </body>
 </html>
