@@ -1,25 +1,20 @@
 <?php
-// Show PHP errors for debugging
+// a page to display the details (name,comments, rating,etc.) of a selected movie
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Load authentication and database connection
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once("../config/DBConn.php");
 
-// Allow creators only
 if ($_SESSION["role_name"] !== "creator") {
     die("Access denied.");
 }
 
-// Connect to database
 $dbc = getConnection();
 
-// Get movie ID and creator ID
 $movie_id = isset($_GET['movie_id']) ? (int)$_GET['movie_id'] : 0;
 $creator_id = $_SESSION['user_id'];
 
-// SQL query to get movie details
 $sql = "
     SELECT *
     FROM mm_movies
@@ -27,28 +22,23 @@ $sql = "
     AND creator_id = $creator_id
 ";
 
-// Execute movie query
 $result = mysqli_query($dbc, $sql);
 $movie = mysqli_fetch_assoc($result);
 
-// Check if movie exists
 if (!$movie) {
     die("Movie not found.");
 }
 
-// SQL query to count watchlist entries
 $watchlist_sql = "
     SELECT COUNT(*) AS watchlist_count
     FROM mm_watchlist_items
     WHERE movie_id = $movie_id
 ";
 
-// Execute watchlist query
 $watchlist_result = mysqli_query($dbc, $watchlist_sql);
 $watchlist_row = mysqli_fetch_assoc($watchlist_result);
 $watchlist_count = $watchlist_row['watchlist_count'] ?? 0;
 
-// SQL query to get movie comments
 $comments_sql = "
     SELECT comment_text, created_at
     FROM mm_comments
@@ -56,10 +46,8 @@ $comments_sql = "
     ORDER BY created_at DESC
 ";
 
-// Execute comments query
 $comments_result = mysqli_query($dbc, $comments_sql);
 
-// SQL query to get movie media
 $media_sql = "
     SELECT media_id, file_path
     FROM mm_movie_media
@@ -67,7 +55,6 @@ $media_sql = "
     ORDER BY media_id DESC
 ";
 
-// Execute media query
 $media_result = mysqli_query($dbc, $media_sql);
 ?>
 

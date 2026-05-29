@@ -1,33 +1,26 @@
 <?php
-// Show PHP errors for debugging
+// a page to display all loged in creator movies and search/filter them 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Load authentication and database connection
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once("../config/DBConn.php");
 
-// Allow creators only
 if ($_SESSION["role_name"] !== "creator") {
     die("Access denied.");
 }
 
-// Connect to database
 $dbc = getConnection();
 
-// Get creator ID from session
 $creator_id = $_SESSION['user_id'];
 
-/* ================= SEARCH INPUTS ================= */
 
-// Get search filter values
 $title      = $_GET['title'] ?? '';
 $status     = $_GET['status'] ?? '';
 $date_from  = $_GET['date_from'] ?? '';
 $date_to    = $_GET['date_to'] ?? '';
 
-// Base SQL query for movies
 $sql = "
     SELECT movie_id, title, poster_image, release_date, short_description, status
     FROM mm_movies
@@ -35,37 +28,30 @@ $sql = "
     AND status != 'deleted'
 ";
 
-// Add title search filter
 if (!empty($title)) {
     $safe_title = mysqli_real_escape_string($dbc, $title);
     $sql .= " AND title LIKE '%$safe_title%'";
 }
 
-// Add status filter
 if (!empty($status)) {
     $safe_status = mysqli_real_escape_string($dbc, $status);
     $sql .= " AND status = '$safe_status'";
 }
 
-// Add release date from filter
 if (!empty($date_from)) {
     $safe_from = mysqli_real_escape_string($dbc, $date_from);
     $sql .= " AND DATE(release_date) >= '$safe_from'";
 }
 
-// Add release date to filter
 if (!empty($date_to)) {
     $safe_to = mysqli_real_escape_string($dbc, $date_to);
     $sql .= " AND DATE(release_date) <= '$safe_to'";
 }
 
-// Sort movies by release date
 $sql .= " ORDER BY release_date DESC";
 
-// Execute movie query
 $result = mysqli_query($dbc, $sql);
 
-// Check for SQL errors
 if (!$result) {
     die("SQL Error: " . mysqli_error($dbc));
 }
