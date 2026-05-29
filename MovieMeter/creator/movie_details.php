@@ -83,10 +83,10 @@ $media_result = mysqli_query($dbc, $media_sql);
 </div>
     
 <div class="top-back">
-    <a href="movie_details.php?movie_id=<?php echo $movie_id; ?>"
+      <a href="movie_details.php?movie_id=<?php echo $movie_id; ?>"
        class="back-link"
-       onclick="event.preventDefault(); goBackSmart(this.href);">
-        ← Back
+       onclick="event.preventDefault(); goBack();">
+        Back
     </a>
 </div>
 <div class="container">
@@ -94,10 +94,8 @@ $media_result = mysqli_query($dbc, $media_sql);
     <div>
 
         <?php
-        // Get movie poster
         $poster = $movie['poster_image'] ?? '';
 
-        // Check if poster exists
         if (!empty($poster)) {
             $poster_path = (strpos($poster, 'http') === 0)
                 ? $poster
@@ -259,30 +257,20 @@ $media_result = mysqli_query($dbc, $media_sql);
 
 </body>
 
+ 
 <script>
 window.addEventListener("scroll", function () {
     const navbar = document.querySelector(".navbar");
-
+ 
     if (window.scrollY > 50) {
         navbar.classList.add("scrolled");
     } else {
         navbar.classList.remove("scrolled");
     }
 });
-
-function goBackSmart(fallbackUrl) {
-    try {
-        if (window.history.length > 1 && document.referrer) {
-            const referrerUrl = new URL(document.referrer, window.location.origin);
-
-            if (referrerUrl.origin === window.location.origin) {
-                window.history.back();
-                return;
-            }
-        }
-    } catch (e) {}
-
-    window.location.href = fallbackUrl;
+ 
+function goBack() {
+    window.history.back();
 }
 </script>
 

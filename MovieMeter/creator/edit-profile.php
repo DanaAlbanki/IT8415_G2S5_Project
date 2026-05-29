@@ -365,10 +365,10 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
     </nav>
     
 <div class="top-back">
-    <a href="../creator/profile.php"
+     <a href="movie_details.php?movie_id=<?php echo $movie_id; ?>"
        class="back-link"
-       onclick="event.preventDefault(); goBackSmart(this.href);">
-        ← Back
+       onclick="event.preventDefault(); goBack();">
+        Back
     </a>
 </div>
     <main class="edit-profile-page">
@@ -483,17 +483,9 @@ $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
 
 </body>
 <script>
-    function goBackSmart(fallbackUrl) {
-    try {
-        if (window.history.length > 1 && document.referrer) {
-            const referrerUrl = new URL(document.referrer, window.location.origin);
-
-            if (referrerUrl.origin === window.location.origin) {
-                window.history.back();
-                return;
-            }
-        }
-    } catch (e) {}
+   function goBack() {
+    window.history.back();
+}
 
     window.location.href = fallbackUrl;
 }

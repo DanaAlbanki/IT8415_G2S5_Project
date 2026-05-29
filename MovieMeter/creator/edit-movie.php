@@ -105,10 +105,10 @@ $media_result = mysqli_query($dbc, $media_sql);
 <body>
 <div class="top-back">
     <a href="movie_details.php?movie_id=<?php echo $movie_id; ?>"
-       class="back-link"
-       onclick="event.preventDefault(); goBackSmart(this.href);">
-        ← Back
-    </a>
+   class="back-link"
+   onclick="event.preventDefault(); goBack();">
+    Back
+</a>
 </div>
 <div class="container">
 
@@ -253,29 +253,19 @@ $media_result = mysqli_query($dbc, $media_sql);
 
 </div>
 
+ 
 <script>
 document.querySelector('input[name="poster_file"]').addEventListener('change', function () {
     const file = this.files[0];
     if (!file) return;
-
+ 
     const reader = new FileReader();
     reader.onload = e => document.getElementById('posterPreview').src = e.target.result;
     reader.readAsDataURL(file);
 });
-
-function goBackSmart(fallbackUrl) {
-    try {
-        if (window.history.length > 1 && document.referrer) {
-            const referrerUrl = new URL(document.referrer, window.location.origin);
-
-            if (referrerUrl.origin === window.location.origin) {
-                window.history.back();
-                return;
-            }
-        }
-    } catch (e) {}
-
-    window.location.href = fallbackUrl;
+ 
+function goBack() {
+    window.history.back();
 }
 </script>
 
