@@ -1,31 +1,26 @@
 <?php
-// Show PHP errors for debugging
+// lets the creator update their profile and picture
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Load authentication and database connection
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once("../config/DBConn.php");
 
-// Connect to database
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
-// Get logged in user ID
 $userId = (int) $_SESSION["user_id"];
 $message = "";
 $messageType = "";
 
-// Function to safely display output
 function h($value)
 {
     return htmlspecialchars((string)$value, ENT_QUOTES, "UTF-8");
 }
 
-// Function to fetch user information
 function fetchUser($conn, $userId)
 {
-    // SQL query to get user details
     $sql = "
         SELECT 
             u.user_id,
@@ -41,18 +36,15 @@ function fetchUser($conn, $userId)
         LIMIT 1
     ";
 
-    // Prepare SQL statement
     $stmt = mysqli_prepare($conn, $sql);
 
     if (!$stmt) {
         return null;
     }
 
-    // Bind user ID parameter
     mysqli_stmt_bind_param($stmt, "i", $userId);
     mysqli_stmt_execute($stmt);
 
-    // Bind database results
     mysqli_stmt_bind_result(
         $stmt,
         $dbUserId,
@@ -66,7 +58,6 @@ function fetchUser($conn, $userId)
 
     $user = null;
 
-    // Store user data in array
     if (mysqli_stmt_fetch($stmt)) {
         $user = array(
             "user_id" => $dbUserId,
@@ -84,7 +75,6 @@ function fetchUser($conn, $userId)
     return $user;
 }
 
-// Function to create writable upload folder
 function ensureWritableDirectory($dirPath)
 {
     if (!is_dir($dirPath)) {
@@ -109,7 +99,6 @@ function ensureWritableDirectory($dirPath)
         return false;
     }
 
-    // Test writing inside directory
     $testFile = rtrim($dirPath, "/") . "/write_test_" . uniqid("", true) . ".tmp";
     $written = @file_put_contents($testFile, "ok");
 
@@ -121,7 +110,6 @@ function ensureWritableDirectory($dirPath)
     return true;
 }
 
-// Get current user data
 $user = fetchUser($conn, $userId);
 
 if (!$user) {
@@ -129,16 +117,13 @@ if (!$user) {
     die("User not found.");
 }
 
-// Store original user values
 $originalFullName = trim(isset($user["full_name"]) ? $user["full_name"] : "");
 $originalUsername = trim(isset($user["username"]) ? $user["username"] : "");
 $originalEmail = trim(isset($user["email"]) ? $user["email"] : "");
 $originalProfileImage = trim(isset($user["profile_image"]) ? $user["profile_image"] : "");
 
-// Run when form is submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    // Get submitted form values
     $fullName = trim(isset($_POST["full_name"]) ? $_POST["full_name"] : "");
     $username = trim(isset($_POST["username"]) ? $_POST["username"] : "");
     $email = trim(isset($_POST["email"]) ? $_POST["email"] : "");
@@ -146,19 +131,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $imageChanged = false;
     $uploadError = false;
 
-    // Validate empty fields
     if ($fullName === "" || $username === "" || $email === "") {
         $message = "Please fill in all fields.";
         $messageType = "error";
 
-    // Validate email format
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = "Please enter a valid email address.";
         $messageType = "error";
 
     } else {
 
-        // Check if profile image is uploaded
         if (
             isset($_FILES["profile_image"]) &&
             isset($_FILES["profile_image"]["error"]) &&
@@ -167,7 +149,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $fileError = (int) $_FILES["profile_image"]["error"];
 
-            // Check upload error
             if ($fileError !== UPLOAD_ERR_OK) {
                 $message = "There was a problem uploading the image.";
                 $messageType = "error";
@@ -175,28 +156,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             } else {
 
-                // Get uploaded file details
                 $tmpPath = $_FILES["profile_image"]["tmp_name"];
                 $fileSize = isset($_FILES["profile_image"]["size"]) ? (int) $_FILES["profile_image"]["size"] : 0;
                 $originalFileName = isset($_FILES["profile_image"]["name"]) ? $_FILES["profile_image"]["name"] : "";
                 $extension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
 
-                // Allowed image types
                 $allowedExtensions = array("jpg", "jpeg", "png", "webp");
 
-                // Validate file size
                 if ($fileSize > 5 * 1024 * 1024) {
                     $message = "Image size must be 5MB or less.";
                     $messageType = "error";
                     $uploadError = true;
 
-                // Validate file extension
                 } elseif (!in_array($extension, $allowedExtensions, true)) {
                     $message = "Only JPG, JPEG, PNG, and WEBP files are allowed.";
                     $messageType = "error";
                     $uploadError = true;
 
-                // Validate image file
                 } elseif (!is_uploaded_file($tmpPath) || @getimagesize($tmpPath) === false) {
                     $message = "Please upload a valid image file.";
                     $messageType = "error";
@@ -204,11 +180,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 } else {
 
-                    // Define upload folders
                     $uploadsRoot = __DIR__ . "/uploads";
                     $profileUploadDir = $uploadsRoot . "/profile";
 
-                    // Check upload folders
                     $rootOk = ensureWritableDirectory($uploadsRoot);
                     $profileOk = ensureWritableDirectory($profileUploadDir);
 
@@ -219,12 +193,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     } else {
 
-                        // Create unique image name
                         $newFileName = "user_" . $userId . "_" . time() . "_" . uniqid() . "." . $extension;
                         $destination = $profileUploadDir . "/" . $newFileName;
                         $relativeImagePath = "profile/" . $newFileName;
 
-                        // Upload image
                         if (move_uploaded_file($tmpPath, $destination)) {
                             $newProfileImage = $relativeImagePath;
                             $imageChanged = true;
@@ -239,10 +211,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
-        // Continue if no upload errors
         if (!$uploadError) {
 
-            // Check if user changed any data
             $textChanged =
                 $fullName !== $originalFullName ||
                 $username !== $originalUsername ||
@@ -254,7 +224,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             } else {
 
-                // SQL query to check existing username
                 $checkUsernameSql = "SELECT user_id FROM mm_users WHERE username = ? AND user_id != ? LIMIT 1";
                 $checkUsernameStmt = mysqli_prepare($conn, $checkUsernameSql);
                 $usernameExists = false;
@@ -267,7 +236,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     mysqli_stmt_close($checkUsernameStmt);
                 }
 
-                // SQL query to check existing email
                 $checkEmailSql = "SELECT user_id FROM mm_users WHERE email = ? AND user_id != ? LIMIT 1";
                 $checkEmailStmt = mysqli_prepare($conn, $checkEmailSql);
                 $emailExists = false;
@@ -280,7 +248,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     mysqli_stmt_close($checkEmailStmt);
                 }
 
-                // Validate username and email uniqueness
                 if ($usernameExists) {
                     $message = "This username is already taken.";
                     $messageType = "error";
@@ -291,7 +258,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 } else {
 
-                    // SQL query to update profile
                     $updateSql = "UPDATE mm_users SET full_name = ?, username = ?, email = ?, profile_image = ? WHERE user_id = ?";
                     $updateStmt = mysqli_prepare($conn, $updateSql);
 
@@ -301,13 +267,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     } else {
 
-                        // Bind update parameters
                         mysqli_stmt_bind_param($updateStmt, "ssssi", $fullName, $username, $email, $newProfileImage, $userId);
 
-                        // Execute update query
                         if (mysqli_stmt_execute($updateStmt)) {
 
-                            // Delete old image if replaced
                             if (
                                 $imageChanged &&
                                 $originalProfileImage !== "" &&
@@ -322,7 +285,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 }
                             }
 
-                            // Update session values
                             $_SESSION["full_name"] = $fullName;
                             $_SESSION["username"] = $username;
                             $_SESSION["email"] = $email;
@@ -331,7 +293,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $message = "Profile updated successfully.";
                             $messageType = "success";
 
-                            // Refresh user data
                             $user = fetchUser($conn, $userId);
                             $originalFullName = trim(isset($user["full_name"]) ? $user["full_name"] : "");
                             $originalUsername = trim(isset($user["username"]) ? $user["username"] : "");
@@ -351,17 +312,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-// Close database connection
 mysqli_close($conn);
 
-// Prepare profile values for display
 $fullNameValue = h(isset($user["full_name"]) ? $user["full_name"] : "");
 $usernameValue = h(isset($user["username"]) ? $user["username"] : "");
 $emailValue = h(isset($user["email"]) ? $user["email"] : "");
 $profileImage = trim(isset($user["profile_image"]) ? $user["profile_image"] : "");
 $profileImagePath = $profileImage !== "" ? "uploads/" . $profileImage : "";
 
-// Generate avatar letter
 $avatarLetterSource = trim(
     (isset($user["full_name"]) && $user["full_name"] !== "") ? $user["full_name"] :
     ((isset($user["username"]) && $user["username"] !== "") ? $user["username"] : "U")

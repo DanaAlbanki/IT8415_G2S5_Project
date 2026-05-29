@@ -1,5 +1,6 @@
 <?php
-// Handles the editing of the admin's profile information by updating the user's name and email in the database.
+// lets the admin update their own profile
+
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 

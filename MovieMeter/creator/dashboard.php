@@ -1,22 +1,19 @@
 <?php
-// Show PHP errors for debugging
+// shows the creator's movie stats and top rated movies
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Load authentication and database connection
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once("../config/DBConn.php"); 
 
-// Allow creators only
 if ($_SESSION["role_name"] !== "creator") {
     die("Access denied.");
 }
 
-// Connect to database and get creator ID
 $dbc = getConnection();
 $creator_id = $_SESSION['user_id'];
 
-// SQL query to calculate average movie rating
 $query = "
     SELECT AVG(r.rating_value) AS avg_rating
     FROM mm_ratings r, mm_movies m
@@ -24,12 +21,10 @@ $query = "
     AND m.creator_id = $creator_id
 ";
 
-// Execute average rating query
 $result = mysqli_query($dbc, $query);
 $avg_row = mysqli_fetch_assoc($result);
 $avg_rating = $avg_row['avg_rating'] ?? 0;
 
-// SQL query to get top 3 rated published movies
 $sql = "
     SELECT 
         m.movie_id,
@@ -45,7 +40,6 @@ $sql = "
     LIMIT 3
 ";
 
-// Execute movie query
 $movies_result = mysqli_query($dbc, $sql);
 ?>
 
@@ -89,7 +83,6 @@ $movies_result = mysqli_query($dbc, $sql);
         <h4>Total Movies</h4>
         <div class="analytics-value">
             <?php
-            // SQL query to count all creator movies
             $res = mysqli_query($dbc, "SELECT COUNT(*) as total FROM mm_movies WHERE creator_id=$creator_id");
             echo mysqli_fetch_assoc($res)['total'];
             ?>
@@ -100,7 +93,6 @@ $movies_result = mysqli_query($dbc, $sql);
         <h4>Published Movies</h4>
         <div class="analytics-value">
             <?php
-            // SQL query to count published movies
             $res = mysqli_query($dbc, "SELECT COUNT(*) as total FROM mm_movies WHERE creator_id=$creator_id AND status='published'");
             echo mysqli_fetch_assoc($res)['total'];
             ?>
@@ -111,7 +103,6 @@ $movies_result = mysqli_query($dbc, $sql);
         <h4>API Imports</h4>
         <div class="analytics-value">
             <?php
-            // SQL query to count imported API movies
             $res = mysqli_query($dbc, "SELECT COUNT(*) as total FROM mm_movies WHERE creator_id=$creator_id AND is_api_imported=1");
             echo mysqli_fetch_assoc($res)['total'];
             ?>
@@ -128,10 +119,8 @@ $movies_result = mysqli_query($dbc, $sql);
     <?php while ($movie = mysqli_fetch_assoc($movies_result)) { ?>
 
         <?php
-        // Get movie poster path
         $poster = $movie["poster_image"];
 
-        // Check if poster exists or use placeholder
         if (!empty($poster)) {
             $poster_path = (strpos($poster, 'http') === 0)
                 ? $poster

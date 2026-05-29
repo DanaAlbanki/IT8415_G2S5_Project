@@ -1,5 +1,6 @@
 <?php
-// This code allow the admin to delete comments
+// deletes a comment and redirects back
+
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 

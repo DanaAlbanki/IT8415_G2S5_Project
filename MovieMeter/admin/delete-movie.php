@@ -1,10 +1,9 @@
 <?php
-//Deletes a specific movie from the database based on the provided ID and redirects the administrator back to the movie management page.
+// deletes a movie by ID and goes back to movie list
 
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 
-// Ensure only admins can perform delete operations
 if ($_SESSION["role_name"] !== "admin") {
     die("Access denied.");
 }

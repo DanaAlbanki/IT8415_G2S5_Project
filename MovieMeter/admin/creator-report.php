@@ -1,5 +1,5 @@
 <?php
-// Retrieves and displays a list of users ranked by the total number of movies they have created.
+// ranks creators by number of movies added
 
 require_once("../includes/auth_check.php");
 require_once("../config/DBConn.php");

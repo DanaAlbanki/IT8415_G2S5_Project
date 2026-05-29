@@ -1,6 +1,4 @@
-/* =========================
-   BASE
-========================= */
+
 * {
     box-sizing: border-box;
 }
@@ -24,9 +22,7 @@ img {
     max-width: 100%;
 }
 
-/* =========================
-   FONTS
-========================= */
+
 .slide-content h1,
 .section-header h2,
 .footer-brand h3,
@@ -53,9 +49,7 @@ img {
     font-family: 'Inter', sans-serif;
 }
 
-/* =========================
-   NAVBAR
-========================= */
+
 .navbar {
     width: 100%;
     display: flex;
@@ -126,9 +120,7 @@ img {
     transition: 0.3s ease;
 }
 
-/* =========================
-   HERO SLIDER
-========================= */
+
 .hero-slider {
     position: relative;
     width: 100%;
@@ -207,9 +199,7 @@ img {
     transform: translateY(-3px);
 }
 
-/* =========================
-   HERO BUTTONS
-========================= */
+
 .slider-btn {
     position: absolute;
     top: 50%;
@@ -263,9 +253,7 @@ img {
     transform: scale(1.15);
 }
 
-/* =========================
-   SEARCH
-========================= */
+
 .search-section {
     background: #58376f;
     padding: 55px 20px;
@@ -358,9 +346,7 @@ img {
     transform: translateY(-2px);
 }
 
-/* =========================
-   SECTION HEADERS
-========================= */
+
 .movies-section {
     padding: 60px 30px 10px;
 }
@@ -383,9 +369,7 @@ img {
     font-size: 15px;
 }
 
-/* =========================
-   MOVIES GRID
-========================= */
+
 .movies {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -396,9 +380,7 @@ img {
     align-items: start;
 }
 
-/* =========================
-   MOVIE CARD
-========================= */
+
 .movie-card {
     width: 100%;
     background: #3a234d;
@@ -430,9 +412,7 @@ img {
     min-height: 78px;
 }
 
-/* =========================
-   EMPTY STATE
-========================= */
+
 .empty-state {
     grid-column: 1 / -1;
     text-align: center;
@@ -443,9 +423,7 @@ img {
     font-size: 16px;
 }
 
-/* =========================
-   PAGINATION
-========================= */
+
 .pagination-wrapper {
     display: flex;
     justify-content: center;
@@ -520,9 +498,7 @@ img {
     transform: none;
 }
 
-/* =========================
-   FOOTER
-========================= */
+
 .footer {
     background: #58376f;
     color: #ffffff;
@@ -587,9 +563,7 @@ img {
     font-size: 14px;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+
 @media (max-width: 1200px) {
     .movies {
         grid-template-columns: repeat(4, minmax(0, 1fr));

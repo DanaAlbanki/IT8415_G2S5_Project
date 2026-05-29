@@ -1,12 +1,9 @@
-/* =========================
-   WATCHLIST PAGE ONLY
-========================= */
+
 
 .active-link {
     color: #facc15 !important;
 }
 
-/* HERO */
 .watchlist-hero-simple {
     position: relative;
     min-height: 58vh;
@@ -51,7 +48,6 @@
     font-family: "Inter", sans-serif;
 }
 
-/* SECTION */
 #watchlist-section {
     padding-top: 60px;
     padding-bottom: 70px;
@@ -99,7 +95,7 @@
     transform: translateY(-2px);
 }
 
-/* RESPONSIVE */
+
 @media (max-width: 992px) {
     .watchlist-hero-content-simple h1 {
         font-size: 4rem;

@@ -1,5 +1,5 @@
 <?php
-//Deletes a specific user from the database based on the provided ID and redirects the administrator back to the user management page.
+// deletes a user by ID and goes back to user list
 
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
@@ -18,7 +18,6 @@ if ($id > 0) {
     
     if ($stmt->execute()) {
     } else {
-        // Log error if deletion fails
         error_log("Database error: " . $stmt->error);
     }
     $stmt->close();

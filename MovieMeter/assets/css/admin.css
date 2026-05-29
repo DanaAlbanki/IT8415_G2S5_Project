@@ -2,13 +2,11 @@
     padding: 120px 60px;
 }
 
-/* TITLE */
 .admin-title {
     font-size: 2.5rem;
     margin-bottom: 30px;
 }
 
-/* CARDS */
 .admin-cards {
     display: grid;
     grid-template-columns: repeat(3,1fr);
@@ -23,7 +21,6 @@
     font-size: 18px;
 }
 
-/* TABLE */
 .admin-table {
     width: 100%;
     border-collapse: collapse;
@@ -62,7 +59,6 @@
     font-size: 18px;
 }
 
-/* BUTTONS */
 .btn {
     padding: 12px 20px;
     border-radius: 10px;
@@ -175,7 +171,6 @@
 }
 
 
-/* NAVBAR */
 .admin-navbar {
     position: fixed;
     top: 0;
@@ -246,7 +241,6 @@ body {
 }
 
 
-/* NEW */
 
 .admin-nav-links a {
     color: white;

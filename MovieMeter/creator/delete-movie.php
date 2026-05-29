@@ -1,26 +1,22 @@
 <?php
+// soft deletes a movie with a reason
+
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once("../config/DBConn.php");
 
-// Allow creators only
 if ($_SESSION["role_name"] !== "creator") {
     die("Access denied.");
 }
 
-// Connect to database
 $dbc = getConnection();
 
-// Get movie ID and creator ID
 $movie_id = (int)$_GET['movie_id'];
 $creator_id = $_SESSION['user_id'];
 
-// Run when form is submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-// Escape delete reason input
 $reason = mysqli_real_escape_string($dbc, $_POST['reason']);
 
-// SQL query to soft delete movie
     $sql = "
     UPDATE mm_movies
     SET 
@@ -32,10 +28,8 @@ $reason = mysqli_real_escape_string($dbc, $_POST['reason']);
     AND creator_id = $creator_id
     ";
 
-// Execute delete query
     mysqli_query($dbc, $sql);
 
-// Redirect back to movie list
     header("Location: my-movie.php");
     exit;
 }

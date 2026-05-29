@@ -1,5 +1,6 @@
 <?php
-// Fetches and displays a list of all movies in an administrative table, providing links to edit or delete each record.
+// lists all movies with edit and delete options
+
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 

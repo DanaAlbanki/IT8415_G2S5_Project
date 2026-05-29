@@ -1,16 +1,13 @@
 <?php
-// Fetches and displays a list of all visible user comments,
-// including the associated user and movie, with options to edit or delete each record.
+// lists all visible comments with edit and delete options
 
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once(__DIR__ . "/../config/DBConn.php");
 
-// Allow access to admin only
 if ($_SESSION["role_name"] !== "admin") die("Access denied.");
 
 $conn = getConnection();
 
-// Fetch all visible comments with user and movie info
 $result = mysqli_query($conn,"
 SELECT c.comment_id, c.comment_text, c.movie_id, u.full_name, m.title
 FROM mm_comments c
@@ -53,7 +50,6 @@ ORDER BY c.comment_id DESC
     <form method="POST" action="../delete-comment.php" style="display:inline" onsubmit="return confirm('Delete comment?')">
         <input type="hidden" name="comment_id" value="<?php echo $row['comment_id']; ?>">
         <input type="hidden" name="movie_id" value="<?php echo $row['movie_id']; ?>">
-        <!-- Tell delete-comment.php to redirect back to admin page -->
         <input type="hidden" name="redirect_to" value="admin">
         <button type="submit" class="btn btn-delete">Delete</button>
     </form>

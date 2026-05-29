@@ -1,7 +1,6 @@
 <footer class="footer">
     <div class="footer-container">
 
-        <!-- Footer brand information -->
         <div class="footer-brand">
             <h3>MovieMeter</h3>
             <p>
@@ -10,7 +9,6 @@
             </p>
         </div>
 
-        <!-- Admin navigation links -->
         <div class="footer-links">
             <h4>Admin Links</h4>
             <ul>
@@ -21,7 +19,6 @@
             </ul>
         </div>
 
-        <!-- Quick action links -->
         <div class="footer-links">
             <h4>Quick Actions</h4>
             <ul>
@@ -32,7 +29,6 @@
             </ul>
         </div>
 
-        <!-- Contact information -->
         <div class="footer-contact">
             <h4>Contact</h4>
             <p>support@moviemeter.com</p>
@@ -41,7 +37,6 @@
 
     </div>
 
-    <!-- Footer copyright -->
     <div class="footer-bottom">
         <p>© 2026 MovieMeter. All rights reserved.</p>
     </div>

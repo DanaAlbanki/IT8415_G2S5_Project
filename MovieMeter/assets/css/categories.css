@@ -21,9 +21,7 @@ img {
     max-width: 100%;
 }
 
-/* =========================
-   FONTS
-========================= */
+
 .categories-hero h1,
 .section-header h2,
 .footer-brand h3,
@@ -50,9 +48,7 @@ img {
     text-decoration: none;
 }
 
-/* =========================
-   NAVBAR
-========================= */
+
 .navbar {
     width: 100%;
     display: flex;
@@ -126,9 +122,7 @@ img {
     transition: 0.3s ease;
 }
 
-/* =========================
-   HERO
-========================= */
+
 .categories-hero {
     position: relative;
     min-height: 58vh;
@@ -171,9 +165,7 @@ img {
     color: #e9d5ff;
 }
 
-/* =========================
-   SECTION HEADERS
-========================= */
+
 .genres-section,
 .movies-section {
     padding: 60px 30px 10px;
@@ -197,9 +189,7 @@ img {
     font-size: 15px;
 }
 
-/* =========================
-   GENRE BUTTONS
-========================= */
+
 .genres-list {
     max-width: 1400px;
     margin: 0 auto;
@@ -233,9 +223,7 @@ img {
     color: #1a1025;
 }
 
-/* =========================
-   MOVIES GRID
-========================= */
+
 .movies {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -246,9 +234,7 @@ img {
     align-items: start;
 }
 
-/* =========================
-   MOVIE CARD
-========================= */
+
 .movie-card {
     width: 100%;
     background: #3a234d;
@@ -280,9 +266,7 @@ img {
     min-height: 78px;
 }
 
-/* =========================
-   EMPTY STATE
-========================= */
+
 .empty-state {
     grid-column: 1 / -1;
     text-align: center;
@@ -295,9 +279,7 @@ img {
     margin: 0 auto;
 }
 
-/* =========================
-   PAGINATION
-========================= */
+
 .pagination-wrapper {
     display: flex;
     justify-content: center;
@@ -361,9 +343,7 @@ img {
     transform: none;
 }
 
-/* =========================
-   FOOTER
-========================= */
+
 .footer {
     background: #58376f;
     color: #ffffff;
@@ -422,9 +402,7 @@ img {
     font-size: 14px;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+
 @media (max-width: 1280px) {
     .movies {
         grid-template-columns: repeat(4, minmax(0, 1fr));

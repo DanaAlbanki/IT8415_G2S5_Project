@@ -30,9 +30,7 @@ button {
     font: inherit;
 }
 
-/* =========================
-   TOP BAR
-========================= */
+
 .movie-topbar {
     position: fixed;
     top: 0;
@@ -68,9 +66,6 @@ button {
     width: 100%;
 }
 
-/* =========================
-   HERO
-========================= */
 .hero {
     position: relative;
     min-height: 72vh;
@@ -143,9 +138,7 @@ button {
     gap: 14px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
+
 .action-btn {
     display: inline-flex;
     align-items: center;
@@ -182,9 +175,7 @@ button {
     transform: translateY(-2px) scale(1.02);
 }
 
-/* =========================
-   CONTENT AREA
-========================= */
+
 .details-section,
 .trailer-section {
     max-width: 1320px;
@@ -227,9 +218,7 @@ button {
     font-size: 16px;
 }
 
-/* =========================
-   INFO ROWS
-========================= */
+
 .info-row {
     display: grid;
     grid-template-columns: 170px 1fr;
@@ -257,9 +246,7 @@ button {
     font-weight: 700;
 }
 
-/* =========================
-   FULL WIDTH RATING + COMMENTS
-========================= */
+
 .engagement-section {
     width: 100%;
     background: #58386f;
@@ -430,9 +417,7 @@ button {
     font-size: 13px;
 }
 
-/* =========================
-   TRAILER
-========================= */
+
 .trailer-section {
     padding-top: 28px;
     padding-bottom: 70px;
@@ -486,9 +471,7 @@ button {
     font-size: 16px;
 }
 
-/* =========================
-   ACTORS + RECOMMENDATIONS
-========================= */
+
 
 .movie-extra-section {
     width: min(1420px, calc(100% - 60px));
