@@ -50,7 +50,6 @@ ORDER BY c.comment_id DESC
 <td>
     <a href="edit-comment.php?id=<?php echo $row["comment_id"]; ?>" class="btn btn-edit">Edit</a>
 
-    <!-- Delete comment using POST form to pass comment_id and movie_id securely -->
     <form method="POST" action="../delete-comment.php" style="display:inline" onsubmit="return confirm('Delete comment?')">
         <input type="hidden" name="comment_id" value="<?php echo $row['comment_id']; ?>">
         <input type="hidden" name="movie_id" value="<?php echo $row['movie_id']; ?>">
