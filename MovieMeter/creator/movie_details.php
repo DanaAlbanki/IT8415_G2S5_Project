@@ -6,6 +6,7 @@ ini_set('display_errors', 1);
 require_once(__DIR__ . "/../includes/auth_check.php");
 require_once("../config/DBConn.php");
 
+// Get movie ID from URL and creator ID from session
 if ($_SESSION["role_name"] !== "creator") {
     die("Access denied.");
 }
@@ -15,6 +16,7 @@ $dbc = getConnection();
 $movie_id = isset($_GET['movie_id']) ? (int)$_GET['movie_id'] : 0;
 $creator_id = $_SESSION['user_id'];
 
+// Retrieve the selected movie that belongs to the logged-in creator
 $sql = "
     SELECT *
     FROM mm_movies
@@ -25,10 +27,12 @@ $sql = "
 $result = mysqli_query($dbc, $sql);
 $movie = mysqli_fetch_assoc($result);
 
+// Stop execution if movie does not exist
 if (!$movie) {
     die("Movie not found.");
 }
 
+// Get total number of users who added this movie to their watchlist
 $watchlist_sql = "
     SELECT COUNT(*) AS watchlist_count
     FROM mm_watchlist_items
@@ -39,6 +43,7 @@ $watchlist_result = mysqli_query($dbc, $watchlist_sql);
 $watchlist_row = mysqli_fetch_assoc($watchlist_result);
 $watchlist_count = $watchlist_row['watchlist_count'] ?? 0;
 
+// Retrieve all comments related to this movie, newest first
 $comments_sql = "
     SELECT comment_text, created_at
     FROM mm_comments
@@ -48,6 +53,7 @@ $comments_sql = "
 
 $comments_result = mysqli_query($dbc, $comments_sql);
 
+// Retrieve all uploaded media files for this movie
 $media_sql = "
     SELECT media_id, file_path
     FROM mm_movie_media

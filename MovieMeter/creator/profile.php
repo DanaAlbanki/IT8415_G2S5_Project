@@ -10,6 +10,7 @@ require_once("../config/DBConn.php");
 $conn = getConnection();
 mysqli_set_charset($conn, "utf8mb4");
 
+// Get logged in user ID
 $userId = (int) $_SESSION["user_id"];
 
 $sql = "
@@ -27,34 +28,44 @@ $sql = "
     LIMIT 1
 ";
 
+// Prepare SQL statement
 $stmt = mysqli_prepare($conn, $sql);
 
+// Check statement preparation
 if (!$stmt) {
     die("Database error: " . mysqli_error($conn));
 }
 
+// Bind user ID parameter
 mysqli_stmt_bind_param($stmt, "i", $userId);
 
+// Execute query
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
+// Fetch user data
 $user = mysqli_fetch_assoc($result);
 
+// Close statement and database connection
 mysqli_stmt_close($stmt);
 mysqli_close($conn);
 
+// Check if user exists
 if (!$user) {
     die("User not found.");
 }
 
+// Escape profile values for safe output
 $fullName = htmlspecialchars($user["full_name"] ?? "User", ENT_QUOTES, "UTF-8");
 $username = htmlspecialchars($user["username"] ?? "username", ENT_QUOTES, "UTF-8");
 $email = htmlspecialchars($user["email"] ?? "No email", ENT_QUOTES, "UTF-8");
 $roleName = htmlspecialchars($user["role_name"] ?? "Member", ENT_QUOTES, "UTF-8");
 
+// Generate avatar letter
 $avatarLetterSource = trim($user["full_name"] ?? $user["username"] ?? "U");
 $avatarLetter = strtoupper(substr($avatarLetterSource, 0, 1));
 
+// Format member since date
 $memberSince = "N/A";
 
 if (!empty($user["created_at"])) {
@@ -65,6 +76,7 @@ if (!empty($user["created_at"])) {
     }
 }
 
+// Build profile image path
 $profileImage = trim($user["profile_image"] ?? "");
 $profileImagePath = "";
 
