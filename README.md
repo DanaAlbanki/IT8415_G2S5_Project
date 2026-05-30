@@ -362,7 +362,7 @@ Follow these steps to run the project locally:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/DanaAlbanki/IT8415_G2S5_Project.git
+git clone https://github.com/<your-username>/IT8415_G2S5_Project.git
 ```
 
 ### 2. Move Project to Server
